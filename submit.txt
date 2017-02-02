@@ -1,5 +1,0 @@
-[DEFAULT]
-name = Jacob Lambert
-host = ix.cs.uoreogn.edu
-path = /home/users/jlambert/quack/
-repo = 

@@ -1,5 +1,5 @@
 [DEFAULT]
 name = Jacob Lambert
 host = ix.cs.uoreogn.edu
-path = /home/users/jlambert/quack/
+path = /home/users/jlambert/quack/p1/
 repo = https://gitlab.com/lamb/quack.git
