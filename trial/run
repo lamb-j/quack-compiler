@@ -1,0 +1,12 @@
+#! /bin/bash
+#
+# Usage: "run path/to/scanner"
+#
+
+scanner=$1
+
+for src in `ls samples/*.qk`; do
+   srcname=`basename ${src}`
+   echo "Scanning ${src}, producing expect/${srcname}.out"
+   ${scanner} ${src} >expect/${srcname}.out 2>expect/${srcname}.err
+done

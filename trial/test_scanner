@@ -1,0 +1,13 @@
+#! /bin/bash
+#
+# Usage: "test_scanner path/to/scanner"
+#
+
+scanner=$1
+rm -f actual/*
+
+for src in `ls samples/*.qk`; do
+   srcname=`basename ${src}`
+   echo "Scanning ${src}, producing actual/${srcname}.out"
+   ${scanner} ${src} >actual/${srcname}.out 2>actual/${srcname}.err
+done

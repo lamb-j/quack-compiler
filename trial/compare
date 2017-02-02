@@ -1,0 +1,18 @@
+#! /bin/bash
+#
+#
+# Compare actual results with expectation from
+# my scanner. There will be some discrepancies that
+# don't matter, but there shouldn't be too many
+#
+echo "Checking stdout files"
+for expected in `ls expect/*.qk.out`; do
+    actual=actual/`basename ${expected}`
+    cat ${expected} | python3 normalize.py >,expected
+    cat ${actual} | python3 normalize.py >,actual
+    echo ${actual} >> ,diffs
+    echo ${actual}
+    diff ,expected ,actual >> ,diffs
+done
+echo "Differences:"
+cat ,diffs
