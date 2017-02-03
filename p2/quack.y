@@ -9,16 +9,6 @@ void yyerror();
 FILE *yyin;
 %}
 
-%union {
-  int intval;
-	char* strval;
-}
-
-%type<intval> R_expr intval;
-/*
-type<strval> ??
-*/
-
 /* declare tokens */
 %token CLASS
 %token DEF
@@ -117,7 +107,7 @@ R_expr: R_expr '>' R_expr
       | R_expr OR R_expr 
       | NOT R_expr 
 
-R_expr: INT_LIT  { printf("INT %d\n", $1); }
+R_expr: INT_LIT 
       | STRING_LIT 
       | TRI_STRING_LIT 
 
