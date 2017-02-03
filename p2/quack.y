@@ -14,8 +14,8 @@ FILE *yyin;
 	char* strval;
 }
 
+%type<intval> R_expr intval;
 /*
-type<intval> ??
 type<strval> ??
 */
 

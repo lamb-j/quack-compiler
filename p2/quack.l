@@ -1,4 +1,5 @@
 /* recognize tokens for the calculator and print them out */
+/* Try to add badstring test things */
 %option yylineno
 %{
   #include "quack.tab.h"
