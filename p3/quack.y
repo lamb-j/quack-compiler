@@ -6,7 +6,7 @@
 #include <vector>
 #include "quack.h"
 
-statement_node *root;
+statement_block_node *root;
 
 int yylex();
 void yyerror(const char *s);
@@ -16,14 +16,18 @@ void yyerror(const char *s);
 %union {
   int intval;
 	char* strval;
-	exp_node *eNode;
+	r_expr_node *eNode;
 	statement_node *sNode;
-	//list<int_node *> *iNode_list;
+	statement_block_node *sbNode;
+	list<statement_node *> *sNode_list;
+  elif_data *elifNode;  
 }
 
+%type<sbNode> Statement_Block;
 %type<sNode> Statement;
+%type<sNode_list> Statements;
 %type<eNode> R_expr;
-//%type<iNode_list> Numbers;
+%type<elifNode> Elseif;
 //%type<strval> Word;
 
 /* declare tokens */
@@ -76,21 +80,23 @@ void yyerror(const char *s);
 //    | IDENT ':' IDENT
 //		| IDENT ':' IDENT ',' Args
 		
-//Statement_Block: '{' Statements '}' 
+Statement_Block: '{' Statements '}' { $$ = new statement_block_node($2); root = $$; }
 
-//Statements: /* empty */
-//					| Statements Statement
+Statements: /* empty */ { $$ = new list<statement_node *>(); }
+					| Statements Statement {$$ = $1; $1 -> push_back($2); }
 
-Statement: RETURN R_expr ';' { $$ = new return_node($2); root = $$; }
-         | RETURN ';' { $$ = new return_node( NULL ); root = $$; }
+Statement: RETURN R_expr ';' { $$ = new return_node($2); }
+         | RETURN ';' { $$ = new return_node( NULL ); }
 
-//Statement: IF R_expr Statement_Block Elseif
-//         | IF R_expr Statement_Block Elseif ELSE Statement_Block
+Statement: IF R_expr Statement_Block Elseif 
+             { $$ = new if_node($2, $3, $4); }
+         | IF R_expr Statement_Block Elseif ELSE Statement_Block
+             { $$ = new if_node($2, $3, $4, $6); }
 
-//Elseif: /* empty */
-//      | Elseif ELIF R_expr Statement_Block
+Elseif: /* empty */ { $$ = new elif_data(); }
+      | Elseif ELIF R_expr Statement_Block { $$ = $1; $1 -> add($3, $4); }
 
-//Statement: WHILE R_expr Statement_Block
+Statement: WHILE R_expr Statement_Block { $$ = new while_node($2, $3); }
 			     
 //Statement: L_expr '=' R_expr ';'
 //         | L_expr ':' IDENT '=' R_expr ';'
@@ -98,7 +104,7 @@ Statement: RETURN R_expr ';' { $$ = new return_node($2); root = $$; }
 //L_expr: IDENT
 //			| R_expr '.' IDENT  
 
-Statement: R_expr ';' { $$ = $1; root = $$; }
+Statement: R_expr ';' { $$ = $1; }
 
 //R_expr: R_expr '.' IDENT '(' Actual_args ')'  
 //      | IDENT '(' Actual_args ')'
@@ -127,8 +133,6 @@ R_expr: '(' R_expr ')' { $$ = $2; }
 
 R_expr: INT_LIT { $$ = new int_node($1); }
 
-//Numbers: Numbers Num { $$ = $1; $1->push_back($2) ; }
-//			 | /* empty */ { $$ = new list<int_node *>(); root = $$; }
 
 //Word: IDENT | STRING_LIT | TRI_STRING_LIT
 
@@ -154,10 +158,5 @@ int main (int argc, char **argv)
 	int condition = yyparse();
 
 	printf("Finished parse with result %d\n", condition);
-	// iterate over list
-//	list<int_node *>::const_iterator iter;
-//	for (iter = root->begin(); iter != root->end(); ++iter) {
-//	    (*iter)->evaluate();
-//	}
 	if (root != NULL) root->evaluate();
 }
