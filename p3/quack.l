@@ -2,7 +2,9 @@
 /* Try to add badstring test things */
 %option yylineno
 %{
-  #include "quack.tab.h"
+  #include <string>
+  #include "quack.h"
+  #include "y.tab.h"
 
 	void yyerror(const char *msg) {
 	  fprintf(stderr, "%d: %s (at '%s')\n", yylineno, msg, yytext);
