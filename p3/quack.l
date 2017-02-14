@@ -28,10 +28,10 @@
 "or"			{ return  OR; }
 "not"			{ return  NOT; }
 
-[a-zA-Z_][a-zA-Z0-9_]*       {  yylval.strval = yytext;  return IDENT; }
+[a-zA-Z_][a-zA-Z0-9_]*       {  yylval.strval = strdup(yytext);  return IDENT; }
 [0-9]+                       {  yylval.intval = atoi(yytext);  return INT_LIT; } 
-\"([^"\\]|\\[0btnrf"\\])*\"  {  yylval.strval = yytext;  return STRING_LIT; }
-["]["]["](.|\n)*["]["]["]    {  yylval.strval = yytext;  return TRI_STRING_LIT; }
+\"([^"\\]|\\[0btnrf"\\])*\"  {  yylval.strval = strdup(yytext);  return STRING_LIT; }
+["]["]["](.|\n)*["]["]["]    {  yylval.strval = strdup(yytext);  return TRI_STRING_LIT; }
 
 
 [+]       { return '+'; }

@@ -1,0 +1,34 @@
+Class Hierachy
+   - Tree rooted at Obj
+   - Built in classes are:
+      - Obj, Int, String, Nothing
+	 1. Superclass must be defined.
+	 2. No loops
+	 3. Tree should be Dag (single inheritence)
+
+	 Check and report errors if not well formed
+
+	 Solution:
+	   1. Create list of classes
+		 2. Check each superclass against list
+
+		 3. DFS to check for DAG (or loops)
+
+Constructor Call References
+   - Report any constructor calls to classes that don't exist.
+	 - These could occur in the statements, or in another class definition.
+
+
+	 Solution: 
+	   A. In class definitions:
+		   1. save a list of all constructor calls
+			 2. check list against list of classes
+
+		 B. In statements defintions:
+		   1. check any constructor against list of classes
+
+Lexer
+  - Add error checking
+	- Add unary minus
+
+File Input

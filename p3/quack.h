@@ -24,6 +24,20 @@ class statement_block_node {
 class r_expr_node : public statement_node {
 	public:
 		int num;
+		char *str;
+};
+
+class l_expr_node : public r_expr_node {
+	public:
+		char *var;
+		char *modifier;
+		r_expr_node *instance;
+		
+		l_expr_node(char *str);
+		l_expr_node(r_expr_node *r_node, char* str);
+		void print();
+		int evaluate();
+		
 };
 
 class while_node : public statement_node {
@@ -83,7 +97,41 @@ class return_node : public statement_node {
 
 		r_expr_node *return_value;
 };
+
+class asgn_node : public statement_node {
+	public:
+		r_expr_node *rhs;
+		l_expr_node *lhs;
+		char *c_name;
+
+		asgn_node(l_expr_node *left, r_expr_node *right);
+		asgn_node(l_expr_node *left, char* str, r_expr_node *right);
 		
+		void print();
+		int evaluate();
+};
+
+class constructor_call_node : public r_expr_node {
+	public:
+		char *c_name;
+		list <r_expr_node *> *arg_list;
+
+		constructor_call_node(char *str, list <r_expr_node *> *args);
+		void print();
+		int evaluate();
+};
+
+class method_call_node : public r_expr_node {
+	public:
+		r_expr_node *instance;
+		char *modifier;
+		list <r_expr_node *> *arg_list;
+
+		method_call_node(r_expr_node *ins, char *mod, list <r_expr_node *> *args);
+		void print();
+		int evaluate();
+};
+
 class operator_node : public r_expr_node {
 	public:
 		r_expr_node *left;
@@ -111,6 +159,13 @@ class minus_node : public operator_node {
 class int_node : public r_expr_node {
 	public:
 		int_node(int value);
+		void print();
+		int evaluate();
+};
+
+class str_node : public r_expr_node {
+	public:
+		str_node(char *value);
 		void print();
 		int evaluate();
 };

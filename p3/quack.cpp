@@ -90,9 +90,6 @@ int if_node::evaluate() {
 
 }
 
-
-
-
 while_node::while_node(r_expr_node *cond, statement_block_node *stmts) {
 	condition = cond;
 	body = stmts;
@@ -149,7 +146,131 @@ int return_node::evaluate() {
 		return_value->evaluate();
 }
 
-operator_node::operator_node(r_expr_node *L, r_expr_node *R) {
+l_expr_node::l_expr_node(char *str)
+{
+	var = str;
+}
+
+
+l_expr_node::l_expr_node(r_expr_node *r_node, char *str)
+{
+	modifier = str;
+	instance = r_node;
+}
+
+void l_expr_node::print(){
+	
+}
+
+int l_expr_node::evaluate(){
+	printf("l_expr_node:\n");
+	if(var != NULL)
+	{
+		printf("  var: %s\n", var);
+	}
+	if(instance != NULL)
+	{
+		printf("  instance:\n");
+		instance->evaluate();
+	}
+	if(modifier != NULL)
+	{
+		printf("  modifier: %s\n",modifier);
+	}
+	
+	printf("\n");	
+}
+
+asgn_node::asgn_node(l_expr_node *left, r_expr_node *right)
+{
+	lhs = left;
+	rhs = right;
+}
+
+asgn_node::asgn_node(l_expr_node *left,char *str, r_expr_node *right)
+{
+	lhs = left;
+	rhs = right;
+	c_name = str;
+}
+
+void asgn_node::print(){
+}
+
+int asgn_node::evaluate(){
+	printf("asgn node:\n");
+	printf("  lhs:\n");
+	lhs->evaluate();
+	
+	if(c_name != NULL)
+	{
+		printf("  class: %s\n",c_name);
+	}
+
+	printf("  rhs:\n");
+	rhs->evaluate();
+
+	printf("\n");
+}
+
+constructor_call_node::constructor_call_node(char *str, list <r_expr_node *> *args) 
+{
+  c_name = str;
+	arg_list = args;
+}
+
+void constructor_call_node::print() 
+{
+
+}
+
+int constructor_call_node::evaluate() 
+{
+	printf("constructor_call_node:\n");
+
+	printf("class: %s\n", c_name);
+
+	// if class not in class list print error
+
+	printf("arguments:\n");
+	list<r_expr_node *>::const_iterator iter;
+	for (iter = arg_list->begin(); iter != arg_list->end(); ++iter) {
+		(*iter)->evaluate();
+	}
+}
+
+method_call_node::method_call_node(r_expr_node *ins, char *mod, list <r_expr_node *> *args) 
+{
+  instance = ins;
+	modifier = mod;
+	arg_list = args;
+}
+
+void method_call_node::print() 
+{
+
+}
+
+int method_call_node::evaluate() 
+{
+	printf("method_call_node:\n");
+
+	printf("instance:\n");
+	instance->evaluate();
+
+	printf("modifier: %s\n", modifier);
+
+	printf("arguments:\n");
+	list<r_expr_node *>::const_iterator iter;
+	for (iter = arg_list->begin(); iter != arg_list->end(); ++iter) {
+		(*iter)->evaluate();
+	}
+	
+
+}
+
+operator_node::operator_node(r_expr_node *L, r_expr_node *R) 
+{
 	left  = L;
 	right = R;
 }
@@ -199,6 +320,7 @@ int minus_node::evaluate() {
 	return num;
 }
 
+
 int_node::int_node(int value) {
 	num = value;
 }
@@ -210,4 +332,17 @@ void int_node::print() {
 int int_node::evaluate() {
 	printf("int node: operand = %d\n", num);
 	return num;
+}
+
+str_node::str_node(char *value) {
+	str = value;
+}
+
+void str_node::print() {
+	printf("%s\n", str);
+}
+
+int str_node::evaluate() {
+	printf("str node: operand = %s\n", str);
+	return 0;
 }

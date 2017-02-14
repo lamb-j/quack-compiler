@@ -1,9 +1,11 @@
 /* quack parser */
+
 %{
 #include <stdio.h>
 #include <stdlib.h>
 #include <list>
 #include <vector>
+#include <string.h>
 #include "quack.h"
 
 statement_block_node *root;
@@ -15,20 +17,23 @@ void yyerror(const char *s);
 
 %union {
   int intval;
-	char* strval;
-	r_expr_node *eNode;
-	statement_node *sNode;
-	statement_block_node *sbNode;
-	list<statement_node *> *sNode_list;
-  elif_data *elifNode;  
+	char *strval;
+	r_expr_node							*reNode;
+	l_expr_node							*leNode;
+	statement_node					*sNode;
+	statement_block_node		*sbNode;
+	list<statement_node *>	*sNode_list;
+	list<r_expr_node *>			*argNode_list;
+  elif_data								*elifNode;  
 }
 
+%type<argNode_list> Actual_Args;
 %type<sbNode> Statement_Block;
 %type<sNode> Statement;
 %type<sNode_list> Statements;
-%type<eNode> R_expr;
+%type<reNode> R_expr;
+%type<leNode> L_expr;
 %type<elifNode> Elseif;
-//%type<strval> Word;
 
 /* declare tokens */
 %token CLASS
@@ -52,6 +57,7 @@ void yyerror(const char *s);
 
 %left AND OR NOT
 %left '<' '>'  EQUALS ATMOST ATLEAST
+%left NEG
 %left '+' '-'
 %left '*' '/'
 %left '.'
@@ -65,20 +71,20 @@ void yyerror(const char *s);
 
 //Class: Class_Signature Class_Body 
 
-//Class_Signature : CLASS IDENT '(' Args ')' 
-//                | CLASS IDENT '(' Args ')' EXTENDS IDENT
+//Class_Signature : CLASS IDENT '(' Formal_Args ')' 
+//                | CLASS IDENT '(' Formal_Args ')' EXTENDS IDENT
 
 //Class_Body: '{' Statements Methods '}'
 
 //Methods: /* empty */
 //					| Methods Method
 
-//Method: DEF IDENT '(' Args ')' Statement_Block
-//      | DEF IDENT '(' Args ')' ':' IDENT Statement_Block
+//Method: DEF IDENT '(' Formal_Args ')' Statement_Block
+//      | DEF IDENT '(' Formal_Args ')' ':' IDENT Statement_Block
 
-//Args: /* empty */
+//Formal_Args: /* empty */
 //    | IDENT ':' IDENT
-//		| IDENT ':' IDENT ',' Args
+//		| IDENT ':' IDENT ',' Formal_Args
 		
 Statement_Block: '{' Statements '}' { $$ = new statement_block_node($2); root = $$; }
 
@@ -98,22 +104,27 @@ Elseif: /* empty */ { $$ = new elif_data(); }
 
 Statement: WHILE R_expr Statement_Block { $$ = new while_node($2, $3); }
 			     
-//Statement: L_expr '=' R_expr ';'
-//         | L_expr ':' IDENT '=' R_expr ';'
-
-//L_expr: IDENT
-//			| R_expr '.' IDENT  
+Statement: L_expr '=' R_expr ';' {$$ = new asgn_node($1,$3); }
+         | L_expr ':' IDENT '=' R_expr ';' { $$ = new asgn_node($1, $3, $5); }
 
 Statement: R_expr ';' { $$ = $1; }
 
-//R_expr: R_expr '.' IDENT '(' Actual_args ')'  
-//      | IDENT '(' Actual_args ')'
-	
-//Actual_args: /* empty */
-//           | R_expr
-//					 | R_expr ',' Actual_args
+L_expr: IDENT { $$ = new l_expr_node($1); }
+			| R_expr '.' IDENT { $$ = new l_expr_node($1, $3); } 
 
-//R_expr: L_expr
+R_expr: L_expr {$$ = $1;}
+
+R_expr: R_expr '.' IDENT '(' Actual_Args ')' { $$ = new method_call_node($1, $3, $5); }
+
+R_expr: IDENT '(' Actual_Args ')' { $$ = new constructor_call_node($1, $3); }
+	
+// NEEDS SOME WORK
+Actual_Args: /* empty */ { $$ = new list<r_expr_node *>(); }
+           | R_expr Actual_Args { $$ = $2; $2 -> push_back($1); } 
+					 | R_expr ',' Actual_Args { $$ = $3; $3 -> push_back($1); }
+
+//Statements: /* empty */ { $$ = new list<statement_node *>(); }
+//					| Statements Statement {$$ = $1; $1 -> push_back($2); }
 
 //R_expr: R_expr '>' R_expr 
 //      | R_expr '<' R_expr 
@@ -123,6 +134,7 @@ Statement: R_expr ';' { $$ = $1; }
 //      | R_expr AND R_expr 
 //      | R_expr OR R_expr 
 //      | NOT R_expr 
+//      | '-' R_expr %prec NEG
 
 R_expr: '(' R_expr ')' { $$ = $2; }
       | R_expr '+' R_expr { $$ = new plus_node($1, $3); }
@@ -132,9 +144,9 @@ R_expr: '(' R_expr ')' { $$ = $2; }
 
 
 R_expr: INT_LIT { $$ = new int_node($1); }
-
-
-//Word: IDENT | STRING_LIT | TRI_STRING_LIT
+      //| IDENT { $$ = new str_node($1); }
+			| STRING_LIT { $$ = new str_node($1); }
+  		| TRI_STRING_LIT { $$ = new str_node($1); }
 
 %%
 
