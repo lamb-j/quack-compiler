@@ -7,21 +7,9 @@
 
 using namespace std;
 
-// tree data structure
-class tree_node {
-	public:
-		string name;
-		tree_node *parent;
-		vector <tree_node *> children;
-
-    tree_node(string n) { name = n ; }
-};
-
-int print_tree( tree_node *root, int level );
-
 class statement_node {
 	public:
-		virtual void print() = 0;
+		virtual void print(int indent) = 0;
 		virtual int evaluate() = 0;
 };
 
@@ -31,7 +19,7 @@ class statement_block_node {
 	public:
 		statement_block_node(list <statement_node *> *stmts);
 		int evaluate();
-		void print();
+		void print(int indent);
 };
 
 class f_arg_pair {
@@ -50,7 +38,7 @@ class class_sig_node {
 
 		class_sig_node(char *c_name, vector <f_arg_pair *> *f_args, const char *p);
 
-		void print();
+		void print(int indent);
 		int evaluate();
 };
 
@@ -63,7 +51,7 @@ class method_node {
 
 		method_node(char *name, vector < f_arg_pair * > *args, char *r_type, statement_block_node *b);
 
-		void print();
+		void print(int indent);
 		int evaluate();
 };
 
@@ -74,7 +62,7 @@ class class_body_node{
 
 		class_body_node(list<statement_node *> *s_list, list< method_node *> *m_list);
 
-		void print();
+		void print(int indent);
 		int evaluate();
 
 };
@@ -86,7 +74,7 @@ class class_node {
 
 		class_node(class_sig_node *s, class_body_node *b);
 
-		void print();
+		void print(int indent);
 		int evaluate();
 };
 
@@ -97,7 +85,7 @@ class program_node {
 
 	program_node(list <class_node *> *c, list <statement_node *> *s);
 
-	void print();
+	void print(int indent);
 	int evaluate();
 };
 
@@ -115,7 +103,7 @@ class l_expr_node : public r_expr_node {
 		
 		l_expr_node(char *str);
 		l_expr_node(r_expr_node *r_node, char* str);
-		void print();
+		void print(int indent);
 		int evaluate();
 		
 };
@@ -127,7 +115,7 @@ class while_node : public statement_node {
 	
     while_node(r_expr_node *cond, statement_block_node *stmts);
 
-		void print();
+		void print(int indent);
 		int evaluate();
 };
 
@@ -165,14 +153,14 @@ class if_node : public statement_node {
 				elif_data *elif_p, 
 				statement_block_node *else_b); 
 
-	  void print();
+	  void print(int indent);
 		int evaluate();
 };
 
 class return_node : public statement_node {
 	public:
 		return_node(r_expr_node *rv);
-		void print();
+		void print(int indent);
 		int evaluate();
 
 		r_expr_node *return_value;
@@ -187,7 +175,7 @@ class asgn_node : public statement_node {
 		asgn_node(l_expr_node *left, r_expr_node *right);
 		asgn_node(l_expr_node *left, char* str, r_expr_node *right);
 		
-		void print();
+		void print(int indent);
 		int evaluate();
 };
 
@@ -197,7 +185,7 @@ class constructor_call_node : public r_expr_node {
 		list <r_expr_node *> *arg_list;
 
 		constructor_call_node(char *str, list <r_expr_node *> *args);
-		void print();
+		void print(int indent);
 		int evaluate();
 };
 
@@ -208,7 +196,7 @@ class method_call_node : public r_expr_node {
 		list <r_expr_node *> *arg_list;
 
 		method_call_node(r_expr_node *ins, char *mod, list <r_expr_node *> *args);
-		void print();
+		void print(int indent);
 		int evaluate();
 };
 
@@ -229,7 +217,7 @@ class unary_node : public r_expr_node {
 
 		unary_node(const char* sym, r_expr_node *R);
 
-		void print();
+		void print(int indent);
 		int evaluate();
 };
 
@@ -238,7 +226,7 @@ class plus_node : public operator_node {
 	public:
 
 		plus_node(r_expr_node *L, r_expr_node *R);
-		void print();
+		void print(int indent);
 		int evaluate();
 };
 
@@ -246,7 +234,7 @@ class minus_node : public operator_node {
 	public:
 
 		minus_node(r_expr_node *L, r_expr_node *R);
-		void print();
+		void print(int indent);
 		int evaluate();
 };
 
@@ -254,7 +242,7 @@ class times_node : public operator_node {
 	public:
 		
 		times_node(r_expr_node *L, r_expr_node *R);
-		void print();
+		void print(int indent);
 		int evaluate();
 };
 
@@ -262,21 +250,21 @@ class divide_node : public operator_node {
 	public:
 		
 		divide_node(r_expr_node *L, r_expr_node *R);
-		void print();
+		void print(int indent);
 		int evaluate();
 };
 
 class compare_node : public operator_node {
 	public:
 		compare_node(r_expr_node *L, const char* sym, r_expr_node *R);
-		void print();
+		void print(int indent);
 		int evaluate();
 };
 
 class int_node : public r_expr_node {
 	public:
 		int_node(int value);
-		void print();
+		void print(int indent);
 		int evaluate();
 };
 
@@ -284,6 +272,6 @@ class int_node : public r_expr_node {
 class str_node : public r_expr_node {
 	public:
 		str_node(char *value);
-		void print();
+		void print(int indent);
 		int evaluate();
 };

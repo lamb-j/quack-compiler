@@ -7,6 +7,7 @@
 #include <vector>
 #include <string.h>
 #include "quack.h"
+#include "class_tree.h"
 
 extern vector < string > class_names;
 extern FILE *yyin;
@@ -15,9 +16,6 @@ program_node *root;
 
 int yylex();
 void yyerror(const char *s);
-
-
-
 
 %}
 
@@ -203,6 +201,8 @@ int main (int argc, char **argv)
 
 	printf("Finished parse with result %d\n", condition);
 
+	// check class names for Obj, ...
+
 	class_names.push_back("Obj");
 	class_names.push_back("Int");
 	class_names.push_back("String");
@@ -227,8 +227,12 @@ int main (int argc, char **argv)
 	Obj->children.push_back(Nothing);
 	Obj->children.push_back(Boolean);
 
-  print_tree(Obj, 0);
-	//if (root != NULL) root->evaluate();
+  //print_tree(Obj, 0);
+	printf("--- Evaluate ---\n");
+	if (root != NULL) root->evaluate();
+	printf("\n");
+	printf("--- Print ---\n");
+	if (root != NULL) root->print(0);
 
 
 
