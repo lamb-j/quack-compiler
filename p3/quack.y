@@ -8,13 +8,16 @@
 #include <string.h>
 #include "quack.h"
 
-
+extern vector < string > class_names;
 extern FILE *yyin;
 
 program_node *root;
 
 int yylex();
 void yyerror(const char *s);
+
+
+
 
 %}
 
@@ -102,8 +105,10 @@ Classes: /* empty */ { $$ = new list<class_node *>(); }
 
 Class: Class_Signature Class_Body {$$ = new class_node($1, $2); }
 
-Class_Signature : CLASS IDENT '(' Formal_Args ')' { $$ = new class_sig_node($2, $4, "Obj"); }
-                | CLASS IDENT '(' Formal_Args ')' EXTENDS IDENT { $$ = new class_sig_node($2, $4, $7); }
+Class_Signature : CLASS IDENT '(' Formal_Args ')' { $$ = new class_sig_node($2, $4, "Obj");
+																									class_names.push_back( $2 ); }
+                | CLASS IDENT '(' Formal_Args ')' EXTENDS IDENT { $$ = new class_sig_node($2, $4, $7);  
+																									class_names.push_back( $2 ); }
 
 Class_Body: '{' Statements Methods '}' { $$ = new class_body_node( $2, $3 ); }
 
@@ -197,5 +202,34 @@ int main (int argc, char **argv)
 	int condition = yyparse();
 
 	printf("Finished parse with result %d\n", condition);
-	if (root != NULL) root->evaluate();
+
+	class_names.push_back("Obj");
+	class_names.push_back("Int");
+	class_names.push_back("String");
+	class_names.push_back("Nothing");
+	class_names.push_back("Boolean");
+//	printf("class names:\n");
+//	for(int i =0; i<class_names.size(); i++)
+//	{
+//		printf("%s\n",class_names[i].c_str());
+//	}
+
+
+  
+	tree_node *Obj = new tree_node("Obj");
+	tree_node *Int = new tree_node("Int");
+	tree_node *String = new tree_node("String");
+	tree_node *Nothing = new tree_node("Nothing");
+	tree_node *Boolean = new tree_node("Boolean");
+
+	Obj->children.push_back(Int);
+	Obj->children.push_back(String);
+	Obj->children.push_back(Nothing);
+	Obj->children.push_back(Boolean);
+
+  print_tree(Obj, 0);
+	//if (root != NULL) root->evaluate();
+
+
+
 }

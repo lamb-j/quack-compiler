@@ -1,16 +1,34 @@
 #include <stdlib.h>
 #include <string>
+#include <string.h>
 #include <map>
 #include <list>
 #include <cstdio>
 #include "quack.h"
 using namespace std;
 
-elif_data::elif_data() {
- elif_conditions = new list < r_expr_node *>();
- elif_bodies = new list <statement_block_node*>();
+vector < string > class_names;
 
- size = 0;
+int print_tree (tree_node *root, int level) {
+	printf("%*s\n", level + ( int ) (root->name).length(), root->name.c_str());
+	for(int i=0; i<root->children.size(); i++)
+	{ 
+		print_tree(root->children[i], level + 2 );
+	}
+} 
+
+/*
+void append_tree(tree *parent, string c_name)
+{
+	if(
+}
+*/
+
+elif_data::elif_data() {
+	elif_conditions = new list < r_expr_node *>();
+	elif_bodies = new list <statement_block_node*>();
+
+	size = 0;
 
 }
 
@@ -27,12 +45,12 @@ if_node::if_node(
 		statement_block_node *if_b, 
 		elif_data *elif_p) 
 {
-  // if
+	// if
 	if_condition = if_c;
 	if_body = if_b;
 
-  // else if
-  elif_pairs = elif_p;
+	// else if
+	elif_pairs = elif_p;
 }
 
 // if elseif else
@@ -42,15 +60,15 @@ if_node::if_node(
 		elif_data *elif_p, 
 		statement_block_node *else_b) 
 {
-  // if
+	// if
 	if_condition = if_c;
 	if_body = if_b;
 
-  // else if
-  elif_pairs = elif_p;
+	// else if
+	elif_pairs = elif_p;
 
-  // else
-  else_body = else_b;
+	// else
+	else_body = else_b;
 }
 
 void if_node::print() {	
@@ -147,12 +165,21 @@ int class_sig_node::evaluate()
 
 	printf("Formal Arguments:\n");
 	for (int i = 0; i < formal_args->size(); i++) {
-	  printf("formal_arg: %d\n", i);
+		printf("formal_arg: %d\n", i);
 		printf("  name: %s\n", (* formal_args)[i]-> name );
 		printf("  type: %s\n", (* formal_args)[i]-> return_type ); 
 	}
 
 	printf("Parent: %s\n", parent);
+  	
+	int flag = 1;
+	for(int i=0; i<class_names.size(); i++)
+	{
+		if(strcmp(parent, class_names[i].c_str() ) == 0 ) flag = 0;
+	}
+
+	if (flag)	fprintf(stderr,"****parent class %s not defined****\n",parent);
+
 }
 
 class_node::class_node(class_sig_node *s, class_body_node *b) {
@@ -175,7 +202,7 @@ int class_node::evaluate() {
 
 program_node::program_node(list <class_node *> *c, list <statement_node *> *s)
 {
-  class_list = c;
+	class_list = c;
 	statement_list = s;
 }
 
@@ -193,7 +220,7 @@ int program_node::evaluate() {
 	for (c_iter = class_list->begin(); c_iter != class_list->end(); ++c_iter) {
 		(*c_iter)->evaluate();
 	}
-	
+
 	printf("  statements:\n");
 	list<statement_node *>::const_iterator s_iter;
 	for (s_iter = statement_list->begin(); s_iter != statement_list->end(); ++s_iter) {
@@ -203,7 +230,7 @@ int program_node::evaluate() {
 
 method_node::method_node(char *name, vector < f_arg_pair * > *args, char *r_type, statement_block_node *b)
 {
-  method_name = name;
+	method_name = name;
 	formal_args = args;
 	return_type = r_type;
 	body = b;
@@ -216,19 +243,19 @@ void method_node::print()
 
 int method_node::evaluate() 
 {
-  printf("method_node:\n"); 
+	printf("method_node:\n"); 
 
 	printf("method name: %s\n", method_name);
 
 	printf("formal_args: \n");
 
 	for (int i = 0; i < formal_args->size(); i++) {
-	  printf("formal_arg: %d\n", i);
+		printf("formal_arg: %d\n", i);
 		printf("  name: %s\n", (* formal_args)[i]-> name );
 		printf("  type: %s\n", (* formal_args)[i]-> return_type ); 
 	}
 
-  if (return_type != NULL) {
+	if (return_type != NULL) {
 		printf("return type: %s\n", return_type); 
 	}
 
@@ -250,13 +277,13 @@ void class_body_node::print()
 int class_body_node::evaluate()
 {
 	printf("class_body_node:\n");
-  
+
 	printf("statement_list:\n");
 	list<statement_node *>::const_iterator s_iter;
 	for (s_iter = statement_list->begin(); s_iter != statement_list->end(); ++s_iter) {
 		(*s_iter)->evaluate();
 	}
-  
+
 	printf("method_list:\n");
 	list<method_node *>::const_iterator  m_iter;
 	for (m_iter = method_list->begin(); m_iter != method_list->end(); ++m_iter) {
@@ -296,7 +323,7 @@ l_expr_node::l_expr_node(r_expr_node *r_node, char *str)
 }
 
 void l_expr_node::print(){
-	
+
 }
 
 int l_expr_node::evaluate(){
@@ -314,7 +341,7 @@ int l_expr_node::evaluate(){
 	{
 		printf("  modifier: %s\n",modifier);
 	}
-	
+
 	printf("\n");	
 }
 
@@ -338,7 +365,7 @@ int asgn_node::evaluate(){
 	printf("asgn node:\n");
 	printf("  lhs:\n");
 	lhs->evaluate();
-	
+
 	if(c_name != NULL)
 	{
 		printf("  class: %s\n",c_name);
@@ -352,7 +379,7 @@ int asgn_node::evaluate(){
 
 constructor_call_node::constructor_call_node(char *str, list <r_expr_node *> *args) 
 {
-  c_name = str;
+	c_name = str;
 	arg_list = args;
 }
 
@@ -369,6 +396,15 @@ int constructor_call_node::evaluate()
 
 	// if class not in class list print error
 
+	int flag = 1;
+	for(int i=0; i<class_names.size(); i++)
+	{
+		if(strcmp(c_name, class_names[i].c_str() ) == 0 ) flag = 0;
+	}
+
+	if (flag)	fprintf(stderr,"****class %s not defined****\n",c_name);
+
+
 	printf("arguments:\n");
 	list<r_expr_node *>::const_iterator iter;
 	for (iter = arg_list->begin(); iter != arg_list->end(); ++iter) {
@@ -378,7 +414,7 @@ int constructor_call_node::evaluate()
 
 method_call_node::method_call_node(r_expr_node *ins, char *mod, list <r_expr_node *> *args) 
 {
-  instance = ins;
+	instance = ins;
 	modifier = mod;
 	arg_list = args;
 }

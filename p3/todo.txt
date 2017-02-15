@@ -1,33 +1,40 @@
 Class Hierachy
-   - Tree rooted at Obj
-   - Built in classes are:
-      - Obj, Int, String, Nothing
-	 1. Superclass must be defined.
-	 2. No loops
-	 3. Tree should be Dag (single inheritence)
 
-	 Check and report errors if not well formed
-
-	 Solution:
-	   1. Create list of classes
-		 2. Check each superclass against list
-
-		 3. DFS to check for DAG (or loops)
-
-Constructor Call References
-   - Report any constructor calls to classes that don't exist.
-	 - These could occur in the statements, or in another class definition.
+  Check taco extends taco
+	Check Obj, ...,  extends taco
+	Check for duplicates in class list
 
 
-	 Solution: 
-	   A. In class definitions:
-		   1. save a list of all constructor calls
-			 2. check list against list of classes
+  when we make a new tree node, add to list, and to root
+	append(new, parent)
 
-		 B. In statements defintions:
-		   1. check any constructor against list of classes
+    IF
+      search list for new
+		    if found 
+				  found.parent = new.parent
+					found.parent->children.push_back(new)
 
-Lexer
-  - Add error checking
+    ELSE
+	    search list for parent 
+		    if exists
+				  new = new tree_node
+					list.add new
+			    parent->children.push_back (new)
+				  child->parent = parent;
+
+			  else
+				  new = new tree_node
+					parent = new tree_node
+					list.add new
+					list.add parent
+			    parent->children.push_back (new)
+				  child->parent = parent;
+			  
+
+	make flag vector 
+	Walk tree from Obj, set flags
+	  any unset flags == bad class
+
+
 
 
