@@ -127,6 +127,143 @@ void statement_block_node::print() {
 	}
 }
 
+class_sig_node::class_sig_node(char *c_name, vector <f_arg_pair *> *f_args, const char *p) 
+{
+	class_name = c_name;
+	formal_args = f_args;
+	parent = p;
+}
+
+void class_sig_node::print() 
+{
+
+}
+
+int class_sig_node::evaluate() 
+{
+	printf("Class signature node:\n");
+
+	printf("class name: %s\n", class_name);
+
+	printf("Formal Arguments:\n");
+	for (int i = 0; i < formal_args->size(); i++) {
+	  printf("formal_arg: %d\n", i);
+		printf("  name: %s\n", (* formal_args)[i]-> name );
+		printf("  type: %s\n", (* formal_args)[i]-> return_type ); 
+	}
+
+	printf("Parent: %s\n", parent);
+}
+
+class_node::class_node(class_sig_node *s, class_body_node *b) {
+	sig = s;
+	body = b;
+}
+
+void class_node::print() 
+{
+
+}
+
+int class_node::evaluate() {
+
+	printf("NODE: class\n");
+
+	sig->evaluate();
+	body->evaluate();
+}
+
+program_node::program_node(list <class_node *> *c, list <statement_node *> *s)
+{
+  class_list = c;
+	statement_list = s;
+}
+
+void program_node::print() 
+{
+
+}
+
+int program_node::evaluate() {
+
+	printf("NODE: program\n");
+
+	printf("  classes:\n");
+	list<class_node *>::const_iterator c_iter;
+	for (c_iter = class_list->begin(); c_iter != class_list->end(); ++c_iter) {
+		(*c_iter)->evaluate();
+	}
+	
+	printf("  statements:\n");
+	list<statement_node *>::const_iterator s_iter;
+	for (s_iter = statement_list->begin(); s_iter != statement_list->end(); ++s_iter) {
+		(*s_iter)->evaluate();
+	}
+}
+
+method_node::method_node(char *name, vector < f_arg_pair * > *args, char *r_type, statement_block_node *b)
+{
+  method_name = name;
+	formal_args = args;
+	return_type = r_type;
+	body = b;
+}
+
+void method_node::print() 
+{
+
+}
+
+int method_node::evaluate() 
+{
+  printf("method_node:\n"); 
+
+	printf("method name: %s\n", method_name);
+
+	printf("formal_args: \n");
+
+	for (int i = 0; i < formal_args->size(); i++) {
+	  printf("formal_arg: %d\n", i);
+		printf("  name: %s\n", (* formal_args)[i]-> name );
+		printf("  type: %s\n", (* formal_args)[i]-> return_type ); 
+	}
+
+  if (return_type != NULL) {
+		printf("return type: %s\n", return_type); 
+	}
+
+	printf("body:\n");
+
+	body->evaluate();
+}
+
+class_body_node::class_body_node(list<statement_node *> *s_list, list<method_node *> *m_list)
+{
+	statement_list = s_list;
+	method_list = m_list;
+}
+
+void class_body_node::print()
+{
+}
+
+int class_body_node::evaluate()
+{
+	printf("class_body_node:\n");
+  
+	printf("statement_list:\n");
+	list<statement_node *>::const_iterator s_iter;
+	for (s_iter = statement_list->begin(); s_iter != statement_list->end(); ++s_iter) {
+		(*s_iter)->evaluate();
+	}
+  
+	printf("method_list:\n");
+	list<method_node *>::const_iterator  m_iter;
+	for (m_iter = method_list->begin(); m_iter != method_list->end(); ++m_iter) {
+		(*m_iter)->evaluate();
+	}
+}
+
 return_node::return_node(r_expr_node *rv) {
 	return_value = rv;
 }
@@ -265,8 +402,6 @@ int method_call_node::evaluate()
 	for (iter = arg_list->begin(); iter != arg_list->end(); ++iter) {
 		(*iter)->evaluate();
 	}
-	
-
 }
 
 operator_node::operator_node(r_expr_node *L, r_expr_node *R) 
@@ -275,6 +410,30 @@ operator_node::operator_node(r_expr_node *L, r_expr_node *R)
 	right = R;
 }
 
+
+operator_node::operator_node(r_expr_node *L,const char* sym, r_expr_node *R) 
+{
+	left  = L;
+	symbol = sym;
+	right = R;
+}
+
+unary_node::unary_node(const char* sym, r_expr_node *R)
+{
+	symbol = sym;
+	right = R;
+}
+
+void unary_node::print()
+{
+}
+
+int unary_node::evaluate()
+{
+	printf("NODE: unary:\n");
+	printf("operator: %s\n",symbol);
+	right->evaluate();
+}
 
 plus_node::plus_node(r_expr_node *L, r_expr_node *R) : operator_node(L,R) {}
 
@@ -320,7 +479,64 @@ int minus_node::evaluate() {
 	return num;
 }
 
+times_node::times_node(r_expr_node *L, r_expr_node *R) : operator_node(L,R) {}
 
+void times_node::print() {
+	printf("(");
+	left->print();
+	printf(" * ");
+	right->print();
+	printf(")\n");
+}
+
+int times_node::evaluate() {
+	int left_num, right_num;
+
+	left_num = left->evaluate();
+	right_num = right->evaluate();
+
+	//num = left_num - right_num;
+
+	printf("times_node: %d * %d \n", left_num, right_num);
+	return num;
+}
+
+divide_node::divide_node(r_expr_node *L, r_expr_node *R) : operator_node(L,R) {}
+
+void divide_node::print() {
+	printf("(");
+	left->print();
+	printf(" / ");
+	right->print();
+	printf(")\n");
+}
+
+int divide_node::evaluate() {
+	int left_num, right_num;
+
+	left_num = left->evaluate();
+	right_num = right->evaluate();
+
+	num = left_num / right_num;
+
+	printf("divide_node: %d / %d \n", left_num, right_num);
+	return num;
+}
+
+compare_node::compare_node(r_expr_node *L, const char* sym, r_expr_node *R) : operator_node(L,sym,R){} 
+
+void compare_node::print()
+{
+}
+
+int compare_node::evaluate()
+{
+	printf("NODE: compare: \n");
+	left->evaluate();
+	printf("operation: %s\n", symbol);
+	right->evaluate();
+	printf("\n");
+}
 int_node::int_node(int value) {
 	num = value;
 }
@@ -342,6 +558,7 @@ void str_node::print() {
 	printf("%s\n", str);
 }
 
+//Need to figure out how to use double inheritance for l-expr nad r-expr ident
 int str_node::evaluate() {
 	printf("str node: operand = %s\n", str);
 	return 0;

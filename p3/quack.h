@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <string>
+#include <vector>
 #include <map>
 #include <list>
 
@@ -19,6 +20,73 @@ class statement_block_node {
 		statement_block_node(list <statement_node *> *stmts);
 		int evaluate();
 		void print();
+};
+
+class f_arg_pair {
+	public:
+		char *name;
+		char *return_type;
+
+		f_arg_pair(char *n, char *r) {name = n; return_type = r;}
+}; 
+
+class class_sig_node {
+	public:
+		char *class_name;
+	  vector <f_arg_pair *> *formal_args;
+	  const char *parent;
+
+		class_sig_node(char *c_name, vector <f_arg_pair *> *f_args, const char *p);
+
+		void print();
+		int evaluate();
+};
+
+class method_node {
+	public:
+		char *method_name;
+		vector < f_arg_pair *> *formal_args;
+		char *return_type;
+		statement_block_node *body;
+
+		method_node(char *name, vector < f_arg_pair * > *args, char *r_type, statement_block_node *b);
+
+		void print();
+		int evaluate();
+};
+
+class class_body_node{
+	public:
+		list<method_node *> *method_list;
+		list<statement_node *> *statement_list;
+
+		class_body_node(list<statement_node *> *s_list, list< method_node *> *m_list);
+
+		void print();
+		int evaluate();
+
+};
+
+class class_node {
+	public:
+		class_sig_node *sig;
+		class_body_node *body;
+
+		class_node(class_sig_node *s, class_body_node *b);
+
+		void print();
+		int evaluate();
+};
+
+class program_node {
+	public:
+		list <class_node *> *class_list;
+		list <statement_node *> *statement_list;
+
+	program_node(list <class_node *> *c, list <statement_node *> *s);
+
+	void print();
+	int evaluate();
 };
 
 class r_expr_node : public statement_node {
@@ -136,9 +204,23 @@ class operator_node : public r_expr_node {
 	public:
 		r_expr_node *left;
 		r_expr_node *right;
-
+    const char* symbol;
 		operator_node(r_expr_node *L, r_expr_node *R);
+		operator_node(r_expr_node *L, const char* sym, r_expr_node *R);
+
 };
+
+class unary_node : public r_expr_node {
+	public:
+		r_expr_node *right;
+		const char *symbol;
+
+		unary_node(const char* sym, r_expr_node *R);
+
+		void print();
+		int evaluate();
+};
+
 
 class plus_node : public operator_node {
 	public:
@@ -156,6 +238,29 @@ class minus_node : public operator_node {
 		int evaluate();
 };
 
+class times_node : public operator_node {
+	public:
+		
+		times_node(r_expr_node *L, r_expr_node *R);
+		void print();
+		int evaluate();
+};
+
+class divide_node : public operator_node {
+	public:
+		
+		divide_node(r_expr_node *L, r_expr_node *R);
+		void print();
+		int evaluate();
+};
+
+class compare_node : public operator_node {
+	public:
+		compare_node(r_expr_node *L, const char* sym, r_expr_node *R);
+		void print();
+		int evaluate();
+};
+
 class int_node : public r_expr_node {
 	public:
 		int_node(int value);
@@ -163,6 +268,7 @@ class int_node : public r_expr_node {
 		int evaluate();
 };
 
+// inhereit from l_expr_node?
 class str_node : public r_expr_node {
 	public:
 		str_node(char *value);
