@@ -8,7 +8,9 @@
 #include "class_tree.h"
 using namespace std;
 
+// external data structures
 extern vector < string > class_names;
+extern list < tree_node *> *tree_list;
 
 int if_node::evaluate() {
 	if_condition->evaluate();
@@ -49,6 +51,7 @@ int statement_block_node::evaluate()
 
 int class_sig_node::evaluate() 
 {
+	// check if parent class is defined (in the list)
 	int flag = 1;
 	for(int i=0; i<class_names.size(); i++)
 	{
@@ -56,6 +59,25 @@ int class_sig_node::evaluate()
 	}
 
 	if (flag)	fprintf(stderr,"error: parent class %s not defined\n",parent);
+
+	//check if class name among default classes
+	const char* default_classes[] = { "Obj", "Int", "Nothing", "String", "Boolean" };
+	
+	for( int i=0; i<5; i++)
+	{
+		if(! strcmp( class_name, default_classes[i]))
+			fprintf(stderr,"error: class name %s is a default class\n",class_name); 
+	}
+
+	//check if class extends itself
+	if( strcmp( parent, class_name) == 0)
+		fprintf(stderr,"error: class %s cannot extend %s\n",class_name,parent);
+
+
+        // add class to tree_list
+        string p(parent);
+        string c(class_name);
+        append_tree(tree_list, p, c);
 }
 
 

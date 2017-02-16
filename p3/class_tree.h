@@ -15,3 +15,5 @@ class tree_node {
 
 int print_tree( tree_node *root, int level );
 
+void append_tree( list <tree_node *> *tree_list, string parent_class, string new_class);
+

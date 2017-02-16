@@ -8,8 +8,11 @@
 #include <string.h>
 #include "quack.h"
 #include "class_tree.h"
+#include  <algorithm>
 
 extern vector < string > class_names;
+list <tree_node *> *tree_list;
+
 extern FILE *yyin;
 
 program_node *root;
@@ -21,22 +24,21 @@ void yyerror(const char *s);
 
 %union {
   int intval;
-	char *strval;
+  char *strval;
 
-	r_expr_node							*reNode;
-	l_expr_node							*leNode;
+  r_expr_node			*reNode;
+  l_expr_node			*leNode;
 
   program_node						*pNode;
 
   class_node							*cNode;
   class_sig_node					*csNode;
   class_body_node					*cbNode;
-	list<class_node *>			*cNode_list;
+  list<class_node *>			*cNode_list;
 
-	statement_node					*sNode;
-	statement_block_node		*sbNode;
+  statement_node					*sNode;
+ statement_block_node		*sbNode;
 	list<statement_node *>	*sNode_list;
-
 	list<method_node *>			*mNode_list;
 	method_node							*mNode;
 	vector < f_arg_pair * >	*f_arg_vector;
@@ -177,7 +179,7 @@ R_Expr: '(' R_Expr ')' { $$ = $2; }
 R_Expr: INT_LIT { $$ = new int_node($1); }
       //| IDENT { $$ = new str_node($1); }
 			| STRING_LIT { $$ = new str_node($1); }
-  		| TRI_STRING_LIT { $$ = new str_node($1); }
+		| TRI_STRING_LIT { $$ = new str_node($1); }
 
 %%
 
@@ -201,6 +203,8 @@ int main (int argc, char **argv)
 
 	printf("Finished parse with result %d\n", condition);
 
+        if (condition) exit(0);
+
 	// check class names for Obj, ...
 
 	class_names.push_back("Obj");
@@ -208,30 +212,55 @@ int main (int argc, char **argv)
 	class_names.push_back("String");
 	class_names.push_back("Nothing");
 	class_names.push_back("Boolean");
-//	printf("class names:\n");
-//	for(int i =0; i<class_names.size(); i++)
-//	{
-//		printf("%s\n",class_names[i].c_str());
-//	}
+
+        	
+	printf("--- Evaluate ---\n");
+	//sorting vector to check for duplicates
+	sort( class_names.begin(), class_names.end() );
+  	
+	for( int i=1; i < class_names.size(); i++ )
+	{
+		if ( class_names[i].compare(class_names[i-1] ) == 0) 
+		{
+			fprintf(stderr,"error: duplicate class name %s\n",class_names[i].c_str());
+		} 
+	}  
 
 
-  
+	//adding default tree nodes to tree list
+
 	tree_node *Obj = new tree_node("Obj");
 	tree_node *Int = new tree_node("Int");
 	tree_node *String = new tree_node("String");
 	tree_node *Nothing = new tree_node("Nothing");
 	tree_node *Boolean = new tree_node("Boolean");
 
+	tree_list = new list <tree_node*>(); 
+
+	tree_list->push_back(Obj);
+	tree_list->push_back(Int);
+	tree_list->push_back(String);
+	tree_list->push_back(Boolean);
+	tree_list->push_back(Nothing);
+
 	Obj->children.push_back(Int);
 	Obj->children.push_back(String);
 	Obj->children.push_back(Nothing);
 	Obj->children.push_back(Boolean);
 
-  //print_tree(Obj, 0);
-	printf("--- Evaluate ---\n");
+	Int->parent = Obj;
+	String->parent = Obj;
+	Nothing->parent = Obj;
+	Boolean->parent = Obj;
+	
 	if (root != NULL) root->evaluate();
 	printf("\n");
-	printf("--- Print ---\n");
+
+	printf("--- Class Tree ---\n");
+	print_tree(Obj, 0);
+	printf("\n");
+
+	printf("--- Syntax Tree ---\n");
 	if (root != NULL) root->print(0);
 
 

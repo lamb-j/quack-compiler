@@ -1,19 +1,8 @@
-class taco () {
+class a () extends Int {
+
 }
 
-class burrito() {
-}
-
-taco () ;
-burrito () ;
-pizza () ;
-
-if (3 + 4) {
-  cat = "mean";
-}
-elif (3 + 7) {
-  cat = "ok";
-}
-else {
-  cat = "nice!";
-}
+class b () extends a {}
+class c () extends a {}
+class x () extends b {}
+class y () extends b {}
