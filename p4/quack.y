@@ -7,7 +7,6 @@
 #include <vector>
 #include <string.h>
 #include "quack.h"
-#include "class_tree.h"
 #include  <algorithm>
 
 extern vector < string > class_names;
@@ -15,7 +14,7 @@ list <tree_node *> *tree_list;
 
 extern FILE *yyin;
 
-program_node *root;
+program_node *AST_root;
 
 int yylex();
 void yyerror(const char *s);
@@ -98,7 +97,7 @@ void yyerror(const char *s);
 
 %%
 
-Program: Classes Statements { $$ = new program_node($1, $2); root = $$; }
+Program: Classes Statements { $$ = new program_node($1, $2); AST_root = $$; }
 
 Classes: /* empty */ { $$ = new list<class_node *>(); }
 					| Classes Class { $$ = $1; $1->push_back($2); }
@@ -159,8 +158,8 @@ Actual_Args: /* empty */ { $$ = new list<r_expr_node *>(); }
            | R_Expr Actual_Args { $$ = $2; $2 -> push_back($1); } 
 					 | R_Expr ',' Actual_Args { $$ = $3; $3 -> push_back($1); }
 
-R_Expr: R_Expr '>' R_Expr { $$ = new compare_node($1, ">", $3) ;} 
-      | R_Expr '<' R_Expr { $$ = new compare_node($1, "<" , $3); }
+R_Expr: R_Expr '>' R_Expr { $$ = new compare_node($1, "MORE", $3) ;} 
+      | R_Expr '<' R_Expr { $$ = new compare_node($1, "LESS" , $3); }
 			| R_Expr EQUALS R_Expr { $$ = new compare_node($1, "==", $3); }
       | R_Expr ATLEAST R_Expr { $$ = new compare_node($1, ">=" , $3); }
       | R_Expr ATMOST R_Expr { $$ = new compare_node($1, "<=" , $3); }
@@ -177,8 +176,7 @@ R_Expr: '(' R_Expr ')' { $$ = $2; }
 
 
 R_Expr: INT_LIT { $$ = new int_node($1); }
-      //| IDENT { $$ = new str_node($1); }
-			| STRING_LIT { $$ = new str_node($1); }
+		| STRING_LIT { $$ = new str_node($1); }
 		| TRI_STRING_LIT { $$ = new str_node($1); }
 
 %%
@@ -205,64 +203,27 @@ int main (int argc, char **argv)
 
         if (condition) exit(0);
 
-	// check class names for Obj, ...
-
-	class_names.push_back("Obj");
-	class_names.push_back("Int");
-	class_names.push_back("String");
-	class_names.push_back("Nothing");
-	class_names.push_back("Boolean");
-
-        	
-	printf("--- Evaluate ---\n");
-	//sorting vector to check for duplicates
-	sort( class_names.begin(), class_names.end() );
-  	
-	for( int i=1; i < class_names.size(); i++ )
+	if (AST_root != NULL)
 	{
-		if ( class_names[i].compare(class_names[i-1] ) == 0) 
-		{
-			fprintf(stderr,"error: duplicate class name %s\n",class_names[i].c_str());
-		} 
-	}  
+ 		printf("--- Class Errors ---\n");
+		tree_node * class_root = AST_root->build_classTree();
+		printf("\n");
+
+ 		printf("--- Type Check Errors ---\n");
+		AST_root->type_checks();
+		printf("\n");
+
+ 		printf("--- Static Check Errors ---\n");
+		AST_root->static_checks();
+		printf("\n");
+
+		printf("--- Class Tree ---\n");
+		print_tree(class_root, 0);
+		printf("\n");
 
 
-	//adding default tree nodes to tree list
+		printf("--- Syntax Tree ---\n");
+		//if (AST_root != NULL) AST_root->print(0);
 
-	tree_node *Obj = new tree_node("Obj");
-	tree_node *Int = new tree_node("Int");
-	tree_node *String = new tree_node("String");
-	tree_node *Nothing = new tree_node("Nothing");
-	tree_node *Boolean = new tree_node("Boolean");
-
-	tree_list = new list <tree_node*>(); 
-
-	tree_list->push_back(Obj);
-	tree_list->push_back(Int);
-	tree_list->push_back(String);
-	tree_list->push_back(Boolean);
-	tree_list->push_back(Nothing);
-
-	Obj->children.push_back(Int);
-	Obj->children.push_back(String);
-	Obj->children.push_back(Nothing);
-	Obj->children.push_back(Boolean);
-
-	Int->parent = Obj;
-	String->parent = Obj;
-	Nothing->parent = Obj;
-	Boolean->parent = Obj;
-	
-	if (root != NULL) root->evaluate();
-	printf("\n");
-
-	printf("--- Class Tree ---\n");
-	print_tree(Obj, 0);
-	printf("\n");
-
-	printf("--- Syntax Tree ---\n");
-	if (root != NULL) root->print(0);
-
-
-
+        }
 }

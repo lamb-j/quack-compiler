@@ -4,13 +4,16 @@
 #include <vector>
 #include <map>
 #include <list>
+#include "class_tree.h"
 
 using namespace std;
 
 class statement_node {
 	public:
 		virtual void print(int indent) = 0;
-		virtual int evaluate() = 0;
+		virtual int build_classTree() = 0;
+		virtual int static_checks() = 0;
+		virtual string type_checks() = 0;
 };
 
 class statement_block_node {
@@ -18,7 +21,9 @@ class statement_block_node {
 		list <statement_node *> *statements;
 	public:
 		statement_block_node(list <statement_node *> *stmts);
-		int evaluate();
+		int build_classTree();
+		int static_checks();
+		string type_checks();
 		void print(int indent);
 };
 
@@ -39,7 +44,9 @@ class class_sig_node {
 		class_sig_node(char *c_name, vector <f_arg_pair *> *f_args, const char *p);
 
 		void print(int indent);
-		int evaluate();
+		tree_node * build_classTree();
+		int static_checks();
+		string type_checks();
 };
 
 class method_node {
@@ -48,23 +55,28 @@ class method_node {
 		vector < f_arg_pair *> *formal_args;
 		char *return_type;
 		statement_block_node *body;
-
+		
 		method_node(char *name, vector < f_arg_pair * > *args, char *r_type, statement_block_node *b);
 
 		void print(int indent);
-		int evaluate();
+		int build_classTree(tree_node *);
+
+		int static_checks();
+		string type_checks();
 };
 
 class class_body_node{
 	public:
-		list<method_node *> *method_list;
 		list<statement_node *> *statement_list;
+		list<method_node *> *method_list;
 
 		class_body_node(list<statement_node *> *s_list, list< method_node *> *m_list);
 
 		void print(int indent);
-		int evaluate();
+		int build_classTree(tree_node *);
 
+		int static_checks();
+		string type_checks();
 };
 
 class class_node {
@@ -75,7 +87,10 @@ class class_node {
 		class_node(class_sig_node *s, class_body_node *b);
 
 		void print(int indent);
-		int evaluate();
+		int build_classTree();
+
+		int static_checks();
+		string type_checks();
 };
 
 class program_node {
@@ -86,7 +101,9 @@ class program_node {
 	program_node(list <class_node *> *c, list <statement_node *> *s);
 
 	void print(int indent);
-	int evaluate();
+	tree_node * build_classTree();
+	int static_checks();
+	string type_checks();
 };
 
 class r_expr_node : public statement_node {
@@ -104,7 +121,9 @@ class l_expr_node : public r_expr_node {
 		l_expr_node(char *str);
 		l_expr_node(r_expr_node *r_node, char* str);
 		void print(int indent);
-		int evaluate();
+		int build_classTree();
+		int static_checks();
+		string type_checks();
 		
 };
 
@@ -116,7 +135,10 @@ class while_node : public statement_node {
     while_node(r_expr_node *cond, statement_block_node *stmts);
 
 		void print(int indent);
-		int evaluate();
+		int build_classTree();
+
+		int static_checks();
+		string type_checks();
 };
 
 class elif_data {
@@ -153,15 +175,20 @@ class if_node : public statement_node {
 				elif_data *elif_p, 
 				statement_block_node *else_b); 
 
-	  void print(int indent);
-		int evaluate();
+	void print(int indent);
+	int build_classTree();
+
+	int static_checks();
+	string type_checks();
 };
 
 class return_node : public statement_node {
 	public:
 		return_node(r_expr_node *rv);
 		void print(int indent);
-		int evaluate();
+		int build_classTree();
+		int static_checks();
+		string type_checks();
 
 		r_expr_node *return_value;
 };
@@ -176,7 +203,9 @@ class asgn_node : public statement_node {
 		asgn_node(l_expr_node *left, char* str, r_expr_node *right);
 		
 		void print(int indent);
-		int evaluate();
+		int build_classTree();
+		int static_checks();
+		string type_checks();
 };
 
 class constructor_call_node : public r_expr_node {
@@ -186,7 +215,9 @@ class constructor_call_node : public r_expr_node {
 
 		constructor_call_node(char *str, list <r_expr_node *> *args);
 		void print(int indent);
-		int evaluate();
+		int build_classTree();
+		int static_checks();
+		string type_checks();
 };
 
 class method_call_node : public r_expr_node {
@@ -197,7 +228,9 @@ class method_call_node : public r_expr_node {
 
 		method_call_node(r_expr_node *ins, char *mod, list <r_expr_node *> *args);
 		void print(int indent);
-		int evaluate();
+		int build_classTree();
+		int static_checks();
+		string type_checks();
 };
 
 class operator_node : public r_expr_node {
@@ -218,7 +251,9 @@ class unary_node : public r_expr_node {
 		unary_node(const char* sym, r_expr_node *R);
 
 		void print(int indent);
-		int evaluate();
+		int build_classTree();
+		int static_checks();
+		string type_checks();
 };
 
 
@@ -227,7 +262,9 @@ class plus_node : public operator_node {
 
 		plus_node(r_expr_node *L, r_expr_node *R);
 		void print(int indent);
-		int evaluate();
+		int build_classTree();
+		int static_checks();
+		string type_checks();
 };
 
 class minus_node : public operator_node {
@@ -235,7 +272,9 @@ class minus_node : public operator_node {
 
 		minus_node(r_expr_node *L, r_expr_node *R);
 		void print(int indent);
-		int evaluate();
+		int build_classTree();
+		int static_checks();
+		string type_checks();
 };
 
 class times_node : public operator_node {
@@ -243,7 +282,9 @@ class times_node : public operator_node {
 		
 		times_node(r_expr_node *L, r_expr_node *R);
 		void print(int indent);
-		int evaluate();
+		int build_classTree();
+		int static_checks();
+		string type_checks();
 };
 
 class divide_node : public operator_node {
@@ -251,21 +292,27 @@ class divide_node : public operator_node {
 		
 		divide_node(r_expr_node *L, r_expr_node *R);
 		void print(int indent);
-		int evaluate();
+		int build_classTree();
+		int static_checks();
+		string type_checks();
 };
 
 class compare_node : public operator_node {
 	public:
 		compare_node(r_expr_node *L, const char* sym, r_expr_node *R);
 		void print(int indent);
-		int evaluate();
+		int build_classTree();
+		int static_checks();
+		string type_checks();
 };
 
 class int_node : public r_expr_node {
 	public:
 		int_node(int value);
 		void print(int indent);
-		int evaluate();
+		int static_checks();
+		int build_classTree();
+		string type_checks();
 };
 
 // inhereit from l_expr_node?
@@ -273,5 +320,7 @@ class str_node : public r_expr_node {
 	public:
 		str_node(char *value);
 		void print(int indent);
-		int evaluate();
+		int build_classTree();
+		int static_checks();
+		string type_checks();
 };

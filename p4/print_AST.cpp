@@ -5,8 +5,11 @@
 #include <list>
 #include <cstdio>
 #include "quack.h"
-#include "class_tree.h"
+//#include "class_tree.h"
 using namespace std;
+
+
+// Prints Abstract Syntax Tree
 
 extern vector < string > class_names;
 

@@ -10,6 +10,8 @@ class tree_node {
 		tree_node *parent;
 		vector <tree_node *> children;
 
+		vector <string > method_names;
+		
 		// add methods/arguments
 
     tree_node(string n) { name = n ; }
@@ -17,7 +19,12 @@ class tree_node {
 
 int print_tree( tree_node *root, int level );
 
-void append_tree( list <tree_node *> *tree_list, string parent_class, string new_class);
+tree_node * append_tree( list <tree_node *> *tree_list, string parent_class, string new_class);
+
+tree_node * get_tree_node(list < tree_node *> *tree_node_list, string cname);
+
+int class_defines_method(tree_node * class_node, string method_name);
+
 
 // int is_subclass(tree_node *A, tree_node *B)
 

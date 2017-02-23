@@ -1,8 +1,3 @@
-class a () extends Int {
-
+while ("bird" < "cat") {
+  x = 2 / 4;
 }
-
-class b () extends a {}
-class c () extends a {}
-class x () extends b {}
-class y () extends b {}
