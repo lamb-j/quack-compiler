@@ -120,13 +120,13 @@ l_expr_node::l_expr_node(r_expr_node *r_node, char *str)
 	instance = r_node;
 }
 
-asgn_node::asgn_node(l_expr_node *left, r_expr_node *right)
+assign_node::assign_node(l_expr_node *left, r_expr_node *right)
 {
 	lhs = left;
 	rhs = right;
 }
 
-asgn_node::asgn_node(l_expr_node *left,char *str, r_expr_node *right)
+assign_node::assign_node(l_expr_node *left,char *str, r_expr_node *right)
 {
 	lhs = left;
 	rhs = right;

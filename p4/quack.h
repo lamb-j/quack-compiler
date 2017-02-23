@@ -193,14 +193,14 @@ class return_node : public statement_node {
 		r_expr_node *return_value;
 };
 
-class asgn_node : public statement_node {
+class assign_node : public statement_node {
 	public:
 		r_expr_node *rhs;
 		l_expr_node *lhs;
 		char *c_name;
 
-		asgn_node(l_expr_node *left, r_expr_node *right);
-		asgn_node(l_expr_node *left, char* str, r_expr_node *right);
+		assign_node(l_expr_node *left, r_expr_node *right);
+		assign_node(l_expr_node *left, char* str, r_expr_node *right);
 		
 		void print(int indent);
 		int build_classTree();

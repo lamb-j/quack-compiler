@@ -139,8 +139,8 @@ Elseif: /* empty */ { $$ = new elif_data(); }
 
 Statement: WHILE R_Expr Statement_Block { $$ = new while_node($2, $3); }
 			     
-Statement: L_Expr '=' R_Expr ';' {$$ = new asgn_node($1,$3); }
-         | L_Expr ':' IDENT '=' R_Expr ';' { $$ = new asgn_node($1, $3, $5); }
+Statement: L_Expr '=' R_Expr ';' {$$ = new assign_node($1,$3); }
+         | L_Expr ':' IDENT '=' R_Expr ';' { $$ = new assign_node($1, $3, $5); }
 
 Statement: R_Expr ';' { $$ = $1; }
 

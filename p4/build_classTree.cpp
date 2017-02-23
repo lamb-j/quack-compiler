@@ -209,7 +209,7 @@ int l_expr_node::build_classTree()
 	}
 }
 
-int asgn_node::build_classTree(){
+int assign_node::build_classTree(){
 	lhs->build_classTree();
 	rhs->build_classTree();
 }

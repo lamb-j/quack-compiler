@@ -172,7 +172,7 @@ void l_expr_node::print(int indent){
 
 }
 
-void asgn_node::print(int indent){
+void assign_node::print(int indent){
 	printf("%*sNODE: asgn\n", indent, "");
 	printf("%*slhs:\n", indent + 2, "");
 	lhs->print(indent + 4);

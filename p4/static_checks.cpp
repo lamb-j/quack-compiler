@@ -110,7 +110,7 @@ int l_expr_node::static_checks()
 	}
 }
 
-int asgn_node::static_checks(){
+int assign_node::static_checks(){
 	lhs->static_checks();
 	rhs->static_checks();
 }

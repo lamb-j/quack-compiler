@@ -127,7 +127,7 @@ string l_expr_node::type_checks()
 	return var_table[s];
 }
 
-string asgn_node::type_checks(){
+string assign_node::type_checks(){
 	//string s1 = lhs->type_checks();
 
         string s1(lhs->var);
