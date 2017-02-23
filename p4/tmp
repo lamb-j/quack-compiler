@@ -1,0 +1,8 @@
+class a () extends Int {
+
+}
+
+class b () extends a {}
+class c () extends a {}
+class x () extends b {}
+class y () extends b {}

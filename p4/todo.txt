@@ -1,0 +1,22 @@
+class_tree.cpp
+  - tree_node least_common_ancestor(*root, *A, *B)
+
+
+quack.cpp
+  - uninitizalied vars
+	  - add lexpr vars to list
+    - vars in rexpr need to be in list
+
+		- rexpr in if/elif/while need to be boolean
+
+	- add in line numbers
+	  - field in each class?
+
+	- handle undefined methods similar to undefined classes?
+
+	- scopes?
+
+-----------
+
+1. Uninitalized variables
+  - 
