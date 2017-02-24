@@ -4,6 +4,10 @@
 #include <list>
 #include "class_tree.h"
 #include <cstdlib>
+
+//class_tree
+//- class tree (class hierarchy related functions
+
 using namespace std;
 
 int print_tree (tree_node *root, int level) {

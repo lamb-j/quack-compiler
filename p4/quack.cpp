@@ -61,10 +61,11 @@ if_node::if_node(
 	else_body = else_b;
 }
 
-while_node::while_node(r_expr_node *cond, statement_block_node *stmts) 
+while_node::while_node(r_expr_node *cond, statement_block_node *stmts, int linenum) 
 {
 	condition = cond;
 	body = stmts;
+	lineno = linenum;
 }
 
 statement_block_node::statement_block_node(list <statement_node *> *stmts) 
@@ -72,17 +73,19 @@ statement_block_node::statement_block_node(list <statement_node *> *stmts)
 	statements = stmts;
 }
 
-class_sig_node::class_sig_node(char *c_name, vector <f_arg_pair *> *f_args, const char *p) 
+class_sig_node::class_sig_node(char *c_name, vector <f_arg_pair *> *f_args, const char *p, int linenum) 
 {
 	class_name = c_name;
 	formal_args = f_args;
 	parent = p;
+	lineno = linenum;
 }
 
-class_node::class_node(class_sig_node *s, class_body_node *b) 
+class_node::class_node(class_sig_node *s, class_body_node *b, int linenum) 
 {
 	sig = s;
 	body = b;
+	lineno = linenum;
 }
 
 program_node::program_node(list <class_node *> *c, list <statement_node *> *s)
@@ -91,12 +94,13 @@ program_node::program_node(list <class_node *> *c, list <statement_node *> *s)
 	statement_list = s;
 }
 
-method_node::method_node(char *name, vector < f_arg_pair * > *args, char *r_type, statement_block_node *b)
+method_node::method_node(char *name, vector < f_arg_pair * > *args, char *r_type, statement_block_node *b, int linenum)
 {
 	method_name = name;
 	formal_args = args;
 	return_type = r_type;
 	body = b;
+	lineno = linenum;
 }
 
 class_body_node::class_body_node(list<statement_node *> *s_list, list<method_node *> *m_list)
@@ -107,6 +111,7 @@ class_body_node::class_body_node(list<statement_node *> *s_list, list<method_nod
 
 return_node::return_node(r_expr_node *rv) {
 	return_value = rv;
+	lineno = linenum;
 }
 
 l_expr_node::l_expr_node(char *str)

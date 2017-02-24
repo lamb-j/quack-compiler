@@ -40,8 +40,9 @@ class class_sig_node {
 		char *class_name;
 	  vector <f_arg_pair *> *formal_args;
 	  const char *parent;
+	  int lineno;
 
-		class_sig_node(char *c_name, vector <f_arg_pair *> *f_args, const char *p);
+		class_sig_node(char *c_name, vector <f_arg_pair *> *f_args, const char *p, int linenum);
 
 		void print(int indent);
 		tree_node * build_classTree();
@@ -55,8 +56,8 @@ class method_node {
 		vector < f_arg_pair *> *formal_args;
 		char *return_type;
 		statement_block_node *body;
-		
-		method_node(char *name, vector < f_arg_pair * > *args, char *r_type, statement_block_node *b);
+	        int lineno;	
+		method_node(char *name, vector < f_arg_pair * > *args, char *r_type, statement_block_node *b, int linenum);
 
 		void print(int indent);
 		int build_classTree(tree_node *);
@@ -83,8 +84,9 @@ class class_node {
 	public:
 		class_sig_node *sig;
 		class_body_node *body;
+		int lineno;
 
-		class_node(class_sig_node *s, class_body_node *b);
+		class_node(class_sig_node *s, class_body_node *b, int linenum);
 
 		void print(int indent);
 		int build_classTree();
@@ -131,8 +133,8 @@ class while_node : public statement_node {
 	public:
 		r_expr_node *condition;
 		statement_block_node *body;
-	
-    while_node(r_expr_node *cond, statement_block_node *stmts);
+		int lineno;	
+    while_node(r_expr_node *cond, statement_block_node *stmts, int linenum);
 
 		void print(int indent);
 		int build_classTree();
@@ -184,12 +186,12 @@ class if_node : public statement_node {
 
 class return_node : public statement_node {
 	public:
-		return_node(r_expr_node *rv);
+		return_node(r_expr_node *rv, int linenum);
 		void print(int indent);
 		int build_classTree();
 		int static_checks();
 		string type_checks();
-
+		int lineno;
 		r_expr_node *return_value;
 };
 

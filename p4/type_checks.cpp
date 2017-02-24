@@ -8,7 +8,7 @@
 //#include "class_tree.h"
 using namespace std;
 
-
+ 
 // Type Checks
 // - check for type errors
 // - building var_table
@@ -47,7 +47,7 @@ string while_node::type_checks()
 	string s1 = condition->type_checks();
 	
 	if (s1.compare("Boolean") != 0) {
-	  fprintf(stderr, "error: while condition is of type \"%s\", type Boolean needed\n", s1.c_str()); 
+	  fprintf(stderr, "%d-error: while condition is of type \"%s\", type Boolean needed\n",lineno,s1.c_str()); 
 	}
 
 	body->type_checks();
@@ -74,7 +74,9 @@ string class_node::type_checks()
 {
 	sig->type_checks();
 	body->type_checks();
-return "Nothing";}
+	return "Nothing";
+}
+
 
 string program_node::type_checks() 
 {
@@ -161,12 +163,14 @@ string method_call_node::type_checks()
 	for (iter = arg_list->begin(); iter != arg_list->end(); ++iter) {
 		(*iter)->type_checks();
 	}
-return "Nothing";}
+	return "Nothing";
+}
 
 string unary_node::type_checks()
 {
 	right->type_checks();
-return "Nothing";}
+	return "Nothing";
+}
 
 string plus_node::type_checks() 
 {
@@ -202,10 +206,13 @@ string divide_node::type_checks()
          return "Nothing";
 	}
 	else if (class_defines_method(get_tree_node(tree_list, s1), "DIVIDE") == 0){
-	 fprintf(stderr,"error: DIVIDE not defined for class %s\n", s1.c_str() );
+	 fprintf(stderr,"error: DIVIDE not defined for class %s\n",s1.c_str());
+	
          return "Nothing";
 	}
 	else {
+          // return type should be return type of DIVDE () in s1/s2, i
+          // which may or may not be the same type as s1,s2 (maybe)
  	  return s1;
 	}
 }

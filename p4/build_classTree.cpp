@@ -8,7 +8,7 @@
 #include <algorithm>
 
 using namespace std;
-
+extern void yyerror(const char* msg);
 
 // Build Class Hierarchy Tree
 // - check duplicate class names
@@ -79,7 +79,7 @@ tree_node * class_sig_node::build_classTree()
 
 	//check if class extends itself
 	if( strcmp( parent, class_name) == 0)
-		fprintf(stderr,"error: class %s cannot extend %s\n",class_name,parent);
+		fprintf(stderr,"%d-error: class %s cannot extend %s\n",lineno, class_name,parent);
 
 
         // add class to tree_list

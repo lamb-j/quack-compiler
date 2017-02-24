@@ -1,3 +1,6 @@
-while ("bird" < "cat") {
-  x = 2 / 4;
+class A()  extends Obj
+{
+
+  def DIVIDE () : Int  {}
+
 }

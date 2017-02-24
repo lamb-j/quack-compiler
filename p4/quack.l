@@ -9,9 +9,15 @@
   #include  <stdio.h>
   #include  <iostream>
 
+  int lineno =1;
   void yyerror(const char *msg)
   {
         fprintf(stderr, "%d: %s (at '%s')\n", yylineno, msg, yytext);
+  }
+
+  void report_error(const char *msg, int lineno)
+  {
+        fprintf(stderr, "%d: %s\n", lineno, msg);
   }
 
 %}
@@ -23,39 +29,39 @@
 
 %%
 
-"class"         { return CLASS; }
-"def"           { return DEF; }
-"extends"       { return EXTENDS; }
-"if"            { return  IF; }
-"elif"          { return  ELIF; }
-"else"          { return  ELSE; }
-"while"         { return  WHILE; }
-"return"        { return  RETURN; }
-">="            { return  ATLEAST; }
-"<="            { return  ATMOST; }
-"=="            { return  EQUALS; }
-"and"           { return  AND; }
-"or"            { return  OR; }
-"not"           { return  NOT; }
+"class"         { yylloc.first_line = yylineno;  return CLASS; }
+"def"           { yylloc.first_line = yylineno;  return DEF; }
+"extends"       { yylloc.first_line = yylineno;  return EXTENDS; }
+"if"            { yylloc.first_line = yylineno;  return  IF; }
+"elif"          { yylloc.first_line = yylineno;  return  ELIF; }
+"else"          { yylloc.first_line = yylineno;  return  ELSE; }
+"while"         { yylloc.first_line = yylineno; return  WHILE; }
+"return"        { yylloc.first_line = yylineno; return  RETURN; }
+">="            { yylloc.first_line = yylineno; return  ATLEAST; }
+"<="            { yylloc.first_line = yylineno; return  ATMOST; }
+"=="            { yylloc.first_line = yylineno; return  EQUALS; }
+"and"           { yylloc.first_line = yylineno; return  AND; }
+"or"            { yylloc.first_line = yylineno; return  OR; }
+"not"           { yylloc.first_line = yylineno; return  NOT; }
 
-[a-zA-Z_][a-zA-Z0-9_]*       {  yylval.strval = strdup(yytext);  return IDENT; }
-[0-9]+                       {  yylval.intval = atoi(yytext);  return INT_LIT; }
+[a-zA-Z_][a-zA-Z0-9_]*       { yylloc.first_line = yylineno;  yylval.strval = strdup(yytext);  return IDENT; }
+[0-9]+                       { yylloc.first_line = yylineno;  yylval.intval = atoi(yytext);  return INT_LIT; }
 
-[+]       { return '+'; }
-"-"       { return '-'; }
-"*"       { return '*'; }
-"/"       { return '/'; }
-"="       { return '='; }
-">"       { return '>'; }
-"<"       { return '<'; }
-"."       { return '.'; }
-","       { return ','; }
-":"       { return ':'; }
-";"       { return ';'; }
-"("       { return '('; }
-")"       { return ')'; }
-"{"       { return '{'; }
-"}"       { return '}'; }
+[+]       { yylloc.first_line = yylineno; return '+'; }
+"-"       { yylloc.first_line = yylineno; return '-'; }
+"*"       { yylloc.first_line = yylineno; return '*'; }
+"/"       { yylloc.first_line = yylineno; return '/'; }
+"="       { yylloc.first_line = yylineno; return '='; }
+">"       { yylloc.first_line = yylineno; return '>'; }
+"<"       { yylloc.first_line = yylineno; return '<'; }
+"."       { yylloc.first_line = yylineno; return '.'; }
+","       { yylloc.first_line = yylineno; return ','; }
+":"       { yylloc.first_line = yylineno; return ':'; }
+";"       { yylloc.first_line = yylineno; return ';'; }
+"("       { yylloc.first_line = yylineno; return '('; }
+")"       { yylloc.first_line = yylineno; return ')'; }
+"{" 	  { yylloc.first_line = yylineno; return '{'; }
+"}"       { yylloc.first_line = yylineno; return '}'; }
 
 
 "/*"                      BEGIN(mlcomment);
@@ -63,7 +69,7 @@
 														BEGIN(INITIAL);}
 <mlcomment>[^*\n]*        /* eat anything that's not a '*' */
 <mlcomment>"*"+[^*/\n]*   /* eat up '*'s not followed by '/'s */
-<mlcomment>[\n]*            
+<mlcomment>[\n]*          
 <mlcomment>"*"+"/"        BEGIN(INITIAL);
 
 "//"                      BEGIN(slcomment);
@@ -72,7 +78,7 @@
 
 
 "\"\"\""                  { BEGIN(string2);}
-<string2>[\n]             
+<string2>[\n]              
 <string2>^["]["]["]
 <string2><<EOF>>          { yyerror("incorrect end for triple-quoted string"); 
 														BEGIN(INITIAL); return STRING_LIT;}
@@ -87,7 +93,7 @@
 <string1>[^"]             
 <string1>["]              { BEGIN(INITIAL); return STRING_LIT; }
 
-\n        
+[\n]	  
 [ \t]     { /* ignore whitespace */ }
 "//".*    { /* ignore comments */ }
 .         { yyerror("mystery character"); }

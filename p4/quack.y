@@ -18,6 +18,7 @@ program_node *AST_root;
 
 int yylex();
 void yyerror(const char *s);
+extern int yylineno;
 
 %}
 
@@ -102,11 +103,10 @@ Program: Classes Statements { $$ = new program_node($1, $2); AST_root = $$; }
 Classes: /* empty */ { $$ = new list<class_node *>(); }
 					| Classes Class { $$ = $1; $1->push_back($2); }
 
-Class: Class_Signature Class_Body {$$ = new class_node($1, $2); }
+Class: Class_Signature Class_Body {$$ = new class_node($1, $2, @1.first_line); }
 
-Class_Signature : CLASS IDENT '(' Formal_Args ')' { $$ = new class_sig_node($2, $4, "Obj");
-																									class_names.push_back( $2 ); }
-                | CLASS IDENT '(' Formal_Args ')' EXTENDS IDENT { $$ = new class_sig_node($2, $4, $7);  
+Class_Signature : CLASS IDENT '(' Formal_Args ')' { $$ = new class_sig_node($2, $4, "Obj", @1.first_line);								class_names.push_back( $2 ); }
+                | CLASS IDENT '(' Formal_Args ')' EXTENDS IDENT { $$ = new class_sig_node($2, $4, $7, @1.first_line);  
 																									class_names.push_back( $2 ); }
 
 Class_Body: '{' Statements Methods '}' { $$ = new class_body_node( $2, $3 ); }
@@ -114,8 +114,8 @@ Class_Body: '{' Statements Methods '}' { $$ = new class_body_node( $2, $3 ); }
 Methods: /* empty */ { $$ = new list<method_node *>(); }
 					| Methods Method { $$ = $1; $1 -> push_back($2); }
 
-Method: DEF IDENT '(' Formal_Args ')' Statement_Block { $$ = new method_node($2, $4, NULL, $6); }
-      | DEF IDENT '(' Formal_Args ')' ':' IDENT Statement_Block { $$ = new method_node($2, $4, $7, $8); }
+Method: DEF IDENT '(' Formal_Args ')' Statement_Block { $$ = new method_node($2, $4, NULL, $6, @1.first_line); }
+      | DEF IDENT '(' Formal_Args ')' ':' IDENT Statement_Block { $$ = new method_node($2, $4, $7, $8, @1.first_line); }
 
 Formal_Args: /* empty */ {$$ = new vector< f_arg_pair * >(); }
     | IDENT ':' IDENT Formal_Args { $$ = $4; $4 -> push_back( new f_arg_pair($1, $3) ); }
@@ -126,20 +126,21 @@ Statement_Block: '{' Statements '}' { $$ = new statement_block_node($2); }
 Statements: /* empty */ { $$ = new list<statement_node *>(); }
 					| Statements Statement {$$ = $1; $1 -> push_back($2); }
 
-Statement: RETURN R_Expr ';' { $$ = new return_node($2); }
+Statement: RETURN R_Expr ';' { $$ = new return_node($2, @1.first_line); }
          | RETURN ';' { $$ = new return_node( NULL ); }
 
 Statement: IF R_Expr Statement_Block Elseif 
-             { $$ = new if_node($2, $3, $4); }
+             { $$ = new if_node($2, $3, $4, @1.first_line); }
          | IF R_Expr Statement_Block Elseif ELSE Statement_Block
-             { $$ = new if_node($2, $3, $4, $6); }
+             { $$ = new if_node($2, $3, $4, $6, @1.first_line); }
 
 Elseif: /* empty */ { $$ = new elif_data(); }
       | Elseif ELIF R_Expr Statement_Block { $$ = $1; $1 -> add($3, $4); }
 
-Statement: WHILE R_Expr Statement_Block { $$ = new while_node($2, $3); }
+Statement: WHILE R_Expr Statement_Block { $$ = new while_node($2, $3, @1.first_line);
+	 printf("@1.first_line: %d, yylineo: %d\n", @1.first_line, yylineno); }
 			     
-Statement: L_Expr '=' R_Expr ';' {$$ = new assign_node($1,$3); }
+Statement: L_Expr '=' R_Expr ';' { $$ = new assign_node($1,$3); }
          | L_Expr ':' IDENT '=' R_Expr ';' { $$ = new assign_node($1, $3, $5); }
 
 Statement: R_Expr ';' { $$ = $1; }
@@ -158,7 +159,7 @@ Actual_Args: /* empty */ { $$ = new list<r_expr_node *>(); }
            | R_Expr Actual_Args { $$ = $2; $2 -> push_back($1); } 
 					 | R_Expr ',' Actual_Args { $$ = $3; $3 -> push_back($1); }
 
-R_Expr: R_Expr '>' R_Expr { $$ = new compare_node($1, "MORE", $3) ;} 
+R_Expr: R_Expr '>' R_Expr { $$ = new compare_node($1, "MORE", $3);} 
       | R_Expr '<' R_Expr { $$ = new compare_node($1, "LESS" , $3); }
 			| R_Expr EQUALS R_Expr { $$ = new compare_node($1, "==", $3); }
       | R_Expr ATLEAST R_Expr { $$ = new compare_node($1, ">=" , $3); }
@@ -169,10 +170,10 @@ R_Expr: R_Expr '>' R_Expr { $$ = new compare_node($1, "MORE", $3) ;}
  //     | '-' R_Expr %prec NEG { $$ = new unary_node( "-", $2) ;}
 
 R_Expr: '(' R_Expr ')' { $$ = $2; }
-      | R_Expr '+' R_Expr { $$ = new plus_node($1, $3); }
-      | R_Expr '-' R_Expr { $$ = new minus_node($1, $3); }
-      | R_Expr '*' R_Expr { $$ = new times_node($1, $3); }
-      | R_Expr '/' R_Expr { $$ = new divide_node($1, $3); }
+      | R_Expr '+' R_Expr { $$ = new plus_node($1, $3, @1.first_line); }
+      | R_Expr '-' R_Expr { $$ = new minus_node($1, $3, @1.first_line); }
+      | R_Expr '*' R_Expr { $$ = new times_node($1, $3, @1.first_line); }
+      | R_Expr '/' R_Expr { $$ = new divide_node($1, $3, @1.first_line); }
 
 
 R_Expr: INT_LIT { $$ = new int_node($1); }
