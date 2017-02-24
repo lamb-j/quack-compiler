@@ -30,15 +30,15 @@ void elif_data::add(r_expr_node *new_cond, statement_block_node *new_body)
 // Node constructors 
 
 // if elseif constructor
-if_node::if_node(
-		r_expr_node *if_c, 
+if_node::if_node(r_expr_node *if_c, 
 		statement_block_node *if_b, 
-		elif_data *elif_p) 
+		elif_data *elif_p,
+		int linenum) 
 {
 	// if
 	if_condition = if_c;
 	if_body = if_b;
-
+	lineno = linenum;
 	// else if
 	elif_pairs = elif_p;
 }
@@ -48,11 +48,13 @@ if_node::if_node(
 		r_expr_node *if_c,
 		statement_block_node *if_b,
 		elif_data *elif_p, 
-		statement_block_node *else_b) 
+		statement_block_node *else_b,
+		int linenum) 
 {
 	// if
 	if_condition = if_c;
 	if_body = if_b;
+	lineno = linenum;
 
 	// else if
 	elif_pairs = elif_p;

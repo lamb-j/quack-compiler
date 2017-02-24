@@ -160,7 +160,7 @@ class if_node : public statement_node {
 		// if 
 		r_expr_node *if_condition;
 		statement_block_node *if_body;
-
+		int lineno;
 		// else if
 		elif_data *elif_pairs;
 
@@ -170,12 +170,12 @@ class if_node : public statement_node {
     if_node(
 				r_expr_node *if_c, 
 				statement_block_node *if_b, 
-				elif_data *elif_p);
+				elif_data *elif_p, int linenum);
     if_node(
 				r_expr_node *if_c, 
 				statement_block_node *if_b, 
 				elif_data *elif_p, 
-				statement_block_node *else_b); 
+				statement_block_node *else_b, int linenum); 
 
 	void print(int indent);
 	int build_classTree();
