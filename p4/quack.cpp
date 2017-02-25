@@ -111,7 +111,7 @@ class_body_node::class_body_node(list<statement_node *> *s_list, list<method_nod
 	method_list = m_list;
 }
 
-return_node::return_node(r_expr_node *rv) {
+return_node::return_node(r_expr_node *rv, int linenum) {
 	return_value = rv;
 	lineno = linenum;
 }
@@ -172,13 +172,25 @@ unary_node::unary_node(const char* sym, r_expr_node *R)
 	right = R;
 }
 
-plus_node::plus_node(r_expr_node *L, r_expr_node *R) : operator_node(L,R) {}
+plus_node::plus_node(r_expr_node *L, r_expr_node *R, int linenum) : operator_node(L,R) 
+{
+	lineno = linenum;
+}
 
-minus_node::minus_node(r_expr_node *L, r_expr_node *R) : operator_node(L,R) {}
+minus_node::minus_node(r_expr_node *L, r_expr_node *R, int linenum) : operator_node(L,R) 
+{
+	lineno = linenum;
+}
 
-times_node::times_node(r_expr_node *L, r_expr_node *R) : operator_node(L,R) {}
+times_node::times_node(r_expr_node *L, r_expr_node *R, int linenum) : operator_node(L,R) 
+{
+	lineno = linenum;
+}
 
-divide_node::divide_node(r_expr_node *L, r_expr_node *R) : operator_node(L,R) {}
+divide_node::divide_node(r_expr_node *L, r_expr_node *R, int linenum) : operator_node(L,R) 
+{
+	lineno = linenum;
+}
 
 compare_node::compare_node(r_expr_node *L, const char* sym, r_expr_node *R) : operator_node(L,sym,R){} 
 

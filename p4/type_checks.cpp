@@ -202,11 +202,11 @@ string divide_node::type_checks()
 	//check if divide exists in s1/s2 type
 	
         if (s1.compare(s2) != 0) {
-	 fprintf(stderr,"error: type mismatch %s is not of type %s\n", s1.c_str(), s2.c_str());
+	 fprintf(stderr,"error:%d: type mismatch %s is not of type %s\n",lineno,s1.c_str(), s2.c_str());
          return "Nothing";
 	}
 	else if (class_defines_method(get_tree_node(tree_list, s1), "DIVIDE") == 0){
-	 fprintf(stderr,"error: DIVIDE not defined for class %s\n",s1.c_str());
+	 fprintf(stderr,"error:%d: DIVIDE not defined for class %s\n",lineno,s1.c_str());
 	
          return "Nothing";
 	}

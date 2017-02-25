@@ -127,7 +127,7 @@ Statements: /* empty */ { $$ = new list<statement_node *>(); }
 					| Statements Statement {$$ = $1; $1 -> push_back($2); }
 
 Statement: RETURN R_Expr ';' { $$ = new return_node($2, @1.first_line); }
-         | RETURN ';' { $$ = new return_node( NULL ); }
+         | RETURN ';' { $$ = new return_node( NULL, @1.first_line ); }
 
 Statement: IF R_Expr Statement_Block Elseif 
              { $$ = new if_node($2, $3, $4, @1.first_line); }

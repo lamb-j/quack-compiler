@@ -261,8 +261,8 @@ class unary_node : public r_expr_node {
 
 class plus_node : public operator_node {
 	public:
-
-		plus_node(r_expr_node *L, r_expr_node *R);
+		int lineno;
+		plus_node(r_expr_node *L, r_expr_node *R, int linenum);
 		void print(int indent);
 		int build_classTree();
 		int static_checks();
@@ -270,9 +270,9 @@ class plus_node : public operator_node {
 };
 
 class minus_node : public operator_node {
-	public:
-
-		minus_node(r_expr_node *L, r_expr_node *R);
+	public: 
+		int lineno;
+		minus_node(r_expr_node *L, r_expr_node *R, int linenum);
 		void print(int indent);
 		int build_classTree();
 		int static_checks();
@@ -280,9 +280,9 @@ class minus_node : public operator_node {
 };
 
 class times_node : public operator_node {
-	public:
-		
-		times_node(r_expr_node *L, r_expr_node *R);
+	public: 
+		int lineno;		
+		times_node(r_expr_node *L, r_expr_node *R, int linenum);
 		void print(int indent);
 		int build_classTree();
 		int static_checks();
@@ -290,9 +290,9 @@ class times_node : public operator_node {
 };
 
 class divide_node : public operator_node {
-	public:
-		
-		divide_node(r_expr_node *L, r_expr_node *R);
+	public: 
+		int lineno;		
+		divide_node(r_expr_node *L, r_expr_node *R, int linenum);
 		void print(int indent);
 		int build_classTree();
 		int static_checks();

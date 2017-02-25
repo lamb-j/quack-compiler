@@ -1,6 +1,8 @@
-class A()  extends Obj
+class A() extends String
 {
-
-  def DIVIDE () : Int  {}
+  def DIVIDE ()  : String 
+  {
+	x = "2" / "3" ;
+  }
 
 }
