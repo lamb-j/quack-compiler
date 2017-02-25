@@ -57,6 +57,9 @@ class method_node {
 		char *return_type;
 		statement_block_node *body;
 	        int lineno;	
+
+		// map method_var_table
+
 		method_node(char *name, vector < f_arg_pair * > *args, char *r_type, statement_block_node *b, int linenum);
 
 		void print(int indent);
@@ -88,6 +91,8 @@ class class_node {
 
 		class_node(class_sig_node *s, class_body_node *b, int linenum);
 
+ 		// class var table
+
 		void print(int indent);
 		int build_classTree();
 
@@ -101,6 +106,9 @@ class program_node {
 		list <statement_node *> *statement_list;
 
 	program_node(list <class_node *> *c, list <statement_node *> *s);
+
+
+        // map st_var_table
 
 	void print(int indent);
 	tree_node * build_classTree();
@@ -119,9 +127,10 @@ class l_expr_node : public r_expr_node {
 		char *var;
 		char *modifier;
 		r_expr_node *instance;
+                int lineno;
 		
-		l_expr_node(char *str);
-		l_expr_node(r_expr_node *r_node, char* str);
+		l_expr_node(char *str, int linenum);
+		l_expr_node(r_expr_node *r_node, char* str, int linenum);
 		void print(int indent);
 		int build_classTree();
 		int static_checks();
@@ -249,8 +258,8 @@ class unary_node : public r_expr_node {
 	public:
 		r_expr_node *right;
 		const char *symbol;
-
-		unary_node(const char* sym, r_expr_node *R);
+		int lineno;
+		unary_node(const char* sym, r_expr_node *R, int linenum);
 
 		void print(int indent);
 		int build_classTree();
@@ -301,7 +310,8 @@ class divide_node : public operator_node {
 
 class compare_node : public operator_node {
 	public:
-		compare_node(r_expr_node *L, const char* sym, r_expr_node *R);
+		compare_node(r_expr_node *L, const char* sym, r_expr_node *R, int linenum);
+		int lineno;
 		void print(int indent);
 		int build_classTree();
 		int static_checks();

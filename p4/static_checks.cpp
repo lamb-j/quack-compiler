@@ -9,9 +9,6 @@
 using namespace std;
 
 
-// Static Checks
-// - constructor call exists for class
-
 // external data structures
 extern vector < string > class_names;
 extern list < tree_node *> *tree_list;
@@ -117,27 +114,12 @@ int assign_node::static_checks(){
 
 int constructor_call_node::static_checks() 
 {
-	// if class not in class list print error
-	int flag = 1;
-	for(int i=0; i<class_names.size(); i++)
-	{
-		if(strcmp(c_name, class_names[i].c_str() ) == 0 ) flag = 0;
-	}
 
-	if (flag)	fprintf(stderr,"error: class %s not defined\n",c_name);
-
-	list<r_expr_node *>::const_iterator iter;
-	for (iter = arg_list->begin(); iter != arg_list->end(); ++iter) {
-		(*iter)->static_checks();
-	}
 }
 
 int method_call_node::static_checks() 
 {
 	instance->static_checks();
-
-        // 
-
 
 	list<r_expr_node *>::const_iterator iter;
 	for (iter = arg_list->begin(); iter != arg_list->end(); ++iter) {

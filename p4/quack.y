@@ -11,6 +11,7 @@
 
 extern vector < string > class_names;
 list <tree_node *> *tree_list;
+extern map<string, string> var_table;
 
 extern FILE *yyin;
 
@@ -137,16 +138,15 @@ Statement: IF R_Expr Statement_Block Elseif
 Elseif: /* empty */ { $$ = new elif_data(); }
       | Elseif ELIF R_Expr Statement_Block { $$ = $1; $1 -> add($3, $4); }
 
-Statement: WHILE R_Expr Statement_Block { $$ = new while_node($2, $3, @1.first_line);
-	 printf("@1.first_line: %d, yylineo: %d\n", @1.first_line, yylineno); }
+Statement: WHILE R_Expr Statement_Block { $$ = new while_node($2, $3, @1.first_line); }
 			     
 Statement: L_Expr '=' R_Expr ';' { $$ = new assign_node($1,$3); }
          | L_Expr ':' IDENT '=' R_Expr ';' { $$ = new assign_node($1, $3, $5); }
 
 Statement: R_Expr ';' { $$ = $1; }
 
-L_Expr: IDENT { $$ = new l_expr_node($1); }
-			| R_Expr '.' IDENT { $$ = new l_expr_node($1, $3); } 
+L_Expr: IDENT { $$ = new l_expr_node($1, @1.first_line); }
+			| R_Expr '.' IDENT { $$ = new l_expr_node($1, $3, @1.first_line); } 
 
 R_Expr: L_Expr {$$ = $1;}
 
@@ -159,14 +159,14 @@ Actual_Args: /* empty */ { $$ = new list<r_expr_node *>(); }
            | R_Expr Actual_Args { $$ = $2; $2 -> push_back($1); } 
 					 | R_Expr ',' Actual_Args { $$ = $3; $3 -> push_back($1); }
 
-R_Expr: R_Expr '>' R_Expr { $$ = new compare_node($1, "MORE", $3);} 
-      | R_Expr '<' R_Expr { $$ = new compare_node($1, "LESS" , $3); }
-			| R_Expr EQUALS R_Expr { $$ = new compare_node($1, "==", $3); }
-      | R_Expr ATLEAST R_Expr { $$ = new compare_node($1, ">=" , $3); }
-      | R_Expr ATMOST R_Expr { $$ = new compare_node($1, "<=" , $3); }
-      | R_Expr AND R_Expr { $$ = new compare_node($1,"AND" , $3); }
-      | R_Expr OR R_Expr { $$ = new compare_node($1, "OR" , $3); }
-      | NOT R_Expr {$$ = new unary_node( "NOT", $2) ; } 
+R_Expr: R_Expr '>' R_Expr { $$ = new compare_node($1, "MORE", $3, @1.first_line);} 
+      | R_Expr '<' R_Expr { $$ = new compare_node($1, "LESS" , $3, @1.first_line); }
+			| R_Expr EQUALS R_Expr { $$ = new compare_node($1, "==", $3, @1.first_line); }
+      | R_Expr ATLEAST R_Expr { $$ = new compare_node($1, ">=" , $3, @1.first_line); }
+      | R_Expr ATMOST R_Expr { $$ = new compare_node($1, "<=" , $3, @1.first_line); }
+      | R_Expr AND R_Expr { $$ = new compare_node($1,"AND" , $3, @1.first_line); }
+      | R_Expr OR R_Expr { $$ = new compare_node($1, "OR" , $3, @1.first_line); }
+      | NOT R_Expr {$$ = new unary_node( "NOT", $2, @1.first_line) ; } 
  //     | '-' R_Expr %prec NEG { $$ = new unary_node( "-", $2) ;}
 
 R_Expr: '(' R_Expr ')' { $$ = $2; }
@@ -212,10 +212,18 @@ int main (int argc, char **argv)
 
  		printf("--- Type Check Errors ---\n");
 		AST_root->type_checks();
+		AST_root->type_checks();
 		printf("\n");
-
- 		printf("--- Static Check Errors ---\n");
-		AST_root->static_checks();
+			
+ 		printf("--- Symbol Table ---\n");
+		for (auto iter = var_table.cbegin(); iter!= var_table.cend(); ++iter)
+		{
+			printf("var:%s\ttype:%s\n",iter->first.c_str(), iter->second.c_str());
+		}
+		printf("\n");
+ 		
+		printf("--- Static Check Errors ---\n");
+		//AST_root->static_checks();
 		printf("\n");
 
 		printf("--- Class Tree ---\n");

@@ -25,11 +25,7 @@ tree_node * get_tree_node(list < tree_node *> *tree_node_list, string cname);
 
 int class_defines_method(tree_node * class_node, string method_name);
 
+string least_common_ancestor(string A, string B);
 
-// int is_subclass(tree_node *A, tree_node *B)
+tree_node * least_common_ancestor(tree_node *A, tree_node *B);
 
-// int is_superclass(tree_node *A, tree_node *B)
-
-// tree_node * least_common_ancestor(tree_node *A, tree_node *B)
-
-// int valid_method_override(method *sub_method, method *super_method)

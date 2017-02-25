@@ -1,22 +1,21 @@
-class_tree.cpp
-  - tree_node least_common_ancestor(*root, *A, *B)
+
+static_check.cpp
+   - undefined method
+
+type_checks.cpp
+   - times/sub/multipe mismatch, class defined
+   - if/elif condition ( lca(thing, boolean) == boolean required)
+
+   - scoping, so each class, method has its own var_table, separate from statement's var_table
 
 
-quack.cpp
-  - uninitizalied vars
-	  - add lexpr vars to list
-    - vars in rexpr need to be in list
+   - actual arg type subtype of formal arg
+   - actual arg list wrong length
+   - method not found in class or superclass
+   - check return type in method against defined type
 
-		- rexpr in if/elif/while need to be boolean
+   - check that if method overrides, return type is subtype and args are supertype (and num args match)
 
-	- add in line numbers
-	  - field in each class?
 
-	- handle undefined methods similar to undefined classes?
-
-	- scopes?
-
------------
-
-1. Uninitalized variables
-  - 
+Later
+   - check for uninitalized vars with ifs/whiles

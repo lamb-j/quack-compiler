@@ -1,7 +1,9 @@
 #include <string>
 #include <string.h>
 #include <cstdio>
+#include <unistd.h>
 #include <list>
+#include <algorithm>
 #include "class_tree.h"
 #include <cstdlib>
 
@@ -9,6 +11,7 @@
 //- class tree (class hierarchy related functions
 
 using namespace std;
+extern list <tree_node *> *tree_list;
 
 int print_tree (tree_node *root, int level) {
  	
@@ -102,7 +105,6 @@ tree_node * get_tree_node(list < tree_node *> *tree_node_list, string cname)
 
 }
 
-
 // check to see if a class defines a method
 int class_defines_method(tree_node * class_node, string method_name) 
 {
@@ -113,5 +115,93 @@ int class_defines_method(tree_node * class_node, string method_name)
   return 0;
 }
 
+tree_node * least_common_ancestor(tree_node *A, tree_node *B)
+{
 
+  tree_node *tmp;
+
+  // make parent list for A
+  vector <tree_node *> A_vec;
+  tmp = A;
+
+  while (tmp->name.compare("Obj") != 0) {
+    A_vec.push_back(tmp);
+
+    tmp = tmp->parent;
+  }
+
+  // make parent vec for B
+  vector <tree_node *> B_vec;
+  tmp = B;
+
+  while (tmp->name.compare("Obj") != 0) {
+    B_vec.push_back(tmp);
+
+    tmp = tmp ->parent;
+  }
+
+  // Add Obj
+  A_vec.push_back(tmp);
+  B_vec.push_back(tmp);
+
+  // compare vecs
+  reverse(A_vec.begin(), A_vec.end());
+  reverse(B_vec.begin(), B_vec.end());
+
+  int len = min (A_vec.size(), B_vec.size());
+
+  for (int i = 0; i < len; i++) {
+    if (A_vec[i] != B_vec[i]) return A_vec[i - 1];
+  }
+
+  // If we didn't find an ancestor, return the node with the smaller list
+  return A_vec.size() < B_vec.size() ? A : B;
+}
+
+
+string least_common_ancestor(string A, string B)
+{
+
+  string tmp;
+
+  // make parent list for A
+  vector <string> A_vec;
+  tmp = A;
+
+  while (tmp.compare("Obj") != 0) {
+    A_vec.push_back(tmp);
+   
+    tmp = get_tree_node(tree_list,tmp)->parent->name;
+  }
+
+  // make parent vec for B
+  vector <string> B_vec;
+  tmp = B;
+
+  while (tmp.compare("Obj") != 0) {
+    B_vec.push_back(tmp);
+    tmp = get_tree_node(tree_list,tmp)->parent->name;
+
+  }
+
+  // Add Obj
+  A_vec.push_back(tmp);
+  B_vec.push_back(tmp);
+
+  // compare vecs
+  reverse(A_vec.begin(), A_vec.end());
+  reverse(B_vec.begin(), B_vec.end());
+
+  int len = min (A_vec.size(), B_vec.size());
+
+  for (int i = 0; i < len; i++) {
+    if ( A_vec[i].compare( B_vec[i] ) !=0 ) 
+    {
+	return A_vec[i - 1];
+    }
+  }
+
+  // If we didn't find an ancestor, return the node with the smaller list
+  return A_vec.size() < B_vec.size() ? A : B;
+}
 

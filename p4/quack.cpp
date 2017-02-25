@@ -116,15 +116,17 @@ return_node::return_node(r_expr_node *rv, int linenum) {
 	lineno = linenum;
 }
 
-l_expr_node::l_expr_node(char *str)
+l_expr_node::l_expr_node(char *str, int linenum)
 {
 	var = str;
+        lineno = linenum;
 }
 
-l_expr_node::l_expr_node(r_expr_node *r_node, char *str)
+l_expr_node::l_expr_node(r_expr_node *r_node, char *str, int linenum)
 {
 	modifier = str;
 	instance = r_node;
+        lineno = linenum;
 }
 
 assign_node::assign_node(l_expr_node *left, r_expr_node *right)
@@ -166,10 +168,11 @@ operator_node::operator_node(r_expr_node *L,const char* sym, r_expr_node *R)
 	right = R;
 }
 
-unary_node::unary_node(const char* sym, r_expr_node *R)
+unary_node::unary_node(const char* sym, r_expr_node *R, int linenum)
 {
 	symbol = sym;
 	right = R;
+	lineno = linenum;
 }
 
 plus_node::plus_node(r_expr_node *L, r_expr_node *R, int linenum) : operator_node(L,R) 
@@ -192,7 +195,10 @@ divide_node::divide_node(r_expr_node *L, r_expr_node *R, int linenum) : operator
 	lineno = linenum;
 }
 
-compare_node::compare_node(r_expr_node *L, const char* sym, r_expr_node *R) : operator_node(L,sym,R){} 
+compare_node::compare_node(r_expr_node *L, const char* sym, r_expr_node *R, int linenum) : operator_node(L,sym,R)
+{
+	lineno = linenum;
+} 
 
 int_node::int_node(int value) {
 	num = value;

@@ -149,6 +149,10 @@ tree_node * program_node::build_classTree()
         Int->method_names.push_back("LESS");
         Int->method_names.push_back("MORE");
 	
+        String->method_names.push_back("ATLEAST");
+        String->method_names.push_back("ATMOST");
+        String->method_names.push_back("LESS");
+        String->method_names.push_back("MORE");
 	
 	Int->parent = Obj;
 	String->parent = Obj;
@@ -173,9 +177,22 @@ tree_node * program_node::build_classTree()
 int method_node::build_classTree(tree_node * class_that_defined_method) 
 {
 
+        tree_node *v = class_that_defined_method;
+
         // add method name to appropriate tree_node
 	string str_mname(method_name);
-        class_that_defined_method->method_names.push_back(str_mname);
+         
+        // if method already in class_that_defined_method, throw error
+
+	if (find(v->method_names.begin(), v->method_names.end(), str_mname) != v->method_names.end())
+	{
+	   fprintf(stderr, "error:%d : Method %s already defined for class %s\n", 
+			lineno, str_mname.c_str(), v->name.c_str() );	
+	}
+        else {
+		class_that_defined_method->method_names.push_back(str_mname);
+        }
+
 	body->build_classTree();
 	
         
@@ -216,6 +233,19 @@ int assign_node::build_classTree(){
 
 int constructor_call_node::build_classTree() 
 {
+        // if class not in class list print error
+        int flag = 1;
+        for(int i=0; i<class_names.size(); i++)
+        {
+                if(strcmp(c_name, class_names[i].c_str() ) == 0 ) flag = 0;
+        }
+
+        if (flag)       fprintf(stderr,"error: class %s not defined\n",c_name);
+
+        list<r_expr_node *>::const_iterator iter;
+        for (iter = arg_list->begin(); iter != arg_list->end(); ++iter) {
+                (*iter)->static_checks();
+        }
 
 }
 

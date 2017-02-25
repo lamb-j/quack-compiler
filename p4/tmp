@@ -1,8 +1,11 @@
-class A() extends String
-{
-  def DIVIDE ()  : String 
-  {
-	x = "2" / "3" ;
-  }
+class A() extends Boolean {}
 
+x = A();
+
+while(x)
+{
+	c = 1 + 2;
 }
+x = Obj();
+
+//y = x.foo();

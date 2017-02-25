@@ -29,12 +29,12 @@
 
 %%
 
-"class"         { yylloc.first_line = yylineno;  return CLASS; }
-"def"           { yylloc.first_line = yylineno;  return DEF; }
-"extends"       { yylloc.first_line = yylineno;  return EXTENDS; }
-"if"            { yylloc.first_line = yylineno;  return  IF; }
-"elif"          { yylloc.first_line = yylineno;  return  ELIF; }
-"else"          { yylloc.first_line = yylineno;  return  ELSE; }
+"class"         { yylloc.first_line = yylineno; return CLASS; }
+"def"           { yylloc.first_line = yylineno; return DEF; }
+"extends"       { yylloc.first_line = yylineno; return EXTENDS; }
+"if"            { yylloc.first_line = yylineno; return  IF; }
+"elif"          { yylloc.first_line = yylineno; return  ELIF; }
+"else"          { yylloc.first_line = yylineno; return  ELSE; }
 "while"         { yylloc.first_line = yylineno; return  WHILE; }
 "return"        { yylloc.first_line = yylineno; return  RETURN; }
 ">="            { yylloc.first_line = yylineno; return  ATLEAST; }

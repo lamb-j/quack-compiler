@@ -45,9 +45,9 @@ return "Nothing";}
 string while_node::type_checks() 
 {
 	string s1 = condition->type_checks();
-	
-	if (s1.compare("Boolean") != 0) {
-	  fprintf(stderr, "%d-error: while condition is of type \"%s\", type Boolean needed\n",lineno,s1.c_str()); 
+	string lca = least_common_ancestor(s1,"Boolean");
+	if (lca.compare("Boolean") != 0) {
+	  fprintf(stderr, "error:%d: while condition is of type \"%s\", type Boolean needed\n",lineno,lca.c_str()); 
 	}
 
 	body->type_checks();
@@ -77,9 +77,11 @@ string class_node::type_checks()
 	return "Nothing";
 }
 
-
 string program_node::type_checks() 
 {
+
+        var_table["true"] = "Boolean";
+        var_table["false"] = "Boolean";
 
 	list<class_node *>::const_iterator c_iter;
 	for (c_iter = class_list->begin(); c_iter != class_list->end(); ++c_iter) {
@@ -126,18 +128,33 @@ string l_expr_node::type_checks()
 
 	// look up var in table of variables, return type of var
         string s(var);
-	return var_table[s];
+ 
+        if (var_table.find(s) != var_table.end()) 
+        {
+		return var_table[s];
+        }
+ 	else 
+        {
+          fprintf(stderr, "error:%d : uninitalized variable %s\n", lineno, s.c_str() );
+	  return "Nothing";
+        }
+
 }
 
-string assign_node::type_checks(){
-	//string s1 = lhs->type_checks();
-
+string assign_node::type_checks()
+{
         string s1(lhs->var);
 	string s2 = rhs->type_checks();
 
  	// add var to table with least_common_ancestor of rhs, and vars old type
-        
-        var_table.insert( make_pair(s1, s2) );
+        if (var_table.find(s1) != var_table.end() ) {
+          tree_node * lca = least_common_ancestor(get_tree_node(tree_list, var_table[s1]), 
+						  get_tree_node(tree_list, s2) );
+          var_table[s1] = lca->name;
+        }
+        else {
+	  var_table[s1] = s2;
+        }
 
 	return "Nothing";
 }
@@ -211,8 +228,6 @@ string divide_node::type_checks()
          return "Nothing";
 	}
 	else {
-          // return type should be return type of DIVDE () in s1/s2, i
-          // which may or may not be the same type as s1,s2 (maybe)
  	  return s1;
 	}
 }
@@ -223,8 +238,6 @@ string compare_node::type_checks()
 	string s2 = right->type_checks();
    
         string symbol_string(symbol);
-
-        printf("s1: %s, s2: %s\n", s1.c_str(), s2.c_str());
 
         if (s1.compare(s2) != 0) {
 	  fprintf(stderr,"error: type mismatch. %s does not match %s\n", s1.c_str(), s2.c_str() );
