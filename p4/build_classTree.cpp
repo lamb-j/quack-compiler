@@ -8,7 +8,8 @@
 #include <algorithm>
 
 using namespace std;
-extern void yyerror(const char* msg);
+//extern void yyerror(const char* msg);
+extern int error_flag;
 
 // Build Class Hierarchy Tree
 // - check duplicate class names
@@ -66,28 +67,33 @@ tree_node * class_sig_node::build_classTree()
 		if(strcmp(parent, class_names[i].c_str() ) == 0 ) flag = 0;
 	}
 
-	if (flag)	fprintf(stderr,"error: parent class %s not defined\n",parent);
+	if (flag)	{
+		fprintf(stderr, "error:%d:  parent class %s not defined\n", lineno, parent);
+		error();
+	}
 
 	//check if class name among default classes
 	const char* default_classes[] = { "Obj", "Int", "Nothing", "String", "Boolean" };
-	
+
 	for( int i=0; i<5; i++)
 	{
-		if(! strcmp( class_name, default_classes[i]))
-			fprintf(stderr,"error: class name %s is a default class\n",class_name); 
+		if(! strcmp( class_name, default_classes[i])) {
+			fprintf(stderr, "error:%d: class name %s is a default class\n", lineno, class_name); 
+			error();
+		}
 	}
 
 	//check if class extends itself
-	if( strcmp( parent, class_name) == 0)
-		fprintf(stderr,"%d-error: class %s cannot extend %s\n",lineno, class_name,parent);
+	if( strcmp( parent, class_name) == 0) {
+		fprintf(stderr, "error:%d: class %s cannot extend %s\n",lineno, class_name,parent);
+		error();
+	}
 
-
-        // add class to tree_list
-        string p(parent);
-        string c(class_name);
-        return append_tree(tree_list, p, c); //returns new tree node
+	// add class to tree_list
+	string p(parent);
+	string c(class_name);
+	return append_tree(tree_list, p, c); //returns new tree node
 }
-
 
 int class_node::build_classTree() 
 {
@@ -113,7 +119,8 @@ tree_node * program_node::build_classTree()
 	{
 		if ( class_names[i].compare(class_names[i-1] ) == 0)
 		{
-			fprintf(stderr,"error: duplicate class name %s\n",class_names[i].c_str());
+			fprintf(stderr,"error: duplicate class name %s\n", class_names[i].c_str());
+			error();
 		}
 	}
 
@@ -139,26 +146,25 @@ tree_node * program_node::build_classTree()
 
 	Obj->method_names.push_back("EQUALS");
 
-        Int->method_names.push_back("PLUS");
-        Int->method_names.push_back("MINUS");
-        Int->method_names.push_back("TIMES");
-        Int->method_names.push_back("DIVIDE");
-        Int->method_names.push_back("EQUALS");
-        Int->method_names.push_back("ATLEAST");
-        Int->method_names.push_back("ATMOST");
-        Int->method_names.push_back("LESS");
-        Int->method_names.push_back("MORE");
-	
-        String->method_names.push_back("ATLEAST");
-        String->method_names.push_back("ATMOST");
-        String->method_names.push_back("LESS");
-        String->method_names.push_back("MORE");
-	
+	Int->method_names.push_back("PLUS");
+	Int->method_names.push_back("MINUS");
+	Int->method_names.push_back("TIMES");
+	Int->method_names.push_back("DIVIDE");
+	Int->method_names.push_back("EQUALS");
+	Int->method_names.push_back("ATLEAST");
+	Int->method_names.push_back("ATMOST");
+	Int->method_names.push_back("LESS");
+	Int->method_names.push_back("MORE");
+
+	String->method_names.push_back("ATLEAST");
+	String->method_names.push_back("ATMOST");
+	String->method_names.push_back("LESS");
+	String->method_names.push_back("MORE");
+
 	Int->parent = Obj;
 	String->parent = Obj;
 	Nothing->parent = Obj;
 	Boolean->parent = Obj;
-
 
 	list<class_node *>::const_iterator c_iter;
 	for (c_iter = class_list->begin(); c_iter != class_list->end(); ++c_iter) {
@@ -170,32 +176,33 @@ tree_node * program_node::build_classTree()
 		(*s_iter)->build_classTree();
 	}
 
-        return Obj;
+	return Obj;
 
 }
 
 int method_node::build_classTree(tree_node * class_that_defined_method) 
 {
 
-        tree_node *v = class_that_defined_method;
+	tree_node *v = class_that_defined_method;
 
-        // add method name to appropriate tree_node
+	// add method name to appropriate tree_node
 	string str_mname(method_name);
-         
-        // if method already in class_that_defined_method, throw error
+
+	// if method already in class_that_defined_method, throw error
 
 	if (find(v->method_names.begin(), v->method_names.end(), str_mname) != v->method_names.end())
 	{
-	   fprintf(stderr, "error:%d : Method %s already defined for class %s\n", 
-			lineno, str_mname.c_str(), v->name.c_str() );	
+		fprintf(stderr, "error:%d : Method %s already defined for class %s\n", 
+				lineno, str_mname.c_str(), v->name.c_str() );	
+		error();
 	}
-        else {
+	else {
 		class_that_defined_method->method_names.push_back(str_mname);
-        }
+	}
 
 	body->build_classTree();
-	
-        
+
+	return 0;
 }
 
 int class_body_node::build_classTree(tree_node * class_that_defined_method)
@@ -210,12 +217,16 @@ int class_body_node::build_classTree(tree_node * class_that_defined_method)
 		// send appropriate class tree_node 
 		(*m_iter)->build_classTree(class_that_defined_method);
 	}
+
+	return 0;
 }
 
 int return_node::build_classTree() 
 {
 	if (return_value != NULL) 
 		return_value->build_classTree();
+
+	return 0;
 }
 
 int l_expr_node::build_classTree()
@@ -224,29 +235,37 @@ int l_expr_node::build_classTree()
 	{
 		instance->build_classTree();
 	}
+
+	return 0;
 }
 
 int assign_node::build_classTree(){
 	lhs->build_classTree();
 	rhs->build_classTree();
+
+	return 0;
 }
 
 int constructor_call_node::build_classTree() 
 {
-        // if class not in class list print error
-        int flag = 1;
-        for(int i=0; i<class_names.size(); i++)
-        {
-                if(strcmp(c_name, class_names[i].c_str() ) == 0 ) flag = 0;
-        }
+	// if class not in class list print error
+	int flag = 1;
+	for(int i=0; i<class_names.size(); i++)
+	{
+		if(strcmp(c_name, class_names[i].c_str() ) == 0 ) flag = 0;
+	}
 
-        if (flag)       fprintf(stderr,"error: class %s not defined\n",c_name);
+	if (flag) {
+		fprintf(stderr,"error: %d:  class %s not defined\n", lineno, c_name);
+		error();
+	}
 
-        list<r_expr_node *>::const_iterator iter;
-        for (iter = arg_list->begin(); iter != arg_list->end(); ++iter) {
-                (*iter)->static_checks();
-        }
+	list<r_expr_node *>::const_iterator iter;
+	for (iter = arg_list->begin(); iter != arg_list->end(); ++iter) {
+		(*iter)->static_checks();
+	}
 
+	return 0;
 }
 
 int method_call_node::build_classTree() 
@@ -299,7 +318,6 @@ int int_node::build_classTree()
 
 }
 
-//Need to figure out how to use double inheritance for l-expr nad r-expr ident
 int str_node::build_classTree() 
 {
 

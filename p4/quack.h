@@ -8,6 +8,8 @@
 
 using namespace std;
 
+void error();
+
 class statement_node {
 	public:
 		virtual void print(int indent) = 0;
@@ -56,7 +58,7 @@ class method_node {
 		vector < f_arg_pair *> *formal_args;
 		char *return_type;
 		statement_block_node *body;
-	        int lineno;	
+	  int lineno;	
 
 		// map method_var_table
 
@@ -209,9 +211,10 @@ class assign_node : public statement_node {
 		r_expr_node *rhs;
 		l_expr_node *lhs;
 		char *c_name;
+		int lineno;
 
-		assign_node(l_expr_node *left, r_expr_node *right);
-		assign_node(l_expr_node *left, char* str, r_expr_node *right);
+		assign_node(l_expr_node *left, r_expr_node *right, int linenum);
+		assign_node(l_expr_node *left, char* str, r_expr_node *right, int linenum);
 		
 		void print(int indent);
 		int build_classTree();
@@ -223,8 +226,9 @@ class constructor_call_node : public r_expr_node {
 	public:
 		char *c_name;
 		list <r_expr_node *> *arg_list;
+		int lineno;
 
-		constructor_call_node(char *str, list <r_expr_node *> *args);
+		constructor_call_node(char *str, list <r_expr_node *> *args, int linenum);
 		void print(int indent);
 		int build_classTree();
 		int static_checks();
@@ -236,8 +240,9 @@ class method_call_node : public r_expr_node {
 		r_expr_node *instance;
 		char *modifier;
 		list <r_expr_node *> *arg_list;
+		int lineno;
 
-		method_call_node(r_expr_node *ins, char *mod, list <r_expr_node *> *args);
+		method_call_node(r_expr_node *ins, char *mod, list <r_expr_node *> *args, int linenum);
 		void print(int indent);
 		int build_classTree();
 		int static_checks();

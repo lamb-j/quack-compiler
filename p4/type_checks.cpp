@@ -8,7 +8,6 @@
 //#include "class_tree.h"
 using namespace std;
 
- 
 // Type Checks
 // - check for type errors
 // - building var_table
@@ -16,6 +15,7 @@ using namespace std;
 // external data structures
 extern vector < string > class_names;
 extern list < tree_node *> *tree_list;
+extern int error_flag;
 
 map<string, string> var_table;
 
@@ -40,14 +40,16 @@ string if_node::type_checks() {
 	{	
 		else_body->type_checks();
 	}
-return "Nothing";}
+	return "Nothing";
+}
 
 string while_node::type_checks() 
 {
 	string s1 = condition->type_checks();
 	string lca = least_common_ancestor(s1,"Boolean");
 	if (lca.compare("Boolean") != 0) {
-	  fprintf(stderr, "error:%d: while condition is of type \"%s\", type Boolean needed\n",lineno,lca.c_str()); 
+		fprintf(stderr, "error:%d: while condition is of type \"%s\", type Boolean needed\n",lineno,lca.c_str()); 
+		error();
 	}
 
 	body->type_checks();
@@ -61,14 +63,14 @@ string statement_block_node::type_checks()
 	for (iter = statements->begin(); iter != statements->end(); ++iter) {
 		(*iter)->type_checks();
 	}
-return "Nothing";}
+	return "Nothing";
+}
 
 string class_sig_node::type_checks() 
 {
 
-
-return "Nothing";}
-
+	return "Nothing";
+}
 
 string class_node::type_checks() 
 {
@@ -80,8 +82,8 @@ string class_node::type_checks()
 string program_node::type_checks() 
 {
 
-        var_table["true"] = "Boolean";
-        var_table["false"] = "Boolean";
+	var_table["true"] = "Boolean";
+	var_table["false"] = "Boolean";
 
 	list<class_node *>::const_iterator c_iter;
 	for (c_iter = class_list->begin(); c_iter != class_list->end(); ++c_iter) {
@@ -92,12 +94,14 @@ string program_node::type_checks()
 	for (s_iter = statement_list->begin(); s_iter != statement_list->end(); ++s_iter) {
 		(*s_iter)->type_checks();
 	}
-return "Nothing";}
+	return "Nothing";
+}
 
 string method_node::type_checks() 
 {
 	body->type_checks();
-return "Nothing";}
+	return "Nothing";
+}
 
 string class_body_node::type_checks()
 {
@@ -110,7 +114,8 @@ string class_body_node::type_checks()
 	for (m_iter = method_list->begin(); m_iter != method_list->end(); ++m_iter) {
 		(*m_iter)->type_checks();
 	}
-return "Nothing";}
+	return "Nothing";
+}
 
 string return_node::type_checks() 
 {
@@ -127,48 +132,49 @@ string l_expr_node::type_checks()
 	}
 
 	// look up var in table of variables, return type of var
-        string s(var);
- 
-        if (var_table.find(s) != var_table.end()) 
-        {
+	string s(var);
+
+	if (var_table.find(s) != var_table.end()) 
+	{
 		return var_table[s];
-        }
- 	else 
-        {
-          fprintf(stderr, "error:%d : uninitalized variable %s\n", lineno, s.c_str() );
-	  return "Nothing";
-        }
+	}
+	else 
+	{
+		fprintf(stderr, "error:%d : uninitalized variable %s\n", lineno, s.c_str() );
+		error();
+		return "Nothing";
+	}
 
 }
 
 string assign_node::type_checks()
 {
-        string s1(lhs->var);
+	string s1(lhs->var);
 	string s2 = rhs->type_checks();
 
- 	// add var to table with least_common_ancestor of rhs, and vars old type
-        if (var_table.find(s1) != var_table.end() ) {
-          tree_node * lca = least_common_ancestor(get_tree_node(tree_list, var_table[s1]), 
-						  get_tree_node(tree_list, s2) );
-          var_table[s1] = lca->name;
-        }
-        else {
-	  var_table[s1] = s2;
-        }
+	// add var to table with least_common_ancestor of rhs, and vars old type
+	if (var_table.find(s1) != var_table.end() ) {
+		tree_node * lca = least_common_ancestor(get_tree_node(tree_list, var_table[s1]), 
+				get_tree_node(tree_list, s2) );
+		var_table[s1] = lca->name;
+	}
+	else {
+		var_table[s1] = s2;
+	}
 
 	return "Nothing";
 }
 
 string constructor_call_node::type_checks() 
 {
-  
+
 	list<r_expr_node *>::const_iterator iter;
 	for (iter = arg_list->begin(); iter != arg_list->end(); ++iter) {
 		(*iter)->type_checks();
 	}
 
-        string s(c_name);
-        return s;
+	string s(c_name);
+	return s;
 }
 
 string method_call_node::type_checks() 
@@ -191,44 +197,93 @@ string unary_node::type_checks()
 
 string plus_node::type_checks() 
 {
-	left->type_checks();
-	right->type_checks();
-	return "Int";
-}
 
-string minus_node::type_checks() 
-{
-	left->type_checks();
-	right->type_checks();
-	return "Int";
-}
-
-string times_node::type_checks() 
-{
-	left->type_checks();
-	right->type_checks();
-	return "Int";
-}
-
-string divide_node::type_checks() 
-{
-	
 	string s1 = left->type_checks();
 	string s2 = right->type_checks();
 
 	//check if divide exists in s1/s2 type
-	
-        if (s1.compare(s2) != 0) {
-	 fprintf(stderr,"error:%d: type mismatch %s is not of type %s\n",lineno,s1.c_str(), s2.c_str());
-         return "Nothing";
+
+	if (s1.compare(s2) != 0) {
+		fprintf(stderr,"error:%d: type mismatch %s is not of type %s\n",lineno,s1.c_str(), s2.c_str());
+		error();
+		return "Nothing";
 	}
-	else if (class_defines_method(get_tree_node(tree_list, s1), "DIVIDE") == 0){
-	 fprintf(stderr,"error:%d: DIVIDE not defined for class %s\n",lineno,s1.c_str());
-	
-         return "Nothing";
+	else if (class_defines_method(get_tree_node(tree_list, s1), "PLUS") == 0){
+		fprintf(stderr,"error:%d: PLUS not defined for class %s\n",lineno,s1.c_str());
+		error();
+		return "Nothing";
 	}
 	else {
- 	  return s1;
+		return s1;
+	}
+}
+
+string minus_node::type_checks() 
+{
+
+	string s1 = left->type_checks();
+	string s2 = right->type_checks();
+
+	//check if divide exists in s1/s2 type
+
+	if (s1.compare(s2) != 0) {
+		fprintf(stderr,"error:%d: type mismatch %s is not of type %s\n",lineno,s1.c_str(), s2.c_str());
+		error();
+		return "Nothing";
+	}
+	else if (class_defines_method(get_tree_node(tree_list, s1), "MINUS") == 0){
+		fprintf(stderr,"error:%d: MINUS not defined for class %s\n",lineno,s1.c_str());
+		error();
+		return "Nothing";
+	}
+	else {
+		return s1;
+	}
+}
+
+string times_node::type_checks() 
+{
+
+	string s1 = left->type_checks();
+	string s2 = right->type_checks();
+
+	//check if divide exists in s1/s2 type
+
+	if (s1.compare(s2) != 0) {
+		fprintf(stderr,"error:%d: type mismatch %s is not of type %s\n",lineno,s1.c_str(), s2.c_str());
+    error();
+		return "Nothing";
+	}
+	else if (class_defines_method(get_tree_node(tree_list, s1), "TIMES") == 0){
+		fprintf(stderr,"error:%d: TIMES not defined for class %s\n",lineno,s1.c_str());
+    error();
+		return "Nothing";
+	}
+	else {
+		return s1;
+	}
+}
+
+string divide_node::type_checks() 
+{
+
+	string s1 = left->type_checks();
+	string s2 = right->type_checks();
+
+	//check if divide exists in s1/s2 type
+
+	if (s1.compare(s2) != 0) {
+		fprintf(stderr,"error:%d: type mismatch %s is not of type %s\n",lineno,s1.c_str(), s2.c_str());
+    error();
+		return "Nothing";
+	}
+	else if (class_defines_method(get_tree_node(tree_list, s1), "DIVIDE") == 0){
+		fprintf(stderr,"error:%d: DIVIDE not defined for class %s\n",lineno,s1.c_str());
+    error();
+		return "Nothing";
+	}
+	else {
+		return s1;
 	}
 }
 
@@ -236,27 +291,30 @@ string compare_node::type_checks()
 {
 	string s1 = left->type_checks();
 	string s2 = right->type_checks();
-   
-        string symbol_string(symbol);
 
-        if (s1.compare(s2) != 0) {
-	  fprintf(stderr,"error: type mismatch. %s does not match %s\n", s1.c_str(), s2.c_str() );
-          return "Nothing";
+	string symbol_string(symbol);
+
+	if (s1.compare(s2) != 0) {
+		fprintf(stderr,"error:%d: type mismatch. %s does not match %s\n", lineno, s1.c_str(), s2.c_str() );
+    error();
+		return "Nothing";
 	}
 	else if (class_defines_method(get_tree_node(tree_list, s1), symbol_string) == 0){
-	 fprintf(stderr,"error: %s not defined for class %s\n", symbol, s1.c_str() );
-         return "Nothing";
+		fprintf(stderr,"error:%d: %s not defined for class %s\n", lineno, symbol, s1.c_str() );
+    error();
+		return "Nothing";
 	}
 	else {
-          return "Boolean";
+		return "Boolean";
 	}
 }
+
 string int_node::type_checks() 
 {
-  return "Int";
+	return "Int";
 }
 
 string str_node::type_checks() 
 {
-  return "String";
+	return "String";
 }

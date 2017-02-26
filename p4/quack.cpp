@@ -8,6 +8,11 @@
 using namespace std;
 
 vector < string > class_names;
+int error_flag = 0;
+
+void error() {
+	error_flag = 1;
+}
 
 // Data structure for handling elif conditions
 elif_data::elif_data() 
@@ -129,30 +134,36 @@ l_expr_node::l_expr_node(r_expr_node *r_node, char *str, int linenum)
         lineno = linenum;
 }
 
-assign_node::assign_node(l_expr_node *left, r_expr_node *right)
+assign_node::assign_node(l_expr_node *left, r_expr_node *right, int linenum)
 {
 	lhs = left;
 	rhs = right;
+	lineno = linenum;
 }
 
-assign_node::assign_node(l_expr_node *left,char *str, r_expr_node *right)
+assign_node::assign_node(l_expr_node *left,char *str, r_expr_node *right, int linenum)
 {
 	lhs = left;
 	rhs = right;
 	c_name = str;
+	lineno = linenum;
 }
 
-constructor_call_node::constructor_call_node(char *str, list <r_expr_node *> *args) 
+constructor_call_node::constructor_call_node(char *str, list <r_expr_node *> *args, int linenum) 
 {
 	c_name = str;
 	arg_list = args;
+
+	lineno = linenum;
 }
 
-method_call_node::method_call_node(r_expr_node *ins, char *mod, list <r_expr_node *> *args) 
+method_call_node::method_call_node(r_expr_node *ins, char *mod, list <r_expr_node *> *args, int linenum) 
 {
 	instance = ins;
 	modifier = mod;
 	arg_list = args;
+
+	lineno = linenum;
 }
 
 operator_node::operator_node(r_expr_node *L, r_expr_node *R) 

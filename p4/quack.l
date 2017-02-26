@@ -13,6 +13,7 @@
   void yyerror(const char *msg)
   {
         fprintf(stderr, "%d: %s (at '%s')\n", yylineno, msg, yytext);
+				error();
   }
 
   void report_error(const char *msg, int lineno)
