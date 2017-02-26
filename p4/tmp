@@ -1,13 +1,3 @@
-class A () {
+x = 3;
 
-  def PLUS () : Obj {}
-
-	def TIMES () : Obj {}
-}
-
-x = A();
-
-y = A();
-
-z = x + y;
-z = x * y;
+z = not x;

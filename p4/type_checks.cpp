@@ -186,18 +186,26 @@ string method_call_node::type_checks()
 	for (iter = arg_list->begin(); iter != arg_list->end(); ++iter) {
 		(*iter)->type_checks();
 	}
+
+	// should be return type of method
 	return "Nothing";
 }
 
 string unary_node::type_checks()
 {
-	right->type_checks();
-	return "Nothing";
+	string s = right->type_checks();
+
+	if (!strcmp(symbol, "NOT") && s.compare("Boolean") ) {
+			fprintf(stderr, "error:%d: \"not\" operation can only be applied to type \"Boolean\"\n", lineno);
+			error();
+			return "Nothing";
+	}
+
+	return s;
 }
 
 string plus_node::type_checks() 
 {
-
 	string s1 = left->type_checks();
 	string s2 = right->type_checks();
 
@@ -220,7 +228,6 @@ string plus_node::type_checks()
 
 string minus_node::type_checks() 
 {
-
 	string s1 = left->type_checks();
 	string s2 = right->type_checks();
 
@@ -243,7 +250,6 @@ string minus_node::type_checks()
 
 string times_node::type_checks() 
 {
-
 	string s1 = left->type_checks();
 	string s2 = right->type_checks();
 
@@ -266,7 +272,6 @@ string times_node::type_checks()
 
 string divide_node::type_checks() 
 {
-
 	string s1 = left->type_checks();
 	string s2 = right->type_checks();
 

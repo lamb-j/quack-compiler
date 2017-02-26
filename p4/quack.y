@@ -169,7 +169,8 @@ R_Expr: R_Expr '>' R_Expr { $$ = new compare_node($1, "MORE", $3, @1.first_line)
 | R_Expr AND R_Expr { $$ = new compare_node($1,"AND" , $3, @1.first_line); }
 | R_Expr OR R_Expr { $$ = new compare_node($1, "OR" , $3, @1.first_line); }
 | NOT R_Expr {$$ = new unary_node( "NOT", $2, @1.first_line) ; } 
-//     | '-' R_Expr %prec NEG { $$ = new unary_node( "-", $2) ;}
+// Introduces 19 shift-reduce errors
+//| '-' R_Expr %prec NEG { $$ = new unary_node( "-", $2, @1.first_line) ;}
 
 R_Expr: '(' R_Expr ')' { $$ = $2; }
 | R_Expr '+' R_Expr { $$ = new plus_node($1, $3, @1.first_line); }
