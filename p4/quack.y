@@ -12,7 +12,6 @@
 // external data structures
 extern vector < string > class_names;
 list <tree_node *> *tree_list;
-extern map<string, string> var_table;
 extern int error_flag;
 
 extern FILE *yyin;
@@ -217,15 +216,51 @@ int main (int argc, char **argv)
     // two sweeps
 		printf("--- Type Check Errors ---\n");
 		AST_root->type_checks();
-		if (error_flag) return 0;
+		//if (error_flag) return 0;
 		AST_root->type_checks();
 		if (error_flag) return 0;
 		printf("\n");
 
-		printf("--- Symbol Table ---\n");
-		for (auto iter = var_table.cbegin(); iter!= var_table.cend(); ++iter)
+
+		list<class_node *>::const_iterator c_iter;
+		for (c_iter = AST_root->class_list->begin(); c_iter != AST_root->class_list->end(); ++c_iter) {
+			class_node *c_node = (*c_iter);
+
+			printf("--- Class %s Symbol Table ---\n", c_node->sig->class_name );
+			for (auto iter = c_node->local_var_table->cbegin(); iter!= c_node->local_var_table->cend(); ++iter)
+			{
+				printf("  local:%s\ttype:%s\n",iter->first.c_str(), iter->second.c_str());
+			}
+			printf("\n");
+			for (auto iter = c_node->field_var_table->cbegin(); iter!= c_node->field_var_table->cend(); ++iter)
+			{
+				printf("  field:%s\ttype:%s\n",iter->first.c_str(), iter->second.c_str());
+			}
+			printf("\n");
+			
+			//printing the method var table
+			
+			list<method_node *>::const_iterator m_iter;
+			list<method_node *> *m_list_ptr = c_node->body->method_list; 
+            
+			for (m_iter = m_list_ptr->begin(); m_iter != m_list_ptr->end(); ++m_iter) {
+				method_node *m_node = (*m_iter);
+				
+				
+				printf("      --- Method %s Symbol Table ---\n", m_node->method_name );
+				for (auto iter = m_node->meth_var_table->cbegin(); iter!= m_node->meth_var_table->cend(); ++iter)
+				{
+					printf("        local:%s\ttype:%s\n",iter->first.c_str(), iter->second.c_str());
+				}
+				printf("\n");
+			}
+			printf("\n");
+		}
+
+		printf("--- Statement Symbol Table ---\n");
+		for (auto iter = AST_root->stmt_var_table->cbegin(); iter!= AST_root->stmt_var_table->cend(); ++iter)
 		{
-			printf("var:%s\ttype:%s\n",iter->first.c_str(), iter->second.c_str());
+			printf("  var:%s\ttype:%s\n",iter->first.c_str(), iter->second.c_str());
 		}
 		printf("\n");
 
@@ -235,12 +270,11 @@ int main (int argc, char **argv)
 		printf("\n");
 
 		printf("--- Class Tree ---\n");
-		print_tree(class_root, 0);
+		//print_tree(class_root, 0);
 		printf("\n");
 
-
 		printf("--- Syntax Tree ---\n");
-		if (AST_root != NULL) AST_root->print(0);
+		//AST_root->print(0);
 
 	}
 }

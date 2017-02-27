@@ -1,21 +1,31 @@
 
-static_check.cpp
-   - undefined method
+// figure out what is inheretied from parent->child, and how to pass stuff on
+// deal with field stuff
+   // special case when in statements of class, dealing with "this"
 
-type_checks.cpp
-   - times/sub/multipe mismatch, class defined
-   - if/elif condition ( lca(thing, boolean) == boolean required)
+class_node * get_AST_class_node(string class_name)
+	// use in method_call to check 
+	- check return type in method against defined type
 
-   - scoping, so each class, method has its own var_table, separate from statement's var_table
+	method_node * get_AST_method_node(string class_name, string method_name);
+	// use in method_call to check 
+	- actual arg type subtype of formal arg
+	- actual arg list wrong length
+	- method not found in class or superclass
 
 
-   - actual arg type subtype of formal arg
-   - actual arg list wrong length
-   - method not found in class or superclass
-   - check return type in method against defined type
+	void add_parent_methods (method_list my_methods, method_list parent_methods) {
+	  if theres a clash, 
+		  keep my_method, but make sure stuff is as below
+      - check that if method overrides, return type is subtype and args are supertype (and num args match)
 
-   - check that if method overrides, return type is subtype and args are supertype (and num args match)
+	// should wait until second pass
+	void add_parent_fields (field_map my_fields, field_map parent_fields) {
+	  if clash types have to match,
+		and if my_fields doesn't have all of parent_fields, error
+
+
 
 
 Later
-   - check for uninitalized vars with ifs/whiles
+	- check for uninitalized vars with ifs/whiles

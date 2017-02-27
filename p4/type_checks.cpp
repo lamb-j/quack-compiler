@@ -17,11 +17,20 @@ extern vector < string > class_names;
 extern list < tree_node *> *tree_list;
 extern int error_flag;
 
-map<string, string> var_table;
 
-string if_node::type_checks() {
-	if_condition->type_checks();
-	if_body->type_checks();
+string if_node::type_checks( map< string, string > *local, map< string, string > *field ) {
+
+	string c, lca; // condition, least common ancestor
+	
+	c = if_condition->type_checks(local, field);
+	lca = least_common_ancestor(c, "Boolean");
+
+	if (lca.compare("Boolean") != 0) {
+		fprintf(stderr, "error:%d: if condition is of type \"%s\", type Boolean needed\n", lineno, c.c_str()); 
+		error();
+	}
+
+	if_body->type_checks(local, field);
 
 	//elseif
 	list<r_expr_node *>::const_iterator c_iter;
@@ -31,112 +40,138 @@ string if_node::type_checks() {
 	b_iter = elif_pairs->elif_bodies->begin();
 
 	for (int i = 0; i < elif_pairs->size; i++, c_iter++, b_iter++) {
-		(*c_iter)->type_checks();
-		(*b_iter)->type_checks();
+		c = (*c_iter)->type_checks(local, field);
+		lca = least_common_ancestor(c,"Boolean");
+		if (lca.compare("Boolean") != 0) {
+			fprintf(stderr, "error:%d: elif condition is of type \"%s\", type Boolean needed\n", lineno, c.c_str()); 
+			error();
+		}
+		(*b_iter)->type_checks(local, field);
 	}
 
 	//else
 	if(else_body != NULL)
 	{	
-		else_body->type_checks();
+		else_body->type_checks(local, field);
 	}
 	return "Nothing";
 }
 
-string while_node::type_checks() 
+string while_node::type_checks( map< string, string > *local, map< string, string > *field ) 
 {
-	string s1 = condition->type_checks();
+	string s1 = condition->type_checks(local, field);
 	string lca = least_common_ancestor(s1,"Boolean");
 	if (lca.compare("Boolean") != 0) {
-		fprintf(stderr, "error:%d: while condition is of type \"%s\", type Boolean needed\n",lineno,lca.c_str()); 
+		fprintf(stderr, "error:%d: while condition is of type \"%s\", type Boolean needed\n", lineno, s1.c_str()); 
 		error();
 	}
 
-	body->type_checks();
+	body->type_checks(local, field);
 
 	return "Nothing";
 }
 
-string statement_block_node::type_checks() 
+string statement_block_node::type_checks( map< string, string > *local, map< string, string > *field ) 
 {
 	list<statement_node *>::const_iterator iter;
 	for (iter = statements->begin(); iter != statements->end(); ++iter) {
-		(*iter)->type_checks();
+		(*iter)->type_checks(local, field);
 	}
 	return "Nothing";
 }
 
-string class_sig_node::type_checks() 
+string class_sig_node::type_checks( map< string, string > *local, map< string, string > *field ) 
 {
+
+	// iterate over args and add to local table
+  for (int i = 0; i < formal_args->size(); i++ ) {
+		if (local->find( ( *formal_args)[i]->name ) == local->end() ) 
+			(*local)[(*formal_args)[i]->name] = (*formal_args)[i]->return_type;
+	}
 
 	return "Nothing";
 }
 
-string class_node::type_checks() 
+string class_node::type_checks( map< string, string > *local, map< string, string > *field ) 
 {
-	sig->type_checks();
-	body->type_checks();
+
+	if( local_var_table == NULL )
+		local_var_table = new map< string, string>();
+	if (field_var_table == NULL )
+		field_var_table = new map< string, string>();
+
+	(*local_var_table)["true"] = "Boolean";
+  (*local_var_table)["false"] = "Boolean";
+
+	sig->type_checks(local_var_table,field_var_table);
+	body->type_checks(local_var_table, field_var_table);
 	return "Nothing";
 }
 
 string program_node::type_checks() 
 {
 
-	var_table["true"] = "Boolean";
-	var_table["false"] = "Boolean";
+	if( stmt_var_table == NULL)
+		stmt_var_table = new map< string, string>();
+
+	(*stmt_var_table)["true"] = "Boolean";
+  (*stmt_var_table)["false"] = "Boolean";
 
 	list<class_node *>::const_iterator c_iter;
 	for (c_iter = class_list->begin(); c_iter != class_list->end(); ++c_iter) {
-		(*c_iter)->type_checks();
+		(*c_iter)->type_checks(NULL, NULL);
 	}
 
 	list<statement_node *>::const_iterator s_iter;
 	for (s_iter = statement_list->begin(); s_iter != statement_list->end(); ++s_iter) {
-		(*s_iter)->type_checks();
+		(*s_iter)->type_checks(stmt_var_table, NULL);
 	}
 	return "Nothing";
 }
 
-string method_node::type_checks() 
+string method_node::type_checks( map< string, string > *local, map< string, string > *field ) 
 {
-	body->type_checks();
+	
+	meth_var_table = new map <string, string>();
+
+  for (int i = 0; i < formal_args->size(); i++ ) {
+		if (meth_var_table->find( ( *formal_args)[i]->name ) == meth_var_table->end() ) 
+			(*meth_var_table)[(*formal_args)[i]->name] = (*formal_args)[i]->return_type;
+	}
+	body->type_checks(meth_var_table, field);
 	return "Nothing";
 }
 
-string class_body_node::type_checks()
+string class_body_node::type_checks( map< string, string > *local, map< string, string > *field )
 {
 	list<statement_node *>::const_iterator s_iter;
 	for (s_iter = statement_list->begin(); s_iter != statement_list->end(); ++s_iter) {
-		(*s_iter)->type_checks();
+		(*s_iter)->type_checks(local, field);
 	}
 
 	list<method_node *>::const_iterator  m_iter;
 	for (m_iter = method_list->begin(); m_iter != method_list->end(); ++m_iter) {
-		(*m_iter)->type_checks();
+		(*m_iter)->type_checks(local, field);
 	}
 	return "Nothing";
 }
 
-string return_node::type_checks() 
+string return_node::type_checks( map< string, string > *local, map< string, string > *field ) 
 {
 	if (return_value != NULL) 
-		return_value->type_checks();
+		return_value->type_checks(local, field);
 	return "Nothing";
 }
-
-string l_expr_node::type_checks()
+// This rule only reachable from R_expr -> L_expr -> IDENT
+//   fix by making ident_node extends R_expr_node, and fixing ambiguity in parser
+string l_expr_node::type_checks( map< string, string > *local, map< string, string > *field )
 {
-	if(instance != NULL)
-	{
-		instance->type_checks();
-	}
-
 	// look up var in table of variables, return type of var
 	string s(var);
 
-	if (var_table.find(s) != var_table.end()) 
+	if (local->find(s) != local->end()) 
 	{
-		return var_table[s];
+		return (*local)[s];
 	}
 	else 
 	{
@@ -147,69 +182,79 @@ string l_expr_node::type_checks()
 
 }
 
-string assign_node::type_checks()
+string assign_node::type_checks( map< string, string > *local, map< string, string > *field )
 {
-	string s1(lhs->var);
-	string s2 = rhs->type_checks();
 
-	// add var to table with least_common_ancestor of rhs, and vars old type
-	if (var_table.find(s1) != var_table.end() ) {
-		tree_node * lca = least_common_ancestor(get_tree_node(tree_list, var_table[s1]), 
-				get_tree_node(tree_list, s2) );
-		var_table[s1] = lca->name;
+	string s1;
+
+	// var case
+	if (lhs->var != NULL) {
+		s1 = string(lhs->var);
+
+		string s2 = rhs->type_checks(local, field);
+
+		// add var to table with least_common_ancestor of rhs, and vars old type
+		if (local->find(s1) != local->end() ) {
+			tree_node * lca = least_common_ancestor(get_tree_node(tree_list, (*local)[s1]), 
+					get_tree_node(tree_list, s2) );
+			(*local)[s1] = lca->name;
+		}
+		else {
+			(*local)[s1] = s2;
+		}
+
 	}
-	else {
-		var_table[s1] = s2;
-	}
+
 
 	return "Nothing";
 }
 
-string constructor_call_node::type_checks() 
+string constructor_call_node::type_checks( map< string, string > *local, map< string, string > *field ) 
 {
 
 	list<r_expr_node *>::const_iterator iter;
 	for (iter = arg_list->begin(); iter != arg_list->end(); ++iter) {
-		(*iter)->type_checks();
+		(*iter)->type_checks(local, field);
 	}
 
 	string s(c_name);
 	return s;
 }
 
-string method_call_node::type_checks() 
+string method_call_node::type_checks( map< string, string > *local, map< string, string > *field ) 
 {
-	instance->type_checks();
+	instance->type_checks(local, field);
 
 
 	list<r_expr_node *>::const_iterator iter;
 	for (iter = arg_list->begin(); iter != arg_list->end(); ++iter) {
-		(*iter)->type_checks();
+		(*iter)->type_checks(local, field);
 	}
 
 	// should be return type of method
 	return "Nothing";
 }
 
-string unary_node::type_checks()
+string unary_node::type_checks( map< string, string > *local, map< string, string > *field )
 {
-	string s = right->type_checks();
+	string s = right->type_checks(local, field);
 
 	if (!strcmp(symbol, "NOT") && s.compare("Boolean") ) {
-			fprintf(stderr, "error:%d: \"not\" operation can only be applied to type \"Boolean\"\n", lineno);
-			error();
-			return "Nothing";
+		fprintf(stderr, "error:%d: \"not\" operation can only be applied to type \"Boolean\"\n", lineno);
+		error();
+		return "Nothing";
 	}
 
 	return s;
 }
 
-string plus_node::type_checks() 
+string plus_node::type_checks( map< string, string > *local, map< string, string > *field ) 
 {
-	string s1 = left->type_checks();
-	string s2 = right->type_checks();
+	string s1 = left->type_checks(local, field);
+	string s2 = right->type_checks(local, field);
 
 	//check if divide exists in s1/s2 type
+
 
 	if (s1.compare(s2) != 0) {
 		fprintf(stderr,"error:%d: type mismatch %s is not of type %s\n",lineno,s1.c_str(), s2.c_str());
@@ -226,10 +271,10 @@ string plus_node::type_checks()
 	}
 }
 
-string minus_node::type_checks() 
+string minus_node::type_checks( map< string, string > *local, map< string, string > *field ) 
 {
-	string s1 = left->type_checks();
-	string s2 = right->type_checks();
+	string s1 = left->type_checks(local, field);
+	string s2 = right->type_checks(local, field);
 
 	//check if divide exists in s1/s2 type
 
@@ -248,21 +293,21 @@ string minus_node::type_checks()
 	}
 }
 
-string times_node::type_checks() 
+string times_node::type_checks( map< string, string > *local, map< string, string > *field ) 
 {
-	string s1 = left->type_checks();
-	string s2 = right->type_checks();
+	string s1 = left->type_checks(local, field);
+	string s2 = right->type_checks(local, field);
 
 	//check if divide exists in s1/s2 type
 
 	if (s1.compare(s2) != 0) {
 		fprintf(stderr,"error:%d: type mismatch %s is not of type %s\n",lineno,s1.c_str(), s2.c_str());
-    error();
+		error();
 		return "Nothing";
 	}
 	else if (class_defines_method(get_tree_node(tree_list, s1), "TIMES") == 0){
 		fprintf(stderr,"error:%d: TIMES not defined for class %s\n",lineno,s1.c_str());
-    error();
+		error();
 		return "Nothing";
 	}
 	else {
@@ -270,21 +315,21 @@ string times_node::type_checks()
 	}
 }
 
-string divide_node::type_checks() 
+string divide_node::type_checks( map< string, string > *local, map< string, string > *field ) 
 {
-	string s1 = left->type_checks();
-	string s2 = right->type_checks();
+	string s1 = left->type_checks(local, field);
+	string s2 = right->type_checks(local, field);
 
 	//check if divide exists in s1/s2 type
 
 	if (s1.compare(s2) != 0) {
 		fprintf(stderr,"error:%d: type mismatch %s is not of type %s\n",lineno,s1.c_str(), s2.c_str());
-    error();
+		error();
 		return "Nothing";
 	}
 	else if (class_defines_method(get_tree_node(tree_list, s1), "DIVIDE") == 0){
 		fprintf(stderr,"error:%d: DIVIDE not defined for class %s\n",lineno,s1.c_str());
-    error();
+		error();
 		return "Nothing";
 	}
 	else {
@@ -292,21 +337,21 @@ string divide_node::type_checks()
 	}
 }
 
-string compare_node::type_checks()
+string compare_node::type_checks( map< string, string > *local, map< string, string > *field )
 {
-	string s1 = left->type_checks();
-	string s2 = right->type_checks();
+	string s1 = left->type_checks(local, field);
+	string s2 = right->type_checks(local, field);
 
 	string symbol_string(symbol);
 
 	if (s1.compare(s2) != 0) {
 		fprintf(stderr,"error:%d: type mismatch. %s does not match %s\n", lineno, s1.c_str(), s2.c_str() );
-    error();
+		error();
 		return "Nothing";
 	}
 	else if (class_defines_method(get_tree_node(tree_list, s1), symbol_string) == 0){
 		fprintf(stderr,"error:%d: %s not defined for class %s\n", lineno, symbol, s1.c_str() );
-    error();
+		error();
 		return "Nothing";
 	}
 	else {
@@ -314,12 +359,12 @@ string compare_node::type_checks()
 	}
 }
 
-string int_node::type_checks() 
+string int_node::type_checks( map< string, string > *local, map< string, string > *field ) 
 {
 	return "Int";
 }
 
-string str_node::type_checks() 
+string str_node::type_checks( map< string, string > *local, map< string, string > *field ) 
 {
 	return "String";
 }

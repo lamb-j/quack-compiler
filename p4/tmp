@@ -1,3 +1,8 @@
-x = 3;
 
-z = not x;
+x = true;
+if (false) {
+
+}
+
+elif (x) {}
+
