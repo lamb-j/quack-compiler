@@ -63,7 +63,7 @@ class method_node {
 		// map method_var_table
 
 		map <string, string> *meth_var_table;
-		map <string, string> *meth_arg_table;
+		//map <string, string> *meth_arg_table;
 		
 		method_node(char *name, vector < f_arg_pair * > *args, char *r_type, statement_block_node *b, int linenum);
 
