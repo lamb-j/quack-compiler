@@ -72,17 +72,6 @@ tree_node * class_sig_node::build_classTree()
 		error();
 	}
 
-	//check if class name among default classes
-	const char* default_classes[] = { "Obj", "Int", "Nothing", "String", "Boolean" };
-
-	for( int i=0; i<5; i++)
-	{
-		if(! strcmp( class_name, default_classes[i])) {
-			fprintf(stderr, "error:%d: class name %s is a default class\n", lineno, class_name); 
-			error();
-		}
-	}
-
 	//check if class extends itself
 	if( strcmp( parent, class_name) == 0) {
 		fprintf(stderr, "error:%d: class %s cannot extend %s\n",lineno, class_name,parent);
@@ -118,6 +107,7 @@ tree_node * program_node::build_classTree()
 {
 
 	// add default classes to names list 
+	class_names.push_back("");
 	class_names.push_back("Obj");
 	class_names.push_back("Int");
 	class_names.push_back("String");
@@ -138,77 +128,78 @@ tree_node * program_node::build_classTree()
 	}
 
 	//adding default tree nodes to tree list
+	/*
 	tree_node *Obj = new tree_node("Obj");
 	tree_node *Int = new tree_node("Int");
 	tree_node *String = new tree_node("String");
 	tree_node *Nothing = new tree_node("Nothing");
 	tree_node *Boolean = new tree_node("Boolean");
-
+	*/
 
 	// Class node for Obj
-//	list<method_node *> *obj_method_list = new list<method_node *>();
-//
-//	vector <f_arg_pair *> *obj_f_args = new vector <f_arg_pair *>();
-//	obj_f_args->push_back( new f_arg_pair("o", "Obj"));
-//  
-//	obj_method_list->push_back( new method_node("PRINT", 
-//								obj_f_args, 
-//								"Nothing", 
-//							  NULL,	
-//								0) );
-//	obj_method_list->push_back( new method_node("STR", 
-//								obj_f_args, 
-//								"String", 
-//							  NULL,	
-//								0) );
-//
-//
-//	class_node *Obj_class = new class_node(
-//		new class_sig_node("Obj", new vector<f_arg_pair *>() , "Obj", 0), 
-//		new class_body_node(new list <statement_node *>(), obj_method_list), 
-//	  0);
-//
-//	Obj_class->class_tree_node = Obj;
-//	Obj->AST_node = Obj_class;
-//
-//	class_list->push_back(Obj_class);
+	list<method_node *> *obj_method_list = new list<method_node *>();
+
+	vector <f_arg_pair *> *obj_f_args = new vector <f_arg_pair *>();
+	obj_f_args->push_back( new f_arg_pair("o", "Obj"));
+  
+	obj_method_list->push_back( new method_node("PRINT", 
+								obj_f_args, 
+								"Nothing", 
+							  new statement_block_node( new list<statement_node*>()),	
+								0) );
+	obj_method_list->push_back( new method_node("STR", 
+								obj_f_args, 
+								"String", 
+							  new statement_block_node( new list<statement_node*>()),	
+								0) );
+
+
+	class_node *Obj_class = new class_node(
+		new class_sig_node("Obj", new vector<f_arg_pair *>() , "", 0), 
+		new class_body_node(new list <statement_node *>(), obj_method_list), 
+	  0);
+
+	//Obj_class->class_tree_node = Obj;
+	//Obj->AST_node = Obj_class;
+
+	class_list->push_back(Obj_class);
 																											
 	tree_list = new list <tree_node*>();
-
-	tree_list->push_back(Obj);
-	tree_list->push_back(Int);
-	tree_list->push_back(String);
-	tree_list->push_back(Boolean);
-	tree_list->push_back(Nothing);
-
-	Obj->children.push_back(Int);
-	Obj->children.push_back(String);
-	Obj->children.push_back(Nothing);
-	Obj->children.push_back(Boolean);
-
-	Obj->method_names.push_back("EQUALS");
-	Obj->method_names.push_back("PRINT");
-	Obj->method_names.push_back("STR");
-
-	Int->method_names.push_back("PLUS");
-	Int->method_names.push_back("MINUS");
-	Int->method_names.push_back("TIMES");
-	Int->method_names.push_back("DIVIDE");
-	Int->method_names.push_back("EQUALS");
-	Int->method_names.push_back("ATLEAST");
-	Int->method_names.push_back("ATMOST");
-	Int->method_names.push_back("LESS");
-	Int->method_names.push_back("MORE");
-
-	String->method_names.push_back("ATLEAST");
-	String->method_names.push_back("ATMOST");
-	String->method_names.push_back("LESS");
-	String->method_names.push_back("MORE");
-
-	Int->parent = Obj;
-	String->parent = Obj;
-	Nothing->parent = Obj;
-	Boolean->parent = Obj;
+//
+//	tree_list->push_back(Obj);
+//	tree_list->push_back(Int);
+//	tree_list->push_back(String);
+//	tree_list->push_back(Boolean);
+//	tree_list->push_back(Nothing);
+//
+//	Obj->children.push_back(Int);
+//	Obj->children.push_back(String);
+//	Obj->children.push_back(Nothing);
+//	Obj->children.push_back(Boolean);
+//
+//	Obj->method_names.push_back("EQUALS");
+//	Obj->method_names.push_back("PRINT");
+//	Obj->method_names.push_back("STR");
+//
+//	Int->method_names.push_back("PLUS");
+//	Int->method_names.push_back("MINUS");
+//	Int->method_names.push_back("TIMES");
+//	Int->method_names.push_back("DIVIDE");
+//	Int->method_names.push_back("EQUALS");
+//	Int->method_names.push_back("ATLEAST");
+//	Int->method_names.push_back("ATMOST");
+//	Int->method_names.push_back("LESS");
+//	Int->method_names.push_back("MORE");
+//
+//	String->method_names.push_back("ATLEAST");
+//	String->method_names.push_back("ATMOST");
+//	String->method_names.push_back("LESS");
+//	String->method_names.push_back("MORE");
+//
+//	Int->parent = Obj;
+//	String->parent = Obj;
+//	Nothing->parent = Obj;
+//	Boolean->parent = Obj;
 
 	list<class_node *>::const_iterator c_iter;
 	for (c_iter = class_list->begin(); c_iter != class_list->end(); ++c_iter) {
@@ -220,7 +211,7 @@ tree_node * program_node::build_classTree()
 		(*s_iter)->build_classTree();
 	}
 
-	return Obj;
+	return Obj_class->class_tree_node;
 
 }
 

@@ -1,6 +1,4 @@
 
-// figure out what is inheretied from parent->child, and how to pass stuff on
-// special case when in statements of class, dealing with "this"
 
 	void add_parent_methods (method_list my_methods, method_list parent_methods) {
 	  if theres a clash, 
@@ -13,13 +11,11 @@
 		and if my_fields doesn't have all of parent_fields, error
 
 
+
+Subclass Inherits from Superclass
+  field table
+	methods
+
 Later
 	- check for uninitalized vars with ifs/whiles
-
-
-
-
-// deal with field stuff
-
-  just fill out field table
-	if not "this", error 
+	- deal with field instance stuff

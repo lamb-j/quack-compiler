@@ -271,13 +271,13 @@ void add_parent_methods(list <method_node *> *parent_mlist, list <method_node *>
 	for(plist_iter = parent_mlist->begin(); plist_iter != parent_mlist->end(); ++plist_iter)
 	{
 		int pflag = 0;
-		char* pname = (*plist_iter)->method_name;
-		char* ptype = (*plist_iter)->return_type;
+		const char* pname = (*plist_iter)->method_name;
+		const char* ptype = (*plist_iter)->return_type;
 
 		for(clist_iter = child_mlist->begin(); clist_iter != child_mlist->end(); ++clist_iter)
 		{
-			char* cname = (*clist_iter)->method_name;
-			char* ctype = (*clist_iter)->return_type;
+			const char* cname = (*clist_iter)->method_name;
+			const char* ctype = (*clist_iter)->return_type;
 			
 			if( strcmp(pname, cname) == 0)
 			{

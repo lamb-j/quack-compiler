@@ -32,20 +32,20 @@ class statement_block_node {
 
 class f_arg_pair {
 	public:
-		char *name;
-		char *return_type;
+		const char *name;
+		const char *return_type;
 
-		f_arg_pair(char *n, char *r) {name = n; return_type = r;}
+		f_arg_pair(const char *n, const char *r) {name = n; return_type = r;}
 }; 
 
 class class_sig_node {
 	public:
-		char *class_name;
+		const char *class_name;
 		vector <f_arg_pair *> *formal_args;
 		const char *parent;
 		int lineno;
 
-		class_sig_node(char *c_name, vector <f_arg_pair *> *f_args, const char *p, int linenum);
+		class_sig_node(const char *c_name, vector <f_arg_pair *> *f_args, const char *p, int linenum);
 
 		void print(int indent);
 		tree_node * build_classTree();
@@ -55,9 +55,9 @@ class class_sig_node {
 
 class method_node {
 	public:
-		char *method_name;
+		const char *method_name;
 		vector < f_arg_pair *> *formal_args;
-		char *return_type;
+		const char *return_type;
 		statement_block_node *body;
 		int lineno;	
 
@@ -66,7 +66,7 @@ class method_node {
 		map <string, string> *meth_var_table;
 		//map <string, string> *meth_arg_table;
 		
-		method_node(char *name, vector < f_arg_pair * > *args, char *r_type, statement_block_node *b, int linenum);
+		method_node(const char *name, vector < f_arg_pair * > *args, const char *r_type, statement_block_node *b, int linenum);
 
 		void print(int indent);
 		int build_classTree(tree_node *);

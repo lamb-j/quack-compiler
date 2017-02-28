@@ -80,7 +80,7 @@ statement_block_node::statement_block_node(list <statement_node *> *stmts)
 	statements = stmts;
 }
 
-class_sig_node::class_sig_node(char *c_name, vector <f_arg_pair *> *f_args, const char *p, int linenum) 
+class_sig_node::class_sig_node(const char *c_name, vector <f_arg_pair *> *f_args, const char *p, int linenum) 
 {
 	class_name = c_name;
 	formal_args = f_args;
@@ -101,7 +101,7 @@ program_node::program_node(list <class_node *> *c, list <statement_node *> *s)
 	statement_list = s;
 }
 
-method_node::method_node(char *name, vector < f_arg_pair * > *args, char *r_type, statement_block_node *b, int linenum)
+method_node::method_node(const char *name, vector < f_arg_pair * > *args, const char *r_type, statement_block_node *b, int linenum)
 {
 	method_name = name;
 	formal_args = args;

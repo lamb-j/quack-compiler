@@ -100,7 +100,8 @@ string class_sig_node::type_checks( map< string, string > *local, map< string, s
 string class_node::type_checks( map< string, string > *local, map< string, string > *field ) 
 {
 
-	add_parent_methods( body->method_list, class_tree_node->parent->AST_node->body->method_list);
+	if (class_tree_node->parent->name.compare(""))
+		add_parent_methods( body->method_list, class_tree_node->parent->AST_node->body->method_list);
 
 	if( local_var_table == NULL )
 		local_var_table = new map< string, string>();
