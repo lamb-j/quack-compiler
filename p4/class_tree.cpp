@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <list>
 #include <algorithm>
-#include "class_tree.h"
+#include "quack.h"
 #include <cstdlib>
 
 //class_tree
@@ -58,10 +58,11 @@ tree_node * append_tree( list <tree_node *> *tree_list, string parent_class, str
 
     tree_list->push_back(new_tree_node);
     tree_list->push_back(parent_tree_node);
+		return new_tree_node;
   }
 
   // case 2
-  else if (new_tree_node == NULL && parent_tree_node != NULL ) {
+  if (new_tree_node == NULL && parent_tree_node != NULL ) {
     //printf("CASE 2, new: %s, parent:%s\n", new_class.c_str(), parent_class.c_str());
 
     new_tree_node = new tree_node(new_class);
@@ -70,10 +71,11 @@ tree_node * append_tree( list <tree_node *> *tree_list, string parent_class, str
     parent_tree_node->children.push_back(new_tree_node);
 
     tree_list->push_back(new_tree_node);
+		return new_tree_node;
   }
 
   // case 3
-  else if (new_tree_node != NULL && parent_tree_node == NULL) {
+  if (new_tree_node != NULL && parent_tree_node == NULL) {
     //printf("CASE 3, new: %s, parent:%s\n", new_class.c_str(), parent_class.c_str());
     
     parent_tree_node = new tree_node(parent_class);
@@ -82,16 +84,37 @@ tree_node * append_tree( list <tree_node *> *tree_list, string parent_class, str
     parent_tree_node->children.push_back(new_tree_node);
     
     tree_list->push_back(parent_tree_node);
+		return new_tree_node;
   }
 
   // case 4
-  else if (new_tree_node != NULL && parent_tree_node != NULL ) {
+  if (new_tree_node != NULL && parent_tree_node != NULL ) {
     //printf("CASE 4, new: %s, parent:%s\n", new_class.c_str(), parent_class.c_str());
-    fprintf(stderr, "error: ill-defined class hierarchy, %s extends %s\n", 
-        new_class.c_str(), parent_class.c_str());
-	//exit(0);
+   
+		//check if class name among default classes
+		  const char* default_classes[] = { "Obj", "Int", "Nothing", "String", "Boolean" };
+
+		int flag = 0;
+		for( int i=0; i<5; i++)
+	  {
+			if ( parent_tree_node->name.compare( string(default_classes[i]) ) == 0 )
+				flag = 1;
+		} 
+		
+		if (flag)
+		{
+			new_tree_node->parent = parent_tree_node;
+			parent_tree_node->children.push_back(new_tree_node);
+
+			return new_tree_node;
+		}
+
+		error();
+		return NULL;
   }
-  return new_tree_node;        
+
+	printf("ERROR IN APPEND TREE\n");
+  return NULL;        
 }
 
 //get the tree node matching the class name
@@ -205,3 +228,38 @@ string least_common_ancestor(string A, string B)
   return A_vec.size() < B_vec.size() ? A : B;
 }
 
+
+class_node * get_AST_class_node(string class_name) {
+
+	tree_node * class_tree_node = get_tree_node(tree_list, class_name);
+
+	return class_tree_node->AST_node;
+}
+
+method_node * get_AST_method_node(string class_name, string method_name) {
+
+	list<method_node *> *method_list  = (get_AST_class_node(class_name))->body->method_list;
+
+	list <method_node *>::const_iterator iter;
+	for (iter = method_list->begin(); iter != method_list->end(); ++iter) {
+		if ( strcmp( (*iter)->method_name , method_name.c_str() ) == 0) return (*iter);
+	}
+
+	return NULL;
+
+	//fprintf(stderr, "error:%d: Method %s not found in class %s\n", lineno, method_name.c_str(), class_name.c_str());
+}
+
+int is_subclass(string sub_class, string super_class)
+{
+	string lca = least_common_ancestor(sub_class, super_class);
+	if(lca.compare(super_class) == 0 )
+		return 1;
+	else
+		return 0;
+}
+
+int is_superclass(string super_class, string sub_class)
+{ 
+  return is_subclass(sub_class, super_class);
+}

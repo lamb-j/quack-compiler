@@ -1,18 +1,6 @@
 
 // figure out what is inheretied from parent->child, and how to pass stuff on
-// deal with field stuff
-   // special case when in statements of class, dealing with "this"
-
-class_node * get_AST_class_node(string class_name)
-	// use in method_call to check 
-	- check return type in method against defined type
-
-	method_node * get_AST_method_node(string class_name, string method_name);
-	// use in method_call to check 
-	- actual arg type subtype of formal arg
-	- actual arg list wrong length
-	- method not found in class or superclass
-
+// special case when in statements of class, dealing with "this"
 
 	void add_parent_methods (method_list my_methods, method_list parent_methods) {
 	  if theres a clash, 
@@ -25,7 +13,13 @@ class_node * get_AST_class_node(string class_name)
 		and if my_fields doesn't have all of parent_fields, error
 
 
-
-
 Later
 	- check for uninitalized vars with ifs/whiles
+
+
+
+
+// deal with field stuff
+
+  just fill out field table
+	if not "this", error 

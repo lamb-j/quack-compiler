@@ -4,12 +4,13 @@
 #include <vector>
 #include <map>
 #include <list>
-#include "class_tree.h"
 
 using namespace std;
 
-void error();
+class tree_node;
 
+void error();
+// class defintions
 class statement_node {
 	public:
 		virtual void print(int indent) = 0;
@@ -92,6 +93,7 @@ class class_node {
 	public:
 		class_sig_node *sig;
 		class_body_node *body;
+		tree_node * class_tree_node;
 		int lineno;
 
 		class_node(class_sig_node *s, class_body_node *b, int linenum);
@@ -206,13 +208,16 @@ class if_node : public statement_node {
 
 class return_node : public statement_node {
 	public:
+		r_expr_node *return_value;
+
 		return_node(r_expr_node *rv, int linenum);
 		void print(int indent);
+
+
 		int build_classTree();
 		int static_checks();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
 		int lineno;
-		r_expr_node *return_value;
 };
 
 class assign_node : public statement_node {
@@ -351,3 +356,33 @@ class str_node : public r_expr_node {
 		int static_checks();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
 };
+
+// Class Tree Functions
+class tree_node {
+	public:
+		string name;
+
+	  class_node *AST_node;
+
+		tree_node *parent;
+		vector <tree_node *> children;
+
+		vector <string > method_names;
+		
+		// add methods/arguments
+
+    tree_node(string n) { name = n ; }
+};
+
+int print_tree( tree_node *root, int level );
+tree_node * append_tree( list <tree_node *> *tree_list, string parent_class, string new_class);
+tree_node * get_tree_node(list < tree_node *> *tree_node_list, string cname);
+int class_defines_method(tree_node * class_node, string method_name);
+string least_common_ancestor(string A, string B);
+tree_node * least_common_ancestor(tree_node *A, tree_node *B);
+
+class_node * get_AST_class_node(string class_name);
+method_node * get_AST_method_node(string class_name, string method_name);
+
+int is_subclass(string sub_class, string super_class);
+int is_superclass(string super_class, string sub_class);

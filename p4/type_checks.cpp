@@ -17,6 +17,9 @@ extern vector < string > class_names;
 extern list < tree_node *> *tree_list;
 extern int error_flag;
 
+string current_method;
+string current_class;
+
 
 string if_node::type_checks( map< string, string > *local, map< string, string > *field ) {
 
@@ -83,6 +86,8 @@ string statement_block_node::type_checks( map< string, string > *local, map< str
 string class_sig_node::type_checks( map< string, string > *local, map< string, string > *field ) 
 {
 
+	current_class = string(class_name);
+
 	// iterate over args and add to local table
   for (int i = 0; i < formal_args->size(); i++ ) {
 		if (local->find( ( *formal_args)[i]->name ) == local->end() ) 
@@ -134,6 +139,8 @@ string method_node::type_checks( map< string, string > *local, map< string, stri
 	
 	meth_var_table = new map <string, string>();
 
+	current_method = string(method_name);
+
   for (int i = 0; i < formal_args->size(); i++ ) {
 		if (meth_var_table->find( ( *formal_args)[i]->name ) == meth_var_table->end() ) 
 			(*meth_var_table)[(*formal_args)[i]->name] = (*formal_args)[i]->return_type;
@@ -158,10 +165,38 @@ string class_body_node::type_checks( map< string, string > *local, map< string, 
 
 string return_node::type_checks( map< string, string > *local, map< string, string > *field ) 
 {
-	if (return_value != NULL) 
-		return_value->type_checks(local, field);
+	string s;
+	method_node * calling_method = get_AST_method_node(current_class, current_method);
+
+	if (return_value != NULL && calling_method->return_type != NULL) {
+		s = return_value->type_checks(local, field);
+
+		if (s.compare( string(calling_method->return_type) ) != 0) {
+			fprintf(stderr, "error:%d: Return type of %s does not matched declared return type of %s\n",
+					lineno, s.c_str(), calling_method->return_type);
+			error();
+			return "Nothing";
+		}
+
+	}
+	else if (return_value != NULL && calling_method->return_type == NULL) {
+		s = return_value->type_checks(local, field);
+
+		fprintf(stderr, "error:%d: Method does not define return type, return type of %s present\n", lineno, s.c_str());
+		error();
+  }
+	else if (return_value == NULL && calling_method->return_type == NULL) {
+		return "Nothing";
+	}
+
+	else {
+		fprintf(stderr, "error:%d: return statement must be of type %s\n", lineno, calling_method->return_type);
+		error();
+	}
+
 	return "Nothing";
 }
+
 // This rule only reachable from R_expr -> L_expr -> IDENT
 //   fix by making ident_node extends R_expr_node, and fixing ambiguity in parser
 string l_expr_node::type_checks( map< string, string > *local, map< string, string > *field )
@@ -223,16 +258,45 @@ string constructor_call_node::type_checks( map< string, string > *local, map< st
 
 string method_call_node::type_checks( map< string, string > *local, map< string, string > *field ) 
 {
-	instance->type_checks(local, field);
 
+	string s1 = instance->type_checks(local, field);
 
-	list<r_expr_node *>::const_iterator iter;
-	for (iter = arg_list->begin(); iter != arg_list->end(); ++iter) {
-		(*iter)->type_checks(local, field);
+  method_node *AST_method_node = get_AST_method_node (s1, string(modifier) ); 
+
+	if (AST_method_node == NULL) {
+		fprintf(stderr, "error:%d: Method %s not found in class %s\n", lineno, modifier, s1.c_str());
+		error();
+		return "Nothing";
 	}
 
+
+	// check arg_list (list r_expr_node*)  against AST_method_node->formal_args (vector f_arg_pair*)
+
+	list<r_expr_node *>::const_iterator iter;
+
+	//check1: length of arg list  vs length of foraml args
+	if( arg_list->size() != AST_method_node->formal_args->size() )
+	{
+		fprintf(stderr,"error:%d Incorrect number of arguments. Method defined at lineno:%d\n",lineno, AST_method_node->lineno);	
+		error();
+		return "Nothing";
+	}
+	int i;	
+	for (iter = arg_list->begin(),i=0; iter != arg_list->end(); ++iter, ++i) {
+		string arg_type = (*iter)->type_checks(local, field);
+		string formal_arg_type = (*AST_method_node->formal_args)[i]->return_type;
+
+		if( !is_subclass(arg_type, formal_arg_type) )
+		{
+			fprintf(stderr,"error:%d: argument %d of type %s does not match formal argument of type %s in method %s\n",
+				lineno,  (int) (arg_list->size() - i - 1), arg_type.c_str(), formal_arg_type.c_str(), AST_method_node->method_name);
+			error();
+		}
+
+	}
+	
 	// should be return type of method
-	return "Nothing";
+	return string(AST_method_node->return_type);
 }
 
 string unary_node::type_checks( map< string, string > *local, map< string, string > *field )

@@ -216,7 +216,7 @@ int main (int argc, char **argv)
     // two sweeps
 		printf("--- Type Check Errors ---\n");
 		AST_root->type_checks();
-		//if (error_flag) return 0;
+		if (error_flag) return 0;
 		AST_root->type_checks();
 		if (error_flag) return 0;
 		printf("\n");

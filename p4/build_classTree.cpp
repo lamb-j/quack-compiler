@@ -92,13 +92,26 @@ tree_node * class_sig_node::build_classTree()
 	// add class to tree_list
 	string p(parent);
 	string c(class_name);
-	return append_tree(tree_list, p, c); //returns new tree node
+
+	tree_node * new_tree_node = append_tree(tree_list, p, c); //returns new tree node
+
+	if (new_tree_node == NULL) {
+		 fprintf(stderr, "error:%d:  ill-defined class hierarchy, %s extends %s\n",
+				        lineno, c.c_str(), p.c_str());
+		 error();
+	   exit(0);
+	}
+
+	return new_tree_node;
 }
 
 int class_node::build_classTree() 
 {
-	tree_node * class_that_defined_method = sig->build_classTree();
-	body->build_classTree(class_that_defined_method);
+	class_tree_node = sig->build_classTree();
+
+	class_tree_node->AST_node = this;
+
+	body->build_classTree(class_tree_node);
 }
 
 tree_node * program_node::build_classTree() 
@@ -180,16 +193,16 @@ tree_node * program_node::build_classTree()
 
 }
 
-int method_node::build_classTree(tree_node * class_that_defined_method) 
+int method_node::build_classTree(tree_node * class_tree_node) 
 {
 
-	tree_node *v = class_that_defined_method;
 
 	// add method name to appropriate tree_node
 	string str_mname(method_name);
 
 	// if method already in class_that_defined_method, throw error
 
+	tree_node *v = class_tree_node;
 	if (find(v->method_names.begin(), v->method_names.end(), str_mname) != v->method_names.end())
 	{
 		fprintf(stderr, "error:%d : Method %s already defined for class %s\n", 
@@ -197,7 +210,7 @@ int method_node::build_classTree(tree_node * class_that_defined_method)
 		error();
 	}
 	else {
-		class_that_defined_method->method_names.push_back(str_mname);
+		class_tree_node->method_names.push_back(str_mname);
 	}
 
 	body->build_classTree();
@@ -205,7 +218,7 @@ int method_node::build_classTree(tree_node * class_that_defined_method)
 	return 0;
 }
 
-int class_body_node::build_classTree(tree_node * class_that_defined_method)
+int class_body_node::build_classTree(tree_node * class_tree_node)
 {
 	list<statement_node *>::const_iterator s_iter;
 	for (s_iter = statement_list->begin(); s_iter != statement_list->end(); ++s_iter) {
@@ -215,7 +228,7 @@ int class_body_node::build_classTree(tree_node * class_that_defined_method)
 	list<method_node *>::const_iterator  m_iter;
 	for (m_iter = method_list->begin(); m_iter != method_list->end(); ++m_iter) {
 		// send appropriate class tree_node 
-		(*m_iter)->build_classTree(class_that_defined_method);
+		(*m_iter)->build_classTree(class_tree_node);
 	}
 
 	return 0;
