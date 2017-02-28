@@ -144,6 +144,35 @@ tree_node * program_node::build_classTree()
 	tree_node *Nothing = new tree_node("Nothing");
 	tree_node *Boolean = new tree_node("Boolean");
 
+
+	// Class node for Obj
+//	list<method_node *> *obj_method_list = new list<method_node *>();
+//
+//	vector <f_arg_pair *> *obj_f_args = new vector <f_arg_pair *>();
+//	obj_f_args->push_back( new f_arg_pair("o", "Obj"));
+//  
+//	obj_method_list->push_back( new method_node("PRINT", 
+//								obj_f_args, 
+//								"Nothing", 
+//							  NULL,	
+//								0) );
+//	obj_method_list->push_back( new method_node("STR", 
+//								obj_f_args, 
+//								"String", 
+//							  NULL,	
+//								0) );
+//
+//
+//	class_node *Obj_class = new class_node(
+//		new class_sig_node("Obj", new vector<f_arg_pair *>() , "Obj", 0), 
+//		new class_body_node(new list <statement_node *>(), obj_method_list), 
+//	  0);
+//
+//	Obj_class->class_tree_node = Obj;
+//	Obj->AST_node = Obj_class;
+//
+//	class_list->push_back(Obj_class);
+																											
 	tree_list = new list <tree_node*>();
 
 	tree_list->push_back(Obj);
@@ -158,6 +187,8 @@ tree_node * program_node::build_classTree()
 	Obj->children.push_back(Boolean);
 
 	Obj->method_names.push_back("EQUALS");
+	Obj->method_names.push_back("PRINT");
+	Obj->method_names.push_back("STR");
 
 	Int->method_names.push_back("PLUS");
 	Int->method_names.push_back("MINUS");

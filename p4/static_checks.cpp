@@ -52,12 +52,15 @@ int statement_block_node::static_checks()
 
 int class_sig_node::static_checks() 
 {
-
+	
 }
 
 
 int class_node::static_checks() 
 {
+
+	// copy methods from parent to child
+
 	sig->static_checks();
 	body->static_checks();
 }

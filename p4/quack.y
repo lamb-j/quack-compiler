@@ -270,11 +270,11 @@ int main (int argc, char **argv)
 		printf("\n");
 
 		printf("--- Class Tree ---\n");
-		//print_tree(class_root, 0);
+		print_tree(class_root, 0);
 		printf("\n");
 
 		printf("--- Syntax Tree ---\n");
-		//AST_root->print(0);
+		AST_root->print(0);
 
 	}
 }

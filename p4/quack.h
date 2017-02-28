@@ -131,6 +131,7 @@ class r_expr_node : public statement_node {
 	public:
 		int num;
 		char *str;
+
 };
 
 class l_expr_node : public r_expr_node {
@@ -386,3 +387,10 @@ method_node * get_AST_method_node(string class_name, string method_name);
 
 int is_subclass(string sub_class, string super_class);
 int is_superclass(string super_class, string sub_class);
+
+
+// add parent methods
+
+void add_parent_methods(list <method_node *> *parent_mlist, list <method_node *> *child_mlist);
+
+void add_parent_fields( map <string, string> *parent_fields, map <string, string > *child_fields);

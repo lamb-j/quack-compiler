@@ -100,6 +100,8 @@ string class_sig_node::type_checks( map< string, string > *local, map< string, s
 string class_node::type_checks( map< string, string > *local, map< string, string > *field ) 
 {
 
+	add_parent_methods( body->method_list, class_tree_node->parent->AST_node->body->method_list);
+
 	if( local_var_table == NULL )
 		local_var_table = new map< string, string>();
 	if (field_var_table == NULL )
@@ -201,18 +203,45 @@ string return_node::type_checks( map< string, string > *local, map< string, stri
 //   fix by making ident_node extends R_expr_node, and fixing ambiguity in parser
 string l_expr_node::type_checks( map< string, string > *local, map< string, string > *field )
 {
-	// look up var in table of variables, return type of var
-	string s(var);
 
-	if (local->find(s) != local->end()) 
-	{
-		return (*local)[s];
+	// var case
+	if (var != NULL) {
+		// look up var in table of variables, return type of var
+		string s(var);
+
+		if (local->find(s) != local->end()) 
+		{
+			return (*local)[s];
+		}
+		else 
+		{
+			fprintf(stderr, "error:%d : uninitalized variable %s\n", lineno, s.c_str() );
+			error();
+			return "Nothing";
+		}
 	}
-	else 
-	{
-		fprintf(stderr, "error:%d : uninitalized variable %s\n", lineno, s.c_str() );
+
+	if (field == NULL ) {
+		fprintf(stderr, "error:%d: cannot access field values outside class\n", lineno);
 		error();
 		return "Nothing";
+	}
+
+	// instance / modifier case
+	if (modifier != NULL) {
+		// look up modifier in table of modifieriables, return type of modifier
+		string s(modifier);
+
+		if (field->find(s) != field->end()) 
+		{
+			return (*field)[s];
+		}
+		else 
+		{
+			fprintf(stderr, "error:%d : uninitalized field %s\n", lineno, s.c_str() );
+			error();
+			return "Nothing";
+		}
 	}
 
 }
@@ -220,12 +249,9 @@ string l_expr_node::type_checks( map< string, string > *local, map< string, stri
 string assign_node::type_checks( map< string, string > *local, map< string, string > *field )
 {
 
-	string s1;
-
 	// var case
 	if (lhs->var != NULL) {
-		s1 = string(lhs->var);
-
+		string s1 = string(lhs->var);
 		string s2 = rhs->type_checks(local, field);
 
 		// add var to table with least_common_ancestor of rhs, and vars old type
@@ -236,6 +262,33 @@ string assign_node::type_checks( map< string, string > *local, map< string, stri
 		}
 		else {
 			(*local)[s1] = s2;
+		}
+
+	}
+
+	// field case
+  else {
+
+		// deal with instance somehow
+
+		// add modifier to field table with least_common_ancestor of rhs, and modifier old type
+		string s1 = string(lhs->modifier);
+		string s2 = rhs->type_checks(local, field);
+
+
+		if (field == NULL ) {
+			fprintf(stderr, "error:%d: cannot access field values outside class\n", lineno);
+			error();
+			return "Nothing";
+		}
+
+		if (field->find(s1) != field->end() ) {
+			tree_node * lca = least_common_ancestor(get_tree_node(tree_list, (*field)[s1]), 
+					get_tree_node(tree_list, s2) );
+			(*field)[s1] = lca->name;
+		}
+		else {
+			(*field)[s1] = s2;
 		}
 
 	}
@@ -256,6 +309,7 @@ string constructor_call_node::type_checks( map< string, string > *local, map< st
 	return s;
 }
 
+// may need to push this out to static_checks.cpp to avoid wrong error messages
 string method_call_node::type_checks( map< string, string > *local, map< string, string > *field ) 
 {
 

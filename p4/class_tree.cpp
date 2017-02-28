@@ -263,3 +263,43 @@ int is_superclass(string super_class, string sub_class)
 { 
   return is_subclass(sub_class, super_class);
 }
+
+void add_parent_methods(list <method_node *> *parent_mlist, list <method_node *> *child_mlist)
+{
+	list<method_node*>::const_iterator plist_iter;
+	list<method_node*>::const_iterator clist_iter;
+	for(plist_iter = parent_mlist->begin(); plist_iter != parent_mlist->end(); ++plist_iter)
+	{
+		int pflag = 0;
+		char* pname = (*plist_iter)->method_name;
+		char* ptype = (*plist_iter)->return_type;
+
+		for(clist_iter = child_mlist->begin(); clist_iter != child_mlist->end(); ++clist_iter)
+		{
+			char* cname = (*clist_iter)->method_name;
+			char* ctype = (*clist_iter)->return_type;
+			
+			if( strcmp(pname, cname) == 0)
+			{
+				pflag = 1;
+				//over-riding methods
+				if(!is_subclass(ctype,ptype))
+				{
+					fprintf(stderr,"error:%d: return type %s for method %s does not match\
+							its superclasses' method (at %d)\n", (*clist_iter)->lineno, ctype, cname, (*plist_iter)->lineno);  
+				}
+				//check number of args for each method
+				else if((*plist_iter)->formal_args->size() != (*clist_iter)->formal_args->size() )
+				{
+					fprintf(stderr,"error:%d: formal arg list for method %s does not match\
+							superclasses\n",(*clist_iter)->lineno, cname);
+				}
+			}
+			if(!pflag)
+			{
+				child_mlist->push_back( (*plist_iter) );
+			}
+		}
+	}
+
+}
