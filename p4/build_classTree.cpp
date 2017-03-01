@@ -97,7 +97,6 @@ tree_node * class_sig_node::build_classTree()
 int class_node::build_classTree() 
 {
 	class_tree_node = sig->build_classTree();
-
 	class_tree_node->AST_node = this;
 
 	body->build_classTree(class_tree_node);
@@ -105,7 +104,6 @@ int class_node::build_classTree()
 
 tree_node * program_node::build_classTree() 
 {
-
 	// add default classes to names list 
 	class_names.push_back("");
 	class_names.push_back("Obj");
@@ -139,9 +137,11 @@ tree_node * program_node::build_classTree()
 	// Class node for Obj
 	list<method_node *> *obj_method_list = new list<method_node *>();
 
+	//Arguments for Obj methods
+  
 	vector <f_arg_pair *> *obj_f_args = new vector <f_arg_pair *>();
 	obj_f_args->push_back( new f_arg_pair("o", "Obj"));
-  
+	//Method of Obj class
 	obj_method_list->push_back( new method_node("PRINT", 
 								obj_f_args, 
 								"Nothing", 
@@ -152,20 +152,158 @@ tree_node * program_node::build_classTree()
 								"String", 
 							  new statement_block_node( new list<statement_node*>()),	
 								0) );
-
+	
+	obj_method_list->push_back( new method_node("EQ", 
+								obj_f_args, 
+								"Boolean", 
+							  new statement_block_node( new list<statement_node*>()),	
+								0) );
 
 	class_node *Obj_class = new class_node(
 		new class_sig_node("Obj", new vector<f_arg_pair *>() , "", 0), 
 		new class_body_node(new list <statement_node *>(), obj_method_list), 
 	  0);
 
-	//Obj_class->class_tree_node = Obj;
-	//Obj->AST_node = Obj_class;
 
 	class_list->push_back(Obj_class);
-																											
+	
+	// Class node for Nothing
+	list<method_node *> *nothing_method_list = new list<method_node *>();
+  
+	class_node *Nothing_class = new class_node(
+		new class_sig_node("Nothing", new vector<f_arg_pair *>() , "Obj", 0), 
+		new class_body_node(new list <statement_node *>(), nothing_method_list), 
+	  0);
+
+	class_list->push_back(Nothing_class);
+
+	// Class node for Integer 
+	list<method_node *> *integer_method_list = new list<method_node *>();
+	//Add integer methods: plus, minus, divide, times, less, more, atleast, atmost, equals
+	
+	vector <f_arg_pair *> *integer_f_args = new vector <f_arg_pair *>();
+	integer_f_args->push_back( new f_arg_pair("x", "Int"));
+  
+	integer_method_list->push_back( new method_node("PLUS", 
+								integer_f_args, 
+								"Int", 
+							  new statement_block_node( new list<statement_node*>()),	
+								0) );
+
+	integer_method_list->push_back( new method_node("MINUS", 
+								integer_f_args, 
+								"Int", 
+							  new statement_block_node( new list<statement_node*>()),	
+								0) );
+
+	integer_method_list->push_back( new method_node("TIMES", 
+								integer_f_args, 
+								"Int", 
+							  new statement_block_node( new list<statement_node*>()),	
+								0) );
+
+	integer_method_list->push_back( new method_node("DIVIDE", 
+								integer_f_args, 
+								"Int", 
+							  new statement_block_node( new list<statement_node*>()),	
+								0) );
+	
+	integer_method_list->push_back( new method_node("ATMOST", 
+								integer_f_args, 
+								"Boolean", 
+							  new statement_block_node( new list<statement_node*>()),	
+								0) );
+	
+	integer_method_list->push_back( new method_node("ATLEAST", 
+								integer_f_args, 
+								"Boolean", 
+							  new statement_block_node( new list<statement_node*>()),	
+								0) );
+	
+	integer_method_list->push_back( new method_node("MORE", 
+								integer_f_args, 
+								"Boolean", 
+							  new statement_block_node( new list<statement_node*>()),	
+								0) );
+	
+	integer_method_list->push_back( new method_node("EQUALS", 
+								integer_f_args, 
+								"Boolean", 
+							  new statement_block_node( new list<statement_node*>()),	
+								0) );
+
+	class_node *Integer_class = new class_node(
+		new class_sig_node("Int", new vector<f_arg_pair *>() , "Obj", 0), 
+		new class_body_node(new list <statement_node *>(), integer_method_list), 
+	  0);
+
+	class_list->push_back(Integer_class);	
+	
+	// Class node for String 
+	list<method_node *> *string_method_list = new list<method_node *>();
+  
+	vector <f_arg_pair *> *string_f_args = new vector <f_arg_pair *>();
+	string_f_args->push_back( new f_arg_pair("other", "String"));
+  
+	string_method_list->push_back( new method_node("PLUS", 
+							  string_f_args, 
+								"String", 
+							  new statement_block_node( new list<statement_node*>()),	
+								0) );
+	
+	string_method_list->push_back( new method_node("EQUALS", 
+							  string_f_args, 
+								"Boolean", 
+							  new statement_block_node( new list<statement_node*>()),	
+								0) );
+
+	class_node *String_class = new class_node(
+		new class_sig_node("String", new vector<f_arg_pair *>() , "Obj", 0), 
+		new class_body_node(new list <statement_node *>(), string_method_list), 
+	  0);
+
+	class_list->push_back(String_class);
+
+	// Class node for Boolean
+	list<method_node *> *boolean_method_list = new list<method_node *>();
+  
+	vector <f_arg_pair *> *boolean_f_args = new vector <f_arg_pair *>();
+	boolean_f_args->push_back( new f_arg_pair("other", "Boolean"));
+  
+	boolean_method_list->push_back( new method_node("EQUALS", 
+							  boolean_f_args, 
+								"Boolean", 
+							  new statement_block_node( new list<statement_node*>()),	
+								0) );
+
+	boolean_method_list->push_back( new method_node("OR", 
+							  boolean_f_args, 
+								"Boolean", 
+							  new statement_block_node( new list<statement_node*>()),	
+								0) );
+	
+	boolean_method_list->push_back( new method_node("AND", 
+							  boolean_f_args, 
+								"Boolean", 
+							  new statement_block_node( new list<statement_node*>()),	
+								0) );
+	
+	boolean_method_list->push_back( new method_node("NOT", 
+							  boolean_f_args, 
+								"Boolean", 
+							  new statement_block_node( new list<statement_node*>()),	
+								0) );
+	
+	class_node *Boolean_class = new class_node(
+		new class_sig_node("Boolean", new vector<f_arg_pair *>() , "Obj", 0), 
+		new class_body_node(new list <statement_node *>(), boolean_method_list), 
+	  0);
+
+	class_list->push_back(Boolean_class);
 	tree_list = new list <tree_node*>();
 //
+	//Obj_class->class_tree_node = Obj;
+	//Obj->AST_node = Obj_class;
 //	tree_list->push_back(Obj);
 //	tree_list->push_back(Int);
 //	tree_list->push_back(String);
@@ -217,9 +355,7 @@ tree_node * program_node::build_classTree()
 
 int method_node::build_classTree(tree_node * class_tree_node) 
 {
-
-
-	// add method name to appropriate tree_node
+ // add method name to appropriate tree_node
 	string str_mname(method_name);
 
 	// if method already in class_that_defined_method, throw error
@@ -231,7 +367,8 @@ int method_node::build_classTree(tree_node * class_tree_node)
 				lineno, str_mname.c_str(), v->name.c_str() );	
 		error();
 	}
-	else {
+	else
+	{
 		class_tree_node->method_names.push_back(str_mname);
 	}
 
@@ -290,13 +427,15 @@ int constructor_call_node::build_classTree()
 		if(strcmp(c_name, class_names[i].c_str() ) == 0 ) flag = 0;
 	}
 
-	if (flag) {
+	if (flag)
+	{
 		fprintf(stderr,"error: %d:  class %s not defined\n", lineno, c_name);
 		error();
 	}
 
 	list<r_expr_node *>::const_iterator iter;
-	for (iter = arg_list->begin(); iter != arg_list->end(); ++iter) {
+	for (iter = arg_list->begin(); iter != arg_list->end(); ++iter)
+	{
 		(*iter)->static_checks();
 	}
 
@@ -308,7 +447,8 @@ int method_call_node::build_classTree()
 	instance->build_classTree();
 
 	list<r_expr_node *>::const_iterator iter;
-	for (iter = arg_list->begin(); iter != arg_list->end(); ++iter) {
+	for (iter = arg_list->begin(); iter != arg_list->end(); ++iter)
+	{
 		(*iter)->build_classTree();
 	}
 }

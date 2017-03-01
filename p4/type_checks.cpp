@@ -101,7 +101,7 @@ string class_node::type_checks( map< string, string > *local, map< string, strin
 {
 
 	if (class_tree_node->parent->name.compare(""))
-		add_parent_methods( body->method_list, class_tree_node->parent->AST_node->body->method_list);
+		add_parent_methods( class_tree_node->parent->AST_node->body->method_list, body->method_list );
 
 	if( local_var_table == NULL )
 		local_var_table = new map< string, string>();

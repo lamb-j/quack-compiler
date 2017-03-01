@@ -1,7 +1,10 @@
-class A () {
-
-   def PRINT (x :Int, y:Int) : Obj {
+class A () extends Int 
+{
+   def foo (x :Int, y:Int) : Obj {
 
 	 }
-
+	 
+	 def PLUS (a_x: A) : Obj 
+	 {
+	 }
 }

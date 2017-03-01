@@ -131,7 +131,8 @@ tree_node * get_tree_node(list < tree_node *> *tree_node_list, string cname)
 // check to see if a class defines a method
 int class_defines_method(tree_node * class_node, string method_name) 
 {
-  for (int i = 0; i < class_node->method_names.size(); i++) {
+  for (int i = 0; i < class_node->method_names.size(); i++)
+	{
     if (class_node->method_names[i].compare(method_name) == 0) return 1;
   }
 
@@ -173,7 +174,8 @@ tree_node * least_common_ancestor(tree_node *A, tree_node *B)
 
   int len = min (A_vec.size(), B_vec.size());
 
-  for (int i = 0; i < len; i++) {
+  for (int i = 0; i < len; i++)
+	{
     if (A_vec[i] != B_vec[i]) return A_vec[i - 1];
   }
 
@@ -271,35 +273,63 @@ void add_parent_methods(list <method_node *> *parent_mlist, list <method_node *>
 	for(plist_iter = parent_mlist->begin(); plist_iter != parent_mlist->end(); ++plist_iter)
 	{
 		int pflag = 0;
-		const char* pname = (*plist_iter)->method_name;
-		const char* ptype = (*plist_iter)->return_type;
+		const char* p_mname = (*plist_iter)->method_name;
+		const char* p_mtype = (*plist_iter)->return_type;
 
 		for(clist_iter = child_mlist->begin(); clist_iter != child_mlist->end(); ++clist_iter)
 		{
-			const char* cname = (*clist_iter)->method_name;
-			const char* ctype = (*clist_iter)->return_type;
+			const char* c_mname = (*clist_iter)->method_name;
+			const char* c_mtype = (*clist_iter)->return_type;
+			//printf("c_mname:%s\tp_mname:%s\n",c_mname, p_mname);
 			
-			if( strcmp(pname, cname) == 0)
+			if( strcmp(p_mname, c_mname) == 0)
 			{
 				pflag = 1;
-				//over-riding methods
-				if(!is_subclass(ctype,ptype))
+				//since pname = cname: check for overriding methods
+				if(!is_subclass(c_mtype,p_mtype))
 				{
-					fprintf(stderr,"error:%d: return type %s for method %s does not match\
-							its superclasses' method (at %d)\n", (*clist_iter)->lineno, ctype, cname, (*plist_iter)->lineno);  
+					fprintf(stderr,"error:%d: return type %s for method %s in superclass is not supertype"
+							" of overriden method\n",
+							(*clist_iter)->lineno, c_mtype, c_mname);
+					error();
+					exit(0);
 				}
 				//check number of args for each method
 				else if((*plist_iter)->formal_args->size() != (*clist_iter)->formal_args->size() )
 				{
-					fprintf(stderr,"error:%d: formal arg list for method %s does not match\
-							superclasses\n",(*clist_iter)->lineno, cname);
+					fprintf(stderr,"error:%d: formal arg list size for method %s does not match"
+							" superclasses\n",(*clist_iter)->lineno, c_mname);
+					error();
+					exit(0);
+				}
+				//check type of each arg in overriding method against parent method
+				else
+				{
+					//iterate over both child and parent method arg list
+					list<f_arg_pair*>::const_iterator p_f_arg_iter;
+					list<f_arg_pair*>::const_iterator c_f_arg_iter;
+
+					vector <f_arg_pair*> *p_arg_vec = (*plist_iter)->formal_args;
+					vector <f_arg_pair*> *c_arg_vec = (*clist_iter)->formal_args;
+
+					for(int i=0; i < p_arg_vec->size(); i++)
+					{
+						printf("c_type:%s\tp_type:%s\n",(*c_arg_vec)[i]->return_type,(*p_arg_vec)[i]->return_type );
+						if(! is_superclass( (*p_arg_vec)[i]->return_type , (*c_arg_vec)[i]->return_type ) )
+						{
+							fprintf(stderr,"error:%d: argument %d of type %s in method \"%s\""
+									" is not a supertype of overridden method argument type %s\n",
+									(*clist_iter)->lineno,i,(*p_arg_vec)[i]->return_type,c_mname,(*c_arg_vec)[i]->return_type);
+							error();
+							exit(0);
+						}
+					}
 				}
 			}
-			if(!pflag)
-			{
+		}
+		if(!pflag)
+		{
 				child_mlist->push_back( (*plist_iter) );
-			}
 		}
 	}
-
 }
