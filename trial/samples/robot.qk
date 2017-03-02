@@ -18,4 +18,8 @@ class SmartRobot(iq: Int) extends Robot {
     this.age = "forty-eight";     // ERROR, not an Int
     this.iq = 2 * iq;            // Sure, why not
     // ERROR, failed to define strength
+
+    def destroy_city(fierceness: Int ) : Nothing {
+    	/* TBD: how do we actually destroy things? */
+    }
 }

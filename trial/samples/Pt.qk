@@ -1,7 +1,7 @@
 /*
  * A point has an x component and a y component
  */
- class Pt(x: Int, y: Int) extends test{
+ class Pt(x: Int, y: Int) extends Obj {
      this.x = x;
      this.y = y;
 

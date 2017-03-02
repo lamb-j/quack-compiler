@@ -16,6 +16,7 @@ using namespace std;
 extern vector < string > class_names;
 extern list < tree_node *> *tree_list;
 extern int error_flag;
+extern int sweep;
 
 string current_method;
 string current_class;
@@ -96,17 +97,35 @@ string class_sig_node::type_checks( map< string, string > *local, map< string, s
 
 	return "Nothing";
 }
-
+//local and field map are NULL. Maps are generated here
 string class_node::type_checks( map< string, string > *local, map< string, string > *field ) 
 {
-
-	if (class_tree_node->parent->name.compare(""))
-		add_parent_methods( class_tree_node->parent->AST_node->body->method_list, body->method_list );
 
 	if( local_var_table == NULL )
 		local_var_table = new map< string, string>();
 	if (field_var_table == NULL )
 		field_var_table = new map< string, string>();
+
+	if (class_tree_node->parent->name.compare("")) //if parent is not "" i.e class is not Obj
+	{
+		add_parent_methods( class_tree_node->parent->AST_node->body->method_list, 
+												body->method_list, 
+												string(sig->class_name) );
+		
+
+		if (sweep == 2) {
+			map<string,string> *tmp = class_tree_node->parent->AST_node->field_var_table;
+
+			if (tmp == NULL) printf("NULL ERROR\n");
+
+			if( tmp != NULL)
+			{
+				add_parent_fields( tmp, field_var_table);
+			}
+
+		}
+	}
+
 
 	(*local_var_table)["true"] = "Boolean";
   (*local_var_table)["false"] = "Boolean";
@@ -116,7 +135,7 @@ string class_node::type_checks( map< string, string > *local, map< string, strin
 	return "Nothing";
 }
 
-string program_node::type_checks() 
+string program_node::type_checks(tree_node *root) 
 {
 
 	if( stmt_var_table == NULL)
@@ -125,15 +144,19 @@ string program_node::type_checks()
 	(*stmt_var_table)["true"] = "Boolean";
   (*stmt_var_table)["false"] = "Boolean";
 
-	list<class_node *>::const_iterator c_iter;
-	for (c_iter = class_list->begin(); c_iter != class_list->end(); ++c_iter) {
-		(*c_iter)->type_checks(NULL, NULL);
-	}
+	//list<class_node *>::const_iterator c_iter;
+	//for (c_iter = class_list->begin(); c_iter != class_list->end(); ++c_iter) {
+  //	(*c_iter)->type_checks(NULL, NULL);
+	//}
+
+	// type_check in order from root to children
+	type_check_class(root);
 
 	list<statement_node *>::const_iterator s_iter;
 	for (s_iter = statement_list->begin(); s_iter != statement_list->end(); ++s_iter) {
 		(*s_iter)->type_checks(stmt_var_table, NULL);
 	}
+
 	return "Nothing";
 }
 
@@ -174,8 +197,9 @@ string return_node::type_checks( map< string, string > *local, map< string, stri
 	if (return_value != NULL && calling_method->return_type != NULL) {
 		s = return_value->type_checks(local, field);
 
-		if (s.compare( string(calling_method->return_type) ) != 0) {
-			fprintf(stderr, "error:%d: Return type of %s does not matched declared return type of %s\n",
+		string lca = least_common_ancestor(s, string(calling_method->return_type));
+		if (string(calling_method->return_type).compare( lca ) != 0) {
+			fprintf(stderr, "error:%d: Return type of %s does not match declared return type of %s\n",
 					lineno, s.c_str(), calling_method->return_type);
 			error();
 			return "Nothing";
@@ -257,9 +281,8 @@ string assign_node::type_checks( map< string, string > *local, map< string, stri
 
 		// add var to table with least_common_ancestor of rhs, and vars old type
 		if (local->find(s1) != local->end() ) {
-			tree_node * lca = least_common_ancestor(get_tree_node(tree_list, (*local)[s1]), 
-					get_tree_node(tree_list, s2) );
-			(*local)[s1] = lca->name;
+			string lca = least_common_ancestor((*local)[s1], s2 );
+			(*local)[s1] = lca;
 		}
 		else {
 			(*local)[s1] = s2;
@@ -283,10 +306,10 @@ string assign_node::type_checks( map< string, string > *local, map< string, stri
 			return "Nothing";
 		}
 
+		//if field exists - update type as lca
 		if (field->find(s1) != field->end() ) {
-			tree_node * lca = least_common_ancestor(get_tree_node(tree_list, (*field)[s1]), 
-					get_tree_node(tree_list, s2) );
-			(*field)[s1] = lca->name;
+			string lca = least_common_ancestor( (*field)[s1] , s2 );
+			(*field)[s1] = lca;
 		}
 		else {
 			(*field)[s1] = s2;
@@ -314,44 +337,48 @@ string constructor_call_node::type_checks( map< string, string > *local, map< st
 string method_call_node::type_checks( map< string, string > *local, map< string, string > *field ) 
 {
 
-	string s1 = instance->type_checks(local, field);
+	if (sweep == 2) {
 
-  method_node *AST_method_node = get_AST_method_node (s1, string(modifier) ); 
+		string s1 = instance->type_checks(local, field);
 
-	if (AST_method_node == NULL) {
-		fprintf(stderr, "error:%d: Method %s not found in class %s\n", lineno, modifier, s1.c_str());
-		error();
-		return "Nothing";
-	}
+		method_node *AST_method_node = get_AST_method_node (s1, string(modifier) ); 
 
-
-	// check arg_list (list r_expr_node*)  against AST_method_node->formal_args (vector f_arg_pair*)
-
-	list<r_expr_node *>::const_iterator iter;
-
-	//check1: length of arg list  vs length of foraml args
-	if( arg_list->size() != AST_method_node->formal_args->size() )
-	{
-		fprintf(stderr,"error:%d Incorrect number of arguments. Method defined at lineno:%d\n",lineno, AST_method_node->lineno);	
-		error();
-		return "Nothing";
-	}
-	int i;	
-	for (iter = arg_list->begin(),i=0; iter != arg_list->end(); ++iter, ++i) {
-		string arg_type = (*iter)->type_checks(local, field);
-		string formal_arg_type = (*AST_method_node->formal_args)[i]->return_type;
-
-		if( !is_subclass(arg_type, formal_arg_type) )
-		{
-			fprintf(stderr,"error:%d: argument %d of type %s does not match formal argument of type %s in method %s\n",
-				lineno,  (int) (arg_list->size() - i - 1), arg_type.c_str(), formal_arg_type.c_str(), AST_method_node->method_name);
+		if (AST_method_node == NULL) {
+			fprintf(stderr, "error:%d: Method %s not found in class %s\n", lineno, modifier, s1.c_str());
 			error();
+			return "Nothing";
 		}
 
+
+		// check arg_list (list r_expr_node*)  against AST_method_node->formal_args (vector f_arg_pair*)
+		list<r_expr_node *>::const_iterator iter;
+
+		//check1: length of arg list  vs length of foraml args
+		if( arg_list->size() != AST_method_node->formal_args->size() )
+		{
+			fprintf(stderr,"error:%d Incorrect number of arguments. Method defined at lineno:%d\n",lineno, AST_method_node->lineno);	
+			error();
+			return "Nothing";
+		}
+		int i;	
+		for (iter = arg_list->begin(),i=0; iter != arg_list->end(); ++iter, ++i) {
+			string arg_type = (*iter)->type_checks(local, field);
+			string formal_arg_type = (*AST_method_node->formal_args)[i]->return_type;
+
+			if( !is_subclass(arg_type, formal_arg_type) )
+			{
+				fprintf(stderr,"error:%d: argument %d of type %s does not match formal argument of type %s in method %s\n",
+						lineno,  (int) (arg_list->size() - i - 1), arg_type.c_str(), formal_arg_type.c_str(), AST_method_node->method_name);
+				error();
+			}
+
+		}
+
+		// should be return type of method
+		return string(AST_method_node->return_type);
 	}
-	
-	// should be return type of method
-	return string(AST_method_node->return_type);
+
+	return "Dummy";
 }
 
 string unary_node::type_checks( map< string, string > *local, map< string, string > *field )
@@ -374,20 +401,19 @@ string plus_node::type_checks( map< string, string > *local, map< string, string
 
 	//check if divide exists in s1/s2 type
 
-
-	if (s1.compare(s2) != 0) {
-		fprintf(stderr,"error:%d: type mismatch %s is not of type %s\n",lineno,s1.c_str(), s2.c_str());
-		error();
-		return "Nothing";
+	if (sweep == 2) {
+		if (s1.compare(s2) != 0) {
+			fprintf(stderr,"error:%d: type mismatch %s is not of type %s\n",lineno,s1.c_str(), s2.c_str());
+			error();
+			return "Nothing";
+		}
+		else if (class_defines_method(get_tree_node(tree_list, s1), "PLUS") == 0){
+			fprintf(stderr,"error:%d: PLUS not defined for class %s\n",lineno,s1.c_str());
+			error();
+			return "Nothing";
+		}
 	}
-	else if (class_defines_method(get_tree_node(tree_list, s1), "PLUS") == 0){
-		fprintf(stderr,"error:%d: PLUS not defined for class %s\n",lineno,s1.c_str());
-		error();
-		return "Nothing";
-	}
-	else {
-		return s1;
-	}
+	return s1;
 }
 
 string minus_node::type_checks( map< string, string > *local, map< string, string > *field ) 

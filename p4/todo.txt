@@ -1,21 +1,4 @@
-
-
-	void add_parent_methods (method_list my_methods, method_list parent_methods) {
-	  if theres a clash, 
-		  keep my_method, but make sure stuff is as below
-      - check that if method overrides, return type is subtype and args are supertype (and num args match)
-
-	// should wait until second pass
-	void add_parent_fields (field_map my_fields, field_map parent_fields) {
-	  if clash types have to match,
-		and if my_fields doesn't have all of parent_fields, error
-
-
-
-Subclass Inherits from Superclass
-  field table
-	methods
-
 Later
 	- check for uninitalized vars with ifs/whiles
 	- deal with field instance stuff
+	- deal with x : Int declarations

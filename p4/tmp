@@ -1,10 +1,12 @@
-class A () extends Int 
-{
-   def foo (x :Int, y:Int) : Obj {
+class D() extends C {}
 
-	 }
-	 
-	 def PLUS (a_x: A) : Obj 
-	 {
-	 }
+class C() extends B {}
+
+class B() extends A {}
+
+class A()  {
+
+  def foo() {}
 }
+
+
