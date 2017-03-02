@@ -399,8 +399,6 @@ string plus_node::type_checks( map< string, string > *local, map< string, string
 	string s1 = left->type_checks(local, field);
 	string s2 = right->type_checks(local, field);
 
-	//check if divide exists in s1/s2 type
-
 	if (sweep == 2) {
 		if (s1.compare(s2) != 0) {
 			fprintf(stderr,"error:%d: type mismatch %s is not of type %s\n",lineno,s1.c_str(), s2.c_str());

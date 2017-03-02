@@ -2,3 +2,5 @@ Later
 	- check for uninitalized vars with ifs/whiles
 	- deal with field instance stuff
 	- deal with x : Int declarations
+
+	- move binary and unary typechecks to sweep 2
