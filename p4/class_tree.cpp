@@ -13,6 +13,15 @@
 using namespace std;
 extern list <tree_node *> *tree_list;
 
+void type_check_class(tree_node *root) {
+
+	root->AST_node->type_checks(NULL, NULL);
+
+	for(int i = 0; i< root->children.size(); i++) {
+		type_check_class(root->children[i]);
+	}
+}
+  
 int print_tree (tree_node *root, int level) {
  	
  	if (root == NULL) {
@@ -90,27 +99,10 @@ tree_node * append_tree( list <tree_node *> *tree_list, string parent_class, str
   // case 4
   if (new_tree_node != NULL && parent_tree_node != NULL ) {
     //printf("CASE 4, new: %s, parent:%s\n", new_class.c_str(), parent_class.c_str());
-   
-		//check if class name among default classes
-		  const char* default_classes[] = { "Obj", "Int", "Nothing", "String", "Boolean" };
-
-		int flag = 0;
-		for( int i=0; i<5; i++)
-	  {
-			if ( parent_tree_node->name.compare( string(default_classes[i]) ) == 0 )
-				flag = 1;
-		} 
-		
-		if (flag)
-		{
 			new_tree_node->parent = parent_tree_node;
 			parent_tree_node->children.push_back(new_tree_node);
 
 			return new_tree_node;
-		}
-
-		error();
-		return NULL;
   }
 
 	printf("ERROR IN APPEND TREE\n");
@@ -125,6 +117,7 @@ tree_node * get_tree_node(list < tree_node *> *tree_node_list, string cname)
 		if ( (*iter)->name.compare(cname) == 0 ) return (*iter);
 	}
 	fprintf(stderr,"error : class name \"%s\" not in tree list\n",cname.c_str() );
+	exit(0);
 
 }
 
@@ -139,53 +132,11 @@ int class_defines_method(tree_node * class_node, string method_name)
   return 0;
 }
 
-tree_node * least_common_ancestor(tree_node *A, tree_node *B)
-{
-
-  tree_node *tmp;
-
-  // make parent list for A
-  vector <tree_node *> A_vec;
-  tmp = A;
-
-  while (tmp->name.compare("Obj") != 0) {
-    A_vec.push_back(tmp);
-
-    tmp = tmp->parent;
-  }
-
-  // make parent vec for B
-  vector <tree_node *> B_vec;
-  tmp = B;
-
-  while (tmp->name.compare("Obj") != 0) {
-    B_vec.push_back(tmp);
-
-    tmp = tmp ->parent;
-  }
-
-  // Add Obj
-  A_vec.push_back(tmp);
-  B_vec.push_back(tmp);
-
-  // compare vecs
-  reverse(A_vec.begin(), A_vec.end());
-  reverse(B_vec.begin(), B_vec.end());
-
-  int len = min (A_vec.size(), B_vec.size());
-
-  for (int i = 0; i < len; i++)
-	{
-    if (A_vec[i] != B_vec[i]) return A_vec[i - 1];
-  }
-
-  // If we didn't find an ancestor, return the node with the smaller list
-  return A_vec.size() < B_vec.size() ? A : B;
-}
-
-
 string least_common_ancestor(string A, string B)
 {
+
+  if (!A.compare("Dummy")) return B;
+  if (!B.compare("Dummy")) return A;
 
   string tmp;
 
@@ -194,8 +145,13 @@ string least_common_ancestor(string A, string B)
   tmp = A;
 
   while (tmp.compare("Obj") != 0) {
-    A_vec.push_back(tmp);
+
+
+		if (get_tree_node(tree_list, tmp)->parent == NULL || find(A_vec.begin(), A_vec.end(), tmp) != A_vec.end() ) {
+			return "Disconnected";
+		}
    
+    A_vec.push_back(tmp);
     tmp = get_tree_node(tree_list,tmp)->parent->name;
   }
 
@@ -266,7 +222,7 @@ int is_superclass(string super_class, string sub_class)
   return is_subclass(sub_class, super_class);
 }
 
-void add_parent_methods(list <method_node *> *parent_mlist, list <method_node *> *child_mlist)
+void add_parent_methods(list <method_node *> *parent_mlist, list <method_node *> *child_mlist, string child_class)
 {
 	list<method_node*>::const_iterator plist_iter;
 	list<method_node*>::const_iterator clist_iter;
@@ -280,27 +236,26 @@ void add_parent_methods(list <method_node *> *parent_mlist, list <method_node *>
 		{
 			const char* c_mname = (*clist_iter)->method_name;
 			const char* c_mtype = (*clist_iter)->return_type;
-			//printf("c_mname:%s\tp_mname:%s\n",c_mname, p_mname);
 			
 			if( strcmp(p_mname, c_mname) == 0)
 			{
+
 				pflag = 1;
 				//since pname = cname: check for overriding methods
 				if(!is_subclass(c_mtype,p_mtype))
 				{
-					fprintf(stderr,"error:%d: return type %s for method %s in superclass is not supertype"
+					fprintf(stderr,"error:%d: return type %s for method %s in superclass is not subtype"
 							" of overriden method\n",
 							(*clist_iter)->lineno, c_mtype, c_mname);
 					error();
-					exit(0);
 				}
+
 				//check number of args for each method
-				else if((*plist_iter)->formal_args->size() != (*clist_iter)->formal_args->size() )
+				if((*plist_iter)->formal_args->size() != (*clist_iter)->formal_args->size() )
 				{
 					fprintf(stderr,"error:%d: formal arg list size for method %s does not match"
 							" superclasses\n",(*clist_iter)->lineno, c_mname);
 					error();
-					exit(0);
 				}
 				//check type of each arg in overriding method against parent method
 				else
@@ -314,22 +269,79 @@ void add_parent_methods(list <method_node *> *parent_mlist, list <method_node *>
 
 					for(int i=0; i < p_arg_vec->size(); i++)
 					{
-						printf("c_type:%s\tp_type:%s\n",(*c_arg_vec)[i]->return_type,(*p_arg_vec)[i]->return_type );
-						if(! is_superclass( (*p_arg_vec)[i]->return_type , (*c_arg_vec)[i]->return_type ) )
+						if(! is_subclass( (*p_arg_vec)[i]->return_type , (*c_arg_vec)[i]->return_type ) )
 						{
 							fprintf(stderr,"error:%d: argument %d of type %s in method \"%s\""
 									" is not a supertype of overridden method argument type %s\n",
-									(*clist_iter)->lineno,i,(*p_arg_vec)[i]->return_type,c_mname,(*c_arg_vec)[i]->return_type);
+									(*clist_iter)->lineno,
+									(int) p_arg_vec->size() - 1 - i,
+									(*c_arg_vec)[i]->return_type,
+									c_mname,
+									(*p_arg_vec)[i]->return_type);
+
 							error();
-							exit(0);
 						}
 					}
 				}
+				break;
 			}
 		}
-		if(!pflag)
+
+		// Add parent's method to child
+		if (!pflag)
 		{
 				child_mlist->push_back( (*plist_iter) );
+				tree_node * child_tree_node = get_tree_node(tree_list, child_class);
+				child_tree_node->method_names.push_back( string(p_mname) );
+		}
+
+	}
+}
+
+void add_parent_fields( map <string, string> *parent_fields, map <string, string> *child_fields)
+{
+	
+	map<string, string>::iterator c_fields_iter;
+	map<string, string>::iterator p_fields_iter;
+
+	string p_fname, p_ftype;
+	string c_fname, c_ftype;
+
+	
+	for(p_fields_iter = parent_fields->begin(); p_fields_iter != parent_fields->end(); ++p_fields_iter)
+	{
+		string p_fname = string(p_fields_iter->first);
+		string p_ftype = string(p_fields_iter->second);
+			
+		//if p_fname exist in child_field :  type must match
+		//else add to child_field
+		if( child_fields->find(p_fname) != child_fields->end() ) 
+		{
+			//string c_fname = c_fields_iter->first;
+			string c_ftype = (*child_fields)[p_fname];
+			if( c_ftype.compare(p_ftype) != 0  ) //type not same
+			{
+				fprintf(stderr,"error: field member \"%s\" of type \"%s\" must match superclass' field type \"%s\"\n",
+							p_fname.c_str(), c_ftype.c_str(), p_ftype.c_str()) ;
+				error();
+			}
+		}
+		else
+		{
+			fprintf(stderr,"error: subclass must have field \"%s\" from superclass\n",p_fname.c_str());
+			error();
+		}
+	}
+} 
+
+void check_class_tree_hierarchy() {
+
+	list <tree_node *>::const_iterator iter;
+
+	for (iter = tree_list->begin(); iter != tree_list->end(); ++iter) {
+    if ( (*iter)->name.compare("") && !is_subclass( (*iter)->name, "Obj") ) {
+			fprintf(stderr, "error: ill-defined class hierarchy, see class %s\n", (*iter)->name.c_str());
+			error();
 		}
 	}
 }

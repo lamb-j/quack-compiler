@@ -99,6 +99,7 @@ int class_node::build_classTree()
 	class_tree_node = sig->build_classTree();
 	class_tree_node->AST_node = this;
 
+
 	body->build_classTree(class_tree_node);
 }
 
@@ -111,6 +112,7 @@ tree_node * program_node::build_classTree()
 	class_names.push_back("String");
 	class_names.push_back("Nothing");
 	class_names.push_back("Boolean");
+	//class_names.push_back("Dummy");
 
 
 	//sorting vector to check for duplicates
@@ -125,22 +127,13 @@ tree_node * program_node::build_classTree()
 		}
 	}
 
-	//adding default tree nodes to tree list
-	/*
-	tree_node *Obj = new tree_node("Obj");
-	tree_node *Int = new tree_node("Int");
-	tree_node *String = new tree_node("String");
-	tree_node *Nothing = new tree_node("Nothing");
-	tree_node *Boolean = new tree_node("Boolean");
-	*/
-
 	// Class node for Obj
 	list<method_node *> *obj_method_list = new list<method_node *>();
 
 	//Arguments for Obj methods
   
 	vector <f_arg_pair *> *obj_f_args = new vector <f_arg_pair *>();
-	obj_f_args->push_back( new f_arg_pair("o", "Obj"));
+	//obj_f_args->push_back( new f_arg_pair("o", "Obj"));
 	//Method of Obj class
 	obj_method_list->push_back( new method_node("PRINT", 
 								obj_f_args, 
@@ -220,6 +213,12 @@ tree_node * program_node::build_classTree()
 							  new statement_block_node( new list<statement_node*>()),	
 								0) );
 	
+	integer_method_list->push_back( new method_node("LESS", 
+								integer_f_args, 
+								"Boolean", 
+							  new statement_block_node( new list<statement_node*>()),	
+								0) );
+
 	integer_method_list->push_back( new method_node("MORE", 
 								integer_f_args, 
 								"Boolean", 
@@ -301,43 +300,6 @@ tree_node * program_node::build_classTree()
 
 	class_list->push_back(Boolean_class);
 	tree_list = new list <tree_node*>();
-//
-	//Obj_class->class_tree_node = Obj;
-	//Obj->AST_node = Obj_class;
-//	tree_list->push_back(Obj);
-//	tree_list->push_back(Int);
-//	tree_list->push_back(String);
-//	tree_list->push_back(Boolean);
-//	tree_list->push_back(Nothing);
-//
-//	Obj->children.push_back(Int);
-//	Obj->children.push_back(String);
-//	Obj->children.push_back(Nothing);
-//	Obj->children.push_back(Boolean);
-//
-//	Obj->method_names.push_back("EQUALS");
-//	Obj->method_names.push_back("PRINT");
-//	Obj->method_names.push_back("STR");
-//
-//	Int->method_names.push_back("PLUS");
-//	Int->method_names.push_back("MINUS");
-//	Int->method_names.push_back("TIMES");
-//	Int->method_names.push_back("DIVIDE");
-//	Int->method_names.push_back("EQUALS");
-//	Int->method_names.push_back("ATLEAST");
-//	Int->method_names.push_back("ATMOST");
-//	Int->method_names.push_back("LESS");
-//	Int->method_names.push_back("MORE");
-//
-//	String->method_names.push_back("ATLEAST");
-//	String->method_names.push_back("ATMOST");
-//	String->method_names.push_back("LESS");
-//	String->method_names.push_back("MORE");
-//
-//	Int->parent = Obj;
-//	String->parent = Obj;
-//	Nothing->parent = Obj;
-//	Boolean->parent = Obj;
 
 	list<class_node *>::const_iterator c_iter;
 	for (c_iter = class_list->begin(); c_iter != class_list->end(); ++c_iter) {
@@ -436,7 +398,7 @@ int constructor_call_node::build_classTree()
 	list<r_expr_node *>::const_iterator iter;
 	for (iter = arg_list->begin(); iter != arg_list->end(); ++iter)
 	{
-		(*iter)->static_checks();
+		(*iter)->build_classTree();
 	}
 
 	return 0;

@@ -15,7 +15,6 @@ class statement_node {
 	public:
 		virtual void print(int indent) = 0;
 		virtual int build_classTree() = 0;
-		virtual int static_checks() = 0;
 		virtual string type_checks( map< string, string > *local, map< string, string > *fields ) = 0;
 };
 
@@ -25,7 +24,6 @@ class statement_block_node {
 	public:
 		statement_block_node(list <statement_node *> *stmts);
 		int build_classTree();
-		int static_checks();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
 		void print(int indent);
 };
@@ -49,7 +47,6 @@ class class_sig_node {
 
 		void print(int indent);
 		tree_node * build_classTree();
-		int static_checks();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
 };
 
@@ -71,7 +68,6 @@ class method_node {
 		void print(int indent);
 		int build_classTree(tree_node *);
 
-		int static_checks();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
 };
 
@@ -85,7 +81,6 @@ class class_body_node{
 		void print(int indent);
 		int build_classTree(tree_node *);
 
-		int static_checks();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
 };
 
@@ -106,7 +101,6 @@ class class_node {
 		void print(int indent);
 		int build_classTree();
 
-		int static_checks();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
 };
 
@@ -123,8 +117,7 @@ class program_node {
 		
 		void print(int indent);
 		tree_node * build_classTree();
-		int static_checks();
-		string type_checks();
+		string type_checks(tree_node *root);
 };
 
 class r_expr_node : public statement_node {
@@ -147,7 +140,6 @@ class l_expr_node : public r_expr_node {
 		l_expr_node(r_expr_node *r_node, char* str, int linenum);
 		void print(int indent);
 		int build_classTree();
-		int static_checks();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
 
 };
@@ -162,7 +154,6 @@ class while_node : public statement_node {
 		void print(int indent);
 		int build_classTree();
 
-		int static_checks();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
 };
 
@@ -203,7 +194,6 @@ class if_node : public statement_node {
 		void print(int indent);
 		int build_classTree();
 
-		int static_checks();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
 };
 
@@ -216,7 +206,6 @@ class return_node : public statement_node {
 
 
 		int build_classTree();
-		int static_checks();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
 		int lineno;
 };
@@ -233,7 +222,6 @@ class assign_node : public statement_node {
 
 		void print(int indent);
 		int build_classTree();
-		int static_checks();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
 };
 
@@ -246,7 +234,6 @@ class constructor_call_node : public r_expr_node {
 		constructor_call_node(char *str, list <r_expr_node *> *args, int linenum);
 		void print(int indent);
 		int build_classTree();
-		int static_checks();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
 };
 
@@ -261,7 +248,6 @@ class method_call_node : public r_expr_node {
 		method_call_node(r_expr_node *ins, char *mod, list <r_expr_node *> *args, int linenum);
 		void print(int indent);
 		int build_classTree();
-		int static_checks();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
 };
 
@@ -284,7 +270,6 @@ class unary_node : public r_expr_node {
 
 		void print(int indent);
 		int build_classTree();
-		int static_checks();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
 };
 
@@ -295,7 +280,6 @@ class plus_node : public operator_node {
 		plus_node(r_expr_node *L, r_expr_node *R, int linenum);
 		void print(int indent);
 		int build_classTree();
-		int static_checks();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
 };
 
@@ -305,7 +289,6 @@ class minus_node : public operator_node {
 		minus_node(r_expr_node *L, r_expr_node *R, int linenum);
 		void print(int indent);
 		int build_classTree();
-		int static_checks();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
 };
 
@@ -315,7 +298,6 @@ class times_node : public operator_node {
 		times_node(r_expr_node *L, r_expr_node *R, int linenum);
 		void print(int indent);
 		int build_classTree();
-		int static_checks();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
 };
 
@@ -325,7 +307,6 @@ class divide_node : public operator_node {
 		divide_node(r_expr_node *L, r_expr_node *R, int linenum);
 		void print(int indent);
 		int build_classTree();
-		int static_checks();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
 };
 
@@ -335,7 +316,6 @@ class compare_node : public operator_node {
 		int lineno;
 		void print(int indent);
 		int build_classTree();
-		int static_checks();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
 };
 
@@ -343,7 +323,6 @@ class int_node : public r_expr_node {
 	public:
 		int_node(int value);
 		void print(int indent);
-		int static_checks();
 		int build_classTree();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
 };
@@ -354,7 +333,6 @@ class str_node : public r_expr_node {
 		str_node(char *value);
 		void print(int indent);
 		int build_classTree();
-		int static_checks();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
 };
 
@@ -379,8 +357,8 @@ int print_tree( tree_node *root, int level );
 tree_node * append_tree( list <tree_node *> *tree_list, string parent_class, string new_class);
 tree_node * get_tree_node(list < tree_node *> *tree_node_list, string cname);
 int class_defines_method(tree_node * class_node, string method_name);
+//tree_node * least_common_ancestor(tree_node *A, tree_node *B);
 string least_common_ancestor(string A, string B);
-tree_node * least_common_ancestor(tree_node *A, tree_node *B);
 
 class_node * get_AST_class_node(string class_name);
 method_node * get_AST_method_node(string class_name, string method_name);
@@ -391,6 +369,7 @@ int is_superclass(string super_class, string sub_class);
 
 // add parent methods
 
-void add_parent_methods(list <method_node *> *parent_mlist, list <method_node *> *child_mlist);
-
+void add_parent_methods(list <method_node *> *parent_mlist, list <method_node *> *child_mlist, string child_class);
 void add_parent_fields( map <string, string> *parent_fields, map <string, string > *child_fields);
+
+void type_check_class(tree_node *root);

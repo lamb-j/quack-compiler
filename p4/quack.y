@@ -22,6 +22,8 @@ int yylex();
 void yyerror(const char *s);
 extern int yylineno;
 
+int sweep;
+
 %}
 
 %union {
@@ -116,7 +118,7 @@ Class_Body: '{' Statements Methods '}' { $$ = new class_body_node( $2, $3 ); }
 Methods: /* empty */ { $$ = new list<method_node *>(); }
 | Methods Method { $$ = $1; $1 -> push_back($2); }
 
-Method: DEF IDENT '(' Formal_Args ')' Statement_Block { $$ = new method_node($2, $4, NULL, $6, @1.first_line); }
+Method: DEF IDENT '(' Formal_Args ')' Statement_Block { $$ = new method_node($2, $4, "Nothing", $6, @1.first_line); }
 | DEF IDENT '(' Formal_Args ')' ':' IDENT Statement_Block { $$ = new method_node($2, $4, $7, $8, @1.first_line); }
 
 Formal_Args: /* empty */ {$$ = new vector< f_arg_pair * >(); }
@@ -215,12 +217,15 @@ int main (int argc, char **argv)
 
     // two sweeps
 		printf("--- Type Check Errors ---\n");
-		AST_root->type_checks();
+		sweep = 1;
+		AST_root->type_checks(class_root);
 		if (error_flag) return 0;
-		AST_root->type_checks();
+		sweep = 2;
+		AST_root->type_checks(class_root);
 		if (error_flag) return 0;
 		printf("\n");
 
+    /*
 
 		list<class_node *>::const_iterator c_iter;
 		for (c_iter = AST_root->class_list->begin(); c_iter != AST_root->class_list->end(); ++c_iter) {
@@ -264,17 +269,14 @@ int main (int argc, char **argv)
 		}
 		printf("\n");
 
-		printf("--- Static Check Errors ---\n");
-		AST_root->static_checks();
-		if (error_flag) return 0;
-		printf("\n");
-
+	*/
 		printf("--- Class Tree ---\n");
 		print_tree(class_root, 0);
 		printf("\n");
 
 		printf("--- Syntax Tree ---\n");
-		AST_root->print(0);
+		//AST_root->print(0);
 
 	}
+
 }
