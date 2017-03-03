@@ -225,8 +225,6 @@ int main (int argc, char **argv)
 		if (error_flag) return 0;
 		printf("\n");
 
-    /*
-
 		list<class_node *>::const_iterator c_iter;
 		for (c_iter = AST_root->class_list->begin(); c_iter != AST_root->class_list->end(); ++c_iter) {
 			class_node *c_node = (*c_iter);
@@ -269,7 +267,6 @@ int main (int argc, char **argv)
 		}
 		printf("\n");
 
-	*/
 		printf("--- Class Tree ---\n");
 		print_tree(class_root, 0);
 		printf("\n");
