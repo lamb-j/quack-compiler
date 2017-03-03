@@ -1,0 +1,6 @@
+[DEFAULT]
+name = Jacob Lambert
+host = ix.cs.uoreogn.edu
+path = /home/users/jlambert/quack/p4/
+repo = https://gitlab.com/lamb/quack/tree/master
+partner = Rajan Sawhney
