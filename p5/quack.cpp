@@ -157,7 +157,7 @@ constructor_call_node::constructor_call_node(char *str, list <r_expr_node *> *ar
 	lineno = linenum;
 }
 
-method_call_node::method_call_node(r_expr_node *ins, char *mod, list <r_expr_node *> *args, int linenum) 
+method_call_node::method_call_node(r_expr_node *ins, const char *mod, list <r_expr_node *> *args, int linenum) 
 {
 	instance = ins;
 	modifier = mod;
@@ -201,10 +201,10 @@ times_node::times_node(r_expr_node *L, r_expr_node *R, int linenum) : operator_n
 	lineno = linenum;
 }
 
-divide_node::divide_node(r_expr_node *L, r_expr_node *R, int linenum) : operator_node(L,R) 
-{
-	lineno = linenum;
-}
+//divide_node::divide_node(r_expr_node *L, r_expr_node *R, int linenum) : operator_node(L,R)
+//{
+//	lineno = linenum;
+//}
 
 compare_node::compare_node(r_expr_node *L, const char* sym, r_expr_node *R, int linenum) : operator_node(L,sym,R)
 {

@@ -4,7 +4,7 @@ ifeq ($(UNAME), Linux)
 CCFLAGS= -O2 -std=c++11 -lfl
 endif
 ifeq ($(UNAME), Darwin)
-CCFLAGS= -O2 -std=c++11 -ll
+CCFLAGS= -std=c++11 -ll 
 endif
 LEX = flex
 LFLAGS= -8     

@@ -40,6 +40,7 @@ int print_tree (tree_node *root, int level) {
 	{ 
 		print_tree(root->children[i], level + 2 );
 	}
+	return 0;
 } 
 
 tree_node * append_tree( list <tree_node *> *tree_list, string parent_class, string new_class)
@@ -67,7 +68,7 @@ tree_node * append_tree( list <tree_node *> *tree_list, string parent_class, str
 
     tree_list->push_back(new_tree_node);
     tree_list->push_back(parent_tree_node);
-		return new_tree_node;
+    return new_tree_node;
   }
 
   // case 2

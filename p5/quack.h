@@ -240,12 +240,12 @@ class constructor_call_node : public r_expr_node {
 class method_call_node : public r_expr_node {
 	public:
 		r_expr_node *instance;
-		char *modifier;
+		const char *modifier;
 		list <r_expr_node *> *arg_list;
 		int lineno;
 
 
-		method_call_node(r_expr_node *ins, char *mod, list <r_expr_node *> *args, int linenum);
+		method_call_node(r_expr_node *ins, const char *mod, list <r_expr_node *> *args, int linenum);
 		void print(int indent);
 		int build_classTree();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
@@ -301,14 +301,14 @@ class times_node : public operator_node {
 		string type_checks( map< string, string > *local, map< string, string > *fields );
 };
 
-class divide_node : public operator_node {
-	public: 
-		int lineno;		
-		divide_node(r_expr_node *L, r_expr_node *R, int linenum);
-		void print(int indent);
-		int build_classTree();
-		string type_checks( map< string, string > *local, map< string, string > *fields );
-};
+//class divide_node : public operator_node {
+//	public: 
+//		int lineno;		
+//		divide_node(r_expr_node *L, r_expr_node *R, int linenum);
+//		void print(int indent);
+//		int build_classTree();
+//		string type_checks( map< string, string > *local, map< string, string > *fields );
+//};
 
 class compare_node : public operator_node {
 	public:

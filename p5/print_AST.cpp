@@ -258,14 +258,14 @@ void times_node::print(int indent) {
 	right->print(indent + 4);
 }
 
-void divide_node::print(int indent) {
-
-	printf("%*sNODE: divide\n", indent, "");
-	printf("%*sleft:\n", indent + 2, "");
-  left->print(indent + 4);
-	printf("%*sright:\n", indent + 2, "");
-	right->print(indent + 4);
-}
+//void divide_node::print(int indent) {
+//
+//	printf("%*sNODE: divide\n", indent, "");
+//	printf("%*sleft:\n", indent + 2, "");
+//  left->print(indent + 4);
+//	printf("%*sright:\n", indent + 2, "");
+//	right->print(indent + 4);
+//}
 
 void compare_node::print(int indent)
 {

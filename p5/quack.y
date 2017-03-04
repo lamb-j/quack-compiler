@@ -162,23 +162,72 @@ Actual_Args: /* empty */ { $$ = new list<r_expr_node *>(); }
 | R_Expr Actual_Args { $$ = $2; $2 -> push_back($1); } 
 | R_Expr ',' Actual_Args { $$ = $3; $3 -> push_back($1); }
 
-R_Expr: R_Expr '>' R_Expr { $$ = new compare_node($1, "MORE", $3, @1.first_line);} 
-| R_Expr '<' R_Expr { $$ = new compare_node($1, "LESS" , $3, @1.first_line); }
-| R_Expr EQUALS R_Expr { $$ = new compare_node($1, "==", $3, @1.first_line); }
-| R_Expr ATLEAST R_Expr { $$ = new compare_node($1, ">=" , $3, @1.first_line); }
-| R_Expr ATMOST R_Expr { $$ = new compare_node($1, "<=" , $3, @1.first_line); }
-| R_Expr AND R_Expr { $$ = new compare_node($1,"AND" , $3, @1.first_line); }
-| R_Expr OR R_Expr { $$ = new compare_node($1, "OR" , $3, @1.first_line); }
-| NOT R_Expr {$$ = new unary_node( "NOT", $2, @1.first_line) ; } 
+R_Expr: R_Expr '>' R_Expr {   list<r_expr_node *> *args = new list<r_expr_node *>();
+			args->push_back($1);
+			args->push_back($3);
+			$$ = new method_call_node($1, "MORE", args, @1.first_line); 
+}
+| R_Expr '<' R_Expr {   list<r_expr_node *> *args = new list<r_expr_node *>();
+			args->push_back($1);
+			args->push_back($3);
+			$$ = new method_call_node($1, "LESS", args, @1.first_line); 
+}
+| R_Expr EQUALS R_Expr {   list<r_expr_node *> *args = new list<r_expr_node *>();
+			args->push_back($1);
+			args->push_back($3);
+			$$ = new method_call_node($1, "EQUALS", args, @1.first_line); 
+}
+| R_Expr ATLEAST R_Expr {   list<r_expr_node *> *args = new list<r_expr_node *>();
+			args->push_back($1);
+			args->push_back($3);
+			$$ = new method_call_node($1, "ATLEAST", args, @1.first_line); 
+}
+| R_Expr ATMOST R_Expr {   list<r_expr_node *> *args = new list<r_expr_node *>();
+			args->push_back($1);
+			args->push_back($3);
+			$$ = new method_call_node($1, "ATMOST", args, @1.first_line); 
+}
+| R_Expr AND R_Expr {   list<r_expr_node *> *args = new list<r_expr_node *>();
+			args->push_back($1);
+			args->push_back($3);
+			$$ = new method_call_node($1, "AND", args, @1.first_line); 
+}
+| R_Expr OR R_Expr {   list<r_expr_node *> *args = new list<r_expr_node *>();
+			args->push_back($1);
+			args->push_back($3);
+			$$ = new method_call_node($1, "OR", args, @1.first_line); 
+}
+| NOT R_Expr {   list<r_expr_node *> *args = new list<r_expr_node *>();
+			args->push_back($2);
+			$$ = new method_call_node($2, "NOT", args, @1.first_line); 
+}
 // Introduces 19 shift-reduce errors
-//| '-' R_Expr %prec NEG { $$ = new unary_node( "-", $2, @1.first_line) ;}
+//| '-' R_Expr %prec NEG {   list<r_expr_node *> *args = new list<r_expr_node *>();
+//			args->push_back($2);
+//			$$ = new method_call_node($2, "NEG", args, @1.first_line); 
+//}
 
 R_Expr: '(' R_Expr ')' { $$ = $2; }
-| R_Expr '+' R_Expr { $$ = new plus_node($1, $3, @1.first_line); }
-| R_Expr '-' R_Expr { $$ = new minus_node($1, $3, @1.first_line); }
-| R_Expr '*' R_Expr { $$ = new times_node($1, $3, @1.first_line); }
-| R_Expr '/' R_Expr { $$ = new divide_node($1, $3, @1.first_line); }
-
+| R_Expr '+' R_Expr {   list<r_expr_node *> *args = new list<r_expr_node *>();
+			args->push_back($1);
+			args->push_back($3);
+			$$ = new method_call_node($1, "PLUS", args, @1.first_line); 
+}
+| R_Expr '-' R_Expr {   list<r_expr_node *> *args = new list<r_expr_node *>();
+			args->push_back($1);
+			args->push_back($3);
+			$$ = new method_call_node($1, "MINUS", args, @1.first_line); 
+}
+| R_Expr '*' R_Expr {   list<r_expr_node *> *args = new list<r_expr_node *>();
+			args->push_back($1);
+			args->push_back($3);
+			$$ = new method_call_node($1, "TIMES", args, @1.first_line); 
+}
+| R_Expr '/' R_Expr {   list<r_expr_node *> *args = new list<r_expr_node *>();
+			args->push_back($1);
+			args->push_back($3);
+			$$ = new method_call_node($1, "DIVIDE", args, @1.first_line); 
+}
 
 R_Expr: INT_LIT { $$ = new int_node($1); }
 | STRING_LIT { $$ = new str_node($1); }
@@ -268,14 +317,14 @@ int main (int argc, char **argv)
 			printf("  var:%s\ttype:%s\n",iter->first.c_str(), iter->second.c_str());
 		}
 		printf("\n");
-
 	*/
+
 		printf("--- Class Tree ---\n");
 		print_tree(class_root, 0);
 		printf("\n");
 
 		printf("--- Syntax Tree ---\n");
-		//AST_root->print(0);
+		AST_root->print(0);
 
 	}
 

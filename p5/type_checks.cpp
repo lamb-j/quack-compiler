@@ -269,6 +269,7 @@ string l_expr_node::type_checks( map< string, string > *local, map< string, stri
 		}
 	}
 
+return "Nothing";
 }
 
 string assign_node::type_checks( map< string, string > *local, map< string, string > *field )
@@ -356,7 +357,10 @@ string method_call_node::type_checks( map< string, string > *local, map< string,
 		//check1: length of arg list  vs length of foraml args
 		if( arg_list->size() != AST_method_node->formal_args->size() )
 		{
-			fprintf(stderr,"error:%d Incorrect number of arguments. Method defined at lineno:%d\n",lineno, AST_method_node->lineno);	
+		  if (AST_method_node->lineno)
+			fprintf(stderr,"error:%d Incorrect number of arguments for Method  \"%s\" defined at line:%d\n",lineno, AST_method_node->method_name, AST_method_node->lineno);
+		  else
+			fprintf(stderr,"error:%d Incorrect number of arguments for Method \"%s\" from default class\n",lineno, AST_method_node->method_name); 
 			error();
 			return "Nothing";
 		}
@@ -458,27 +462,27 @@ string times_node::type_checks( map< string, string > *local, map< string, strin
 	}
 }
 
-string divide_node::type_checks( map< string, string > *local, map< string, string > *field ) 
-{
-	string s1 = left->type_checks(local, field);
-	string s2 = right->type_checks(local, field);
-
-	//check if divide exists in s1/s2 type
-
-	if (s1.compare(s2) != 0) {
-		fprintf(stderr,"error:%d: type mismatch %s is not of type %s\n",lineno,s1.c_str(), s2.c_str());
-		error();
-		return "Nothing";
-	}
-	else if (class_defines_method(get_tree_node(tree_list, s1), "DIVIDE") == 0){
-		fprintf(stderr,"error:%d: DIVIDE not defined for class %s\n",lineno,s1.c_str());
-		error();
-		return "Nothing";
-	}
-	else {
-		return s1;
-	}
-}
+//string divide_node::type_checks( map< string, string > *local, map< string, string > *field ) 
+//{
+//	string s1 = left->type_checks(local, field);
+//	string s2 = right->type_checks(local, field);
+//
+//	//check if divide exists in s1/s2 type
+//
+//	if (s1.compare(s2) != 0) {
+//		fprintf(stderr,"error:%d: type mismatch %s is not of type %s\n",lineno,s1.c_str(), s2.c_str());
+//		error();
+//		return "Nothing";
+//	}
+//	else if (class_defines_method(get_tree_node(tree_list, s1), "DIVIDE") == 0){
+//		fprintf(stderr,"error:%d: DIVIDE not defined for class %s\n",lineno,s1.c_str());
+//		error();
+//		return "Nothing";
+//	}
+//	else {
+//		return s1;
+//	}
+//}
 
 string compare_node::type_checks( map< string, string > *local, map< string, string > *field )
 {
