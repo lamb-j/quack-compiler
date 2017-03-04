@@ -166,51 +166,6 @@ method_call_node::method_call_node(r_expr_node *ins, const char *mod, list <r_ex
 	lineno = linenum;
 }
 
-operator_node::operator_node(r_expr_node *L, r_expr_node *R) 
-{
-	left  = L;
-	right = R;
-}
-
-operator_node::operator_node(r_expr_node *L,const char* sym, r_expr_node *R) 
-{
-	left  = L;
-	symbol = sym;
-	right = R;
-}
-
-unary_node::unary_node(const char* sym, r_expr_node *R, int linenum)
-{
-	symbol = sym;
-	right = R;
-	lineno = linenum;
-}
-
-plus_node::plus_node(r_expr_node *L, r_expr_node *R, int linenum) : operator_node(L,R) 
-{
-	lineno = linenum;
-}
-
-minus_node::minus_node(r_expr_node *L, r_expr_node *R, int linenum) : operator_node(L,R) 
-{
-	lineno = linenum;
-}
-
-times_node::times_node(r_expr_node *L, r_expr_node *R, int linenum) : operator_node(L,R) 
-{
-	lineno = linenum;
-}
-
-//divide_node::divide_node(r_expr_node *L, r_expr_node *R, int linenum) : operator_node(L,R)
-//{
-//	lineno = linenum;
-//}
-
-compare_node::compare_node(r_expr_node *L, const char* sym, r_expr_node *R, int linenum) : operator_node(L,sym,R)
-{
-	lineno = linenum;
-} 
-
 int_node::int_node(int value) {
 	num = value;
 }

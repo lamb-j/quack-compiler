@@ -226,57 +226,6 @@ void method_call_node::print(int indent)
 	}
 }
 
-void unary_node::print(int indent)
-{
-	printf("%*sNODE: unary:\n", indent, "");
-	printf("%*soperator: %s\n", indent + 2, "", symbol);
-	printf("%*sright:\n", indent + 2, "");
-	right->print(indent + 4);
-}
-
-void plus_node::print(int indent) {
-	printf("%*sNODE: minus\n", indent, "");
-	printf("%*sleft:\n", indent + 2, "");
-  left->print(indent + 4);
-	printf("%*sright:\n", indent + 2, "");
-	right->print(indent + 4);
-}
-
-void minus_node::print(int indent) {
-	printf("%*sNODE: minus\n", indent, "");
-	printf("%*sleft:\n", indent + 2, "");
-  left->print(indent + 4);
-	printf("%*sright:\n", indent + 2, "");
-	right->print(indent + 4);
-}
-
-void times_node::print(int indent) {
-	printf("%*sNODE: times\n", indent, "");
-	printf("%*sleft:\n", indent + 2, "");
-  left->print(indent + 4);
-	printf("%*sright:\n", indent + 2, "");
-	right->print(indent + 4);
-}
-
-//void divide_node::print(int indent) {
-//
-//	printf("%*sNODE: divide\n", indent, "");
-//	printf("%*sleft:\n", indent + 2, "");
-//  left->print(indent + 4);
-//	printf("%*sright:\n", indent + 2, "");
-//	right->print(indent + 4);
-//}
-
-void compare_node::print(int indent)
-{
-	printf("%*sNODE: compare\n", indent, "");
-	printf("%*sleft:\n", indent + 2, "");
-	left->print(indent + 4);
-	printf("%*soperation: %s\n", indent + 2, "", symbol);
-	printf("%*sright:\n", indent + 2, "");
-	right->print(indent + 4);
-}
-
 void int_node::print(int indent) {
 	printf("%*sNODE: int\n", indent, "");
 	printf("%*svalue: %d\n", indent + 2, "", num);

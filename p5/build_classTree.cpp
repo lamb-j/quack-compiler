@@ -422,47 +422,6 @@ int method_call_node::build_classTree()
 	return 0;	
 }
 
-int unary_node::build_classTree()
-{
-	right->build_classTree();
-	return 0;	
-}
-
-int plus_node::build_classTree() 
-{
-	left->build_classTree();
-	right->build_classTree();
-	return 0;	
-}
-
-int minus_node::build_classTree() 
-{
-	left->build_classTree();
-	right->build_classTree();
-	return 0;	
-}
-
-int times_node::build_classTree() 
-{
-	left->build_classTree();
-	right->build_classTree();
-	return 0;	
-}
-
-//int divide_node::build_classTree() 
-//{
-//	left->build_classTree();
-//	right->build_classTree();
-//	return 0;	
-//}
-
-int compare_node::build_classTree()
-{
-	left->build_classTree();
-	right->build_classTree();
-	return 0;	
-}
-
 int int_node::build_classTree() 
 {
 

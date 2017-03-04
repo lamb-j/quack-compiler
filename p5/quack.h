@@ -62,7 +62,7 @@ class method_node {
 
 		map <string, string> *meth_var_table;
 		//map <string, string> *meth_arg_table;
-		
+
 		method_node(const char *name, vector < f_arg_pair * > *args, const char *r_type, statement_block_node *b, int linenum);
 
 		void print(int indent);
@@ -96,7 +96,7 @@ class class_node {
 		// class var table
 		map< string, string> *field_var_table;
 		map< string, string> *local_var_table;
-		
+
 
 		void print(int indent);
 		int build_classTree();
@@ -114,7 +114,7 @@ class program_node {
 
 		// map st_var_table
 		map <string, string> *stmt_var_table;
-		
+
 		void print(int indent);
 		tree_node * build_classTree();
 		string type_checks(tree_node *root);
@@ -251,74 +251,6 @@ class method_call_node : public r_expr_node {
 		string type_checks( map< string, string > *local, map< string, string > *fields );
 };
 
-class operator_node : public r_expr_node {
-	public:
-		r_expr_node *left;
-		r_expr_node *right;
-		const char* symbol;
-		operator_node(r_expr_node *L, r_expr_node *R);
-		operator_node(r_expr_node *L, const char* sym, r_expr_node *R);
-
-};
-
-class unary_node : public r_expr_node {
-	public:
-		r_expr_node *right;
-		const char *symbol;
-		int lineno;
-		unary_node(const char* sym, r_expr_node *R, int linenum);
-
-		void print(int indent);
-		int build_classTree();
-		string type_checks( map< string, string > *local, map< string, string > *fields );
-};
-
-
-class plus_node : public operator_node {
-	public:
-		int lineno;
-		plus_node(r_expr_node *L, r_expr_node *R, int linenum);
-		void print(int indent);
-		int build_classTree();
-		string type_checks( map< string, string > *local, map< string, string > *fields );
-};
-
-class minus_node : public operator_node {
-	public: 
-		int lineno;
-		minus_node(r_expr_node *L, r_expr_node *R, int linenum);
-		void print(int indent);
-		int build_classTree();
-		string type_checks( map< string, string > *local, map< string, string > *fields );
-};
-
-class times_node : public operator_node {
-	public: 
-		int lineno;		
-		times_node(r_expr_node *L, r_expr_node *R, int linenum);
-		void print(int indent);
-		int build_classTree();
-		string type_checks( map< string, string > *local, map< string, string > *fields );
-};
-
-//class divide_node : public operator_node {
-//	public: 
-//		int lineno;		
-//		divide_node(r_expr_node *L, r_expr_node *R, int linenum);
-//		void print(int indent);
-//		int build_classTree();
-//		string type_checks( map< string, string > *local, map< string, string > *fields );
-//};
-
-class compare_node : public operator_node {
-	public:
-		compare_node(r_expr_node *L, const char* sym, r_expr_node *R, int linenum);
-		int lineno;
-		void print(int indent);
-		int build_classTree();
-		string type_checks( map< string, string > *local, map< string, string > *fields );
-};
-
 class int_node : public r_expr_node {
 	public:
 		int_node(int value);
@@ -327,7 +259,6 @@ class int_node : public r_expr_node {
 		string type_checks( map< string, string > *local, map< string, string > *fields );
 };
 
-// inhereit from l_expr_node?
 class str_node : public r_expr_node {
 	public:
 		str_node(char *value);
@@ -341,23 +272,20 @@ class tree_node {
 	public:
 		string name;
 
-	  class_node *AST_node;
+		class_node *AST_node;
 
 		tree_node *parent;
 		vector <tree_node *> children;
 
 		vector <string > method_names;
-		
-		// add methods/arguments
 
-    tree_node(string n) { name = n ; }
+		tree_node(string n) { name = n ; }
 };
 
 int print_tree( tree_node *root, int level );
 tree_node * append_tree( list <tree_node *> *tree_list, string parent_class, string new_class);
 tree_node * get_tree_node(list < tree_node *> *tree_node_list, string cname);
 int class_defines_method(tree_node * class_node, string method_name);
-//tree_node * least_common_ancestor(tree_node *A, tree_node *B);
 string least_common_ancestor(string A, string B);
 
 class_node * get_AST_class_node(string class_name);
