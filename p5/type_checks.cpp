@@ -110,7 +110,7 @@ string class_node::type_checks( map< string, string > *local, map< string, strin
 	{
 		add_parent_methods( class_tree_node->parent->AST_node->body->method_list, 
 												body->method_list, 
-												string(sig->class_name) );
+											string(sig->class_name) );
 		
 
 		if (sweep == 2) {

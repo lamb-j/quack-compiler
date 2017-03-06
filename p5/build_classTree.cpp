@@ -8,8 +8,6 @@
 #include <algorithm>
 
 using namespace std;
-//extern void yyerror(const char* msg);
-extern int error_flag;
 
 // Build Class Hierarchy Tree
 // - check duplicate class names
@@ -20,6 +18,7 @@ extern int error_flag;
 // external data structures
 extern vector < string > class_names;
 extern list < tree_node *> *tree_list;
+extern int error_flag;
 
 int if_node::build_classTree() {
 	if_condition->build_classTree();
@@ -135,9 +134,8 @@ tree_node * program_node::build_classTree()
 	list<method_node *> *obj_method_list = new list<method_node *>();
 
 	//Arguments for Obj methods
-
 	vector <f_arg_pair *> *obj_f_args = new vector <f_arg_pair *>();
-	//obj_f_args->push_back( new f_arg_pair("o", "Obj"));
+
 	//Method of Obj class
 	obj_method_list->push_back( new method_node("PRINT", 
 				obj_f_args, 
@@ -176,65 +174,30 @@ tree_node * program_node::build_classTree()
 
 	// Class node for Integer 
 	list<method_node *> *integer_method_list = new list<method_node *>();
-	//Add integer methods: plus, minus, divide, times, less, more, atleast, atmost, equals
 
 	vector <f_arg_pair *> *integer_f_args = new vector <f_arg_pair *>();
 	integer_f_args->push_back( new f_arg_pair("x", "Int"));
 	integer_f_args->push_back( new f_arg_pair("y", "Int"));
 
-	integer_method_list->push_back( new method_node("PLUS", 
-				integer_f_args, 
-				"Int", 
-				new statement_block_node( new list<statement_node*>()),	
-				0) );
+	vector <string> int_operators;
+	int_operators.push_back("PLUS");
+	int_operators.push_back("MINUS");
+	int_operators.push_back("TIMES");
+	int_operators.push_back("DIVIDE");
+	int_operators.push_back("ATMOST");
+	int_operators.push_back("ATLEAST");
+	int_operators.push_back("LESS");
+	int_operators.push_back("MORE");
+	int_operators.push_back("EQUALS");
 
-	integer_method_list->push_back( new method_node("MINUS", 
-				integer_f_args, 
-				"Int", 
-				new statement_block_node( new list<statement_node*>()),	
-				0) );
-
-	integer_method_list->push_back( new method_node("TIMES", 
-				integer_f_args, 
-				"Int", 
-				new statement_block_node( new list<statement_node*>()),	
-				0) );
-
-	integer_method_list->push_back( new method_node("DIVIDE", 
-				integer_f_args, 
-				"Int", 
-				new statement_block_node( new list<statement_node*>()),	
-				0) );
-
-	integer_method_list->push_back( new method_node("ATMOST", 
-				integer_f_args, 
-				"Boolean", 
-				new statement_block_node( new list<statement_node*>()),	
-				0) );
-
-	integer_method_list->push_back( new method_node("ATLEAST", 
-				integer_f_args, 
-				"Boolean", 
-				new statement_block_node( new list<statement_node*>()),	
-				0) );
-
-	integer_method_list->push_back( new method_node("LESS", 
-				integer_f_args, 
-				"Boolean", 
-				new statement_block_node( new list<statement_node*>()),	
-				0) );
-
-	integer_method_list->push_back( new method_node("MORE", 
-				integer_f_args, 
-				"Boolean", 
-				new statement_block_node( new list<statement_node*>()),	
-				0) );
-
-	integer_method_list->push_back( new method_node("EQUALS", 
-				integer_f_args, 
-				"Boolean", 
-				new statement_block_node( new list<statement_node*>()),	
-				0) );
+	for (int i = 0; i < int_operators.size(); i++) {
+		integer_method_list->push_back( 
+				  new method_node(strdup(int_operators[i].c_str() ), 
+					integer_f_args, 
+					"Int", 
+					new statement_block_node( new list<statement_node*>()),	
+					0) );
+	}
 
 	class_node *Integer_class = new class_node(
 			new class_sig_node("Int", new vector<f_arg_pair *>() , "Obj", 0), 
@@ -274,29 +237,21 @@ tree_node * program_node::build_classTree()
 	vector <f_arg_pair *> *boolean_f_args = new vector <f_arg_pair *>();
 	boolean_f_args->push_back( new f_arg_pair("other", "Boolean"));
 
-	boolean_method_list->push_back( new method_node("EQUALS", 
-				boolean_f_args, 
-				"Boolean", 
-				new statement_block_node( new list<statement_node*>()),	
-				0) );
+	vector <string> bool_operators;
+	bool_operators.push_back("EQUALS");
+	bool_operators.push_back("OR");
+	bool_operators.push_back("AND");
+	bool_operators.push_back("NOT");
 
-	boolean_method_list->push_back( new method_node("OR", 
-				boolean_f_args, 
-				"Boolean", 
-				new statement_block_node( new list<statement_node*>()),	
-				0) );
-
-	boolean_method_list->push_back( new method_node("AND", 
-				boolean_f_args, 
-				"Boolean", 
-				new statement_block_node( new list<statement_node*>()),	
-				0) );
-
-	boolean_method_list->push_back( new method_node("NOT", 
-				boolean_f_args, 
-				"Boolean", 
-				new statement_block_node( new list<statement_node*>()),	
-				0) );
+	for (int i = 0; i < bool_operators.size(); i++) {
+		printf("adding metohod %s for bool\n", bool_operators[i].c_str());
+		boolean_method_list->push_back( new method_node( 
+					strdup(bool_operators[i].c_str() ),
+					boolean_f_args, 
+					"Boolean", 
+					new statement_block_node( new list<statement_node*>()),	
+					0) );
+	}
 
 	class_node *Boolean_class = new class_node(
 			new class_sig_node("Boolean", new vector<f_arg_pair *>() , "Obj", 0), 
@@ -304,6 +259,8 @@ tree_node * program_node::build_classTree()
 			0);
 
 	class_list->push_back(Boolean_class);
+
+	// initalize the tree list
 	tree_list = new list <tree_node*>();
 
 	list<class_node *>::const_iterator c_iter;
@@ -317,8 +274,6 @@ tree_node * program_node::build_classTree()
 	}
 
 	return Obj_class->class_tree_node;
-
-	return 0;	
 }
 
 int method_node::build_classTree(tree_node * class_tree_node) 

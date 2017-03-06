@@ -245,17 +245,18 @@ void add_parent_methods(list <method_node *> *parent_mlist, list <method_node *>
 				//since pname = cname: check for overriding methods
 				if(!is_subclass(c_mtype,p_mtype))
 				{
-					fprintf(stderr,"error:%d: return type %s for method %s in superclass is not subtype"
-							" of overriden method\n",
-							(*clist_iter)->lineno, c_mtype, c_mname);
+					fprintf(stderr,"error:%d: return type \"%s\" for method \"%s\" in subclass"
+							" \"%s\" is not subtype of overriden method \n",
+							(*clist_iter)->lineno, c_mtype, c_mname, child_class.c_str() );
 					error();
 				}
 
 				//check number of args for each method
 				if((*plist_iter)->formal_args->size() != (*clist_iter)->formal_args->size() )
 				{
-					fprintf(stderr,"error:%d: formal arg list size for method %s does not match"
-							" superclasses\n",(*clist_iter)->lineno, c_mname);
+					fprintf(stderr,"error:%d: formal arg list size for method %s"
+							" in subclass \"%s\" does not match superclass\n",
+							(*clist_iter)->lineno, c_mname, child_class.c_str() );
 					error();
 				}
 				//check type of each arg in overriding method against parent method
@@ -273,11 +274,13 @@ void add_parent_methods(list <method_node *> *parent_mlist, list <method_node *>
 						if(! is_subclass( (*p_arg_vec)[i]->return_type , (*c_arg_vec)[i]->return_type ) )
 						{
 							fprintf(stderr,"error:%d: argument %d of type %s in method \"%s\""
+									" of subclass \"%s\" "
 									" is not a supertype of overridden method argument type %s\n",
 									(*clist_iter)->lineno,
 									(int) p_arg_vec->size() - 1 - i,
 									(*c_arg_vec)[i]->return_type,
 									c_mname,
+									child_class.c_str(),
 									(*p_arg_vec)[i]->return_type);
 
 							error();
