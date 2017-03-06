@@ -1,11 +1,12 @@
 CCC = g++
 UNAME := $(shell uname)
-CCFLAGS= -std=c++11 
 ifeq ($(UNAME), Linux)
+CCFLAGS= -O2 -std=c++11 
 CCLIBS= -lfl
 endif
 ifeq ($(UNAME), Darwin)
-CCLIBS= -ll
+CCFLAGS= -std=c++11 -Wno-deprecated-register
+CCLIBS= -ll 
 endif
 LEX = flex
 LFLAGS= -8     
