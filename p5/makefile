@@ -1,10 +1,11 @@
 CCC = g++
 UNAME := $(shell uname)
+CCFLAGS= -std=c++11 
 ifeq ($(UNAME), Linux)
-CCFLAGS= -O2 -std=c++11 -lfl
+CCLIBS= -lfl
 endif
 ifeq ($(UNAME), Darwin)
-CCFLAGS= -std=c++11 -ll 
+CCLIBS= -ll
 endif
 LEX = flex
 LFLAGS= -8     
@@ -14,7 +15,7 @@ YFLAGS= -d -t -y
 RM = /bin/rm -f
 
 quack: y.tab.o lex.yy.o quack.o class_tree.o print_AST.o build_classTree.o type_checks.o
-	${CCC} ${CCFLAGS} lex.yy.o y.tab.o quack.o class_tree.o print_AST.o build_classTree.o type_checks.o -o quack 
+	${CCC} ${CCFLAGS} lex.yy.o y.tab.o quack.o class_tree.o print_AST.o build_classTree.o type_checks.o -o quack ${CCLIBS}
 
 quack.o: quack.cpp quack.h
 	${CCC} -c quack.cpp 

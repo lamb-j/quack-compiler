@@ -1,6 +1,13 @@
 CCC = g++
 UNAME := $(shell uname)
+ifeq ($(UNAME), Linux)
+CCFLAGS= -O2 -std=c++11 
+CCLIBS= -lfl
+endif
+ifeq ($(UNAME), Darwin)
 CCFLAGS= -std=c++11 
+CCLIBS= -ll
+endif
 LEX = flex
 LFLAGS= -8     
 YACC= bison 
@@ -9,12 +16,7 @@ YFLAGS= -d -t -y
 RM = /bin/rm -f
 
 quack: y.tab.o lex.yy.o quack.o class_tree.o print_AST.o build_classTree.o type_checks.o
-ifeq ($(UNAME), Linux)
-	${CCC} ${CCFLAGS} lex.yy.o y.tab.o quack.o class_tree.o print_AST.o build_classTree.o type_checks.o -o quack -lfl
-endif
-ifeq ($(UNAME), Darwin)
-	${CCC} ${CCFLAGS} lex.yy.o y.tab.o quack.o class_tree.o print_AST.o build_classTree.o type_checks.o -o quack -ll
-endif
+	${CCC} ${CCFLAGS} lex.yy.o y.tab.o quack.o class_tree.o print_AST.o build_classTree.o type_checks.o -o quack ${CCLIBS}
 
 quack.o: quack.cpp quack.h
 	${CCC} -c quack.cpp 
