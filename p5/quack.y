@@ -249,6 +249,14 @@ int main (int argc, char **argv)
 		exit(0);
 	}
 
+	#ifdef __llvm__
+	printf("LLVM-GCC compiler\n");
+	#endif
+
+	#ifdef __clang__
+	printf("LLVM clang compiler\n");
+	#endif
+
 	//yyrestart(f);
 
 	int condition = yyparse();
