@@ -3,7 +3,7 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
-#include <list>
+#include <vector>
 #include <vector>
 #include <string.h>
 #include "quack.h"
@@ -11,7 +11,7 @@
 
 // external data structures
 extern vector < string > class_names;
-list <tree_node *> *tree_list;
+vector <tree_node *> *tree_vector;
 extern int error_flag;
 
 extern FILE *yyin;
@@ -38,31 +38,31 @@ int sweep;
 	class_node							*cNode;
 	class_sig_node					*csNode;
 	class_body_node					*cbNode;
-	list<class_node *>			*cNode_list;
+	vector<class_node *>			*cNode_vector;
 
 	statement_node					*sNode;
 	statement_block_node		*sbNode;
-	list<statement_node *>	*sNode_list;
-	list<method_node *>			*mNode_list;
+	vector<statement_node *>	*sNode_vector;
+	vector<method_node *>			*mNode_vector;
 	method_node							*mNode;
 	vector < f_arg_pair * >	*f_arg_vector;
 
-	list<r_expr_node *>			*argNode_list;
+	vector<r_expr_node *>			*argNode_vector;
 	elif_data								*elifNode;  
 }
 
 %type<pNode> Program;
 
-%type<cNode_list> Classes;
+%type<cNode_vector> Classes;
 %type<cNode> Class;
 %type<cbNode> Class_Body;
 %type<csNode> Class_Signature;
 
 %type<sbNode> Statement_Block;
 %type<sNode> Statement;
-%type<sNode_list> Statements;
+%type<sNode_vector> Statements;
 
-%type<mNode_list> Methods;
+%type<mNode_vector> Methods;
 %type<mNode> Method;
 %type<f_arg_vector> Formal_Args;
 
@@ -71,7 +71,7 @@ int sweep;
 
 %type<elifNode> Elseif;
 
-%type<argNode_list> Actual_Args;
+%type<argNode_vector> Actual_Args;
 
 /* declare tokens */
 %token CLASS
@@ -104,7 +104,7 @@ int sweep;
 
 Program: Classes Statements { $$ = new program_node($1, $2); AST_root = $$; }
 
-Classes: /* empty */ { $$ = new list<class_node *>(); }
+Classes: /* empty */ { $$ = new vector<class_node *>(); }
 | Classes Class { $$ = $1; $1->push_back($2); }
 
 Class: Class_Signature Class_Body {$$ = new class_node($1, $2, @1.first_line); }
@@ -115,7 +115,7 @@ Class_Signature : CLASS IDENT '(' Formal_Args ')' { $$ = new class_sig_node($2, 
 
 Class_Body: '{' Statements Methods '}' { $$ = new class_body_node( $2, $3 ); }
 
-Methods: /* empty */ { $$ = new list<method_node *>(); }
+Methods: /* empty */ { $$ = new vector<method_node *>(); }
 | Methods Method { $$ = $1; $1 -> push_back($2); }
 
 Method: DEF IDENT '(' Formal_Args ')' Statement_Block { $$ = new method_node($2, $4, "Nothing", $6, @1.first_line); }
@@ -127,7 +127,7 @@ Formal_Args: /* empty */ {$$ = new vector< f_arg_pair * >(); }
 
 Statement_Block: '{' Statements '}' { $$ = new statement_block_node($2); }
 
-Statements: /* empty */ { $$ = new list<statement_node *>(); }
+Statements: /* empty */ { $$ = new vector<statement_node *>(); }
 | Statements Statement {$$ = $1; $1 -> push_back($2); }
 
 Statement: RETURN R_Expr ';' { $$ = new return_node($2, @1.first_line); }
@@ -158,72 +158,72 @@ R_Expr: R_Expr '.' IDENT '(' Actual_Args ')' { $$ = new method_call_node($1, $3,
 R_Expr: IDENT '(' Actual_Args ')' { $$ = new constructor_call_node($1, $3, @1.first_line); }
 
 // NEEDS SOME WORK (accepts no commas, introduces 2 shift/reduce errors)
-Actual_Args: /* empty */ { $$ = new list<r_expr_node *>(); }
+Actual_Args: /* empty */ { $$ = new vector<r_expr_node *>(); }
 | R_Expr Actual_Args { $$ = $2; $2 -> push_back($1); } 
 | R_Expr ',' Actual_Args { $$ = $3; $3 -> push_back($1); }
 
-R_Expr: R_Expr '>' R_Expr {   list<r_expr_node *> *args = new list<r_expr_node *>();
+R_Expr: R_Expr '>' R_Expr {   vector<r_expr_node *> *args = new vector<r_expr_node *>();
 			args->push_back($1);
 			args->push_back($3);
 			$$ = new method_call_node($1, "MORE", args, @1.first_line); 
 }
-| R_Expr '<' R_Expr {   list<r_expr_node *> *args = new list<r_expr_node *>();
+| R_Expr '<' R_Expr {   vector<r_expr_node *> *args = new vector<r_expr_node *>();
 			args->push_back($1);
 			args->push_back($3);
 			$$ = new method_call_node($1, "LESS", args, @1.first_line); 
 }
-| R_Expr EQUALS R_Expr {   list<r_expr_node *> *args = new list<r_expr_node *>();
+| R_Expr EQUALS R_Expr {   vector<r_expr_node *> *args = new vector<r_expr_node *>();
 			args->push_back($1);
 			args->push_back($3);
 			$$ = new method_call_node($1, "EQUALS", args, @1.first_line); 
 }
-| R_Expr ATLEAST R_Expr {   list<r_expr_node *> *args = new list<r_expr_node *>();
+| R_Expr ATLEAST R_Expr {   vector<r_expr_node *> *args = new vector<r_expr_node *>();
 			args->push_back($1);
 			args->push_back($3);
 			$$ = new method_call_node($1, "ATLEAST", args, @1.first_line); 
 }
-| R_Expr ATMOST R_Expr {   list<r_expr_node *> *args = new list<r_expr_node *>();
+| R_Expr ATMOST R_Expr {   vector<r_expr_node *> *args = new vector<r_expr_node *>();
 			args->push_back($1);
 			args->push_back($3);
 			$$ = new method_call_node($1, "ATMOST", args, @1.first_line); 
 }
-| R_Expr AND R_Expr {   list<r_expr_node *> *args = new list<r_expr_node *>();
+| R_Expr AND R_Expr {   vector<r_expr_node *> *args = new vector<r_expr_node *>();
 			args->push_back($1);
 			args->push_back($3);
 			$$ = new method_call_node($1, "AND", args, @1.first_line); 
 }
-| R_Expr OR R_Expr {   list<r_expr_node *> *args = new list<r_expr_node *>();
+| R_Expr OR R_Expr {   vector<r_expr_node *> *args = new vector<r_expr_node *>();
 			args->push_back($1);
 			args->push_back($3);
 			$$ = new method_call_node($1, "OR", args, @1.first_line); 
 }
-| NOT R_Expr {   list<r_expr_node *> *args = new list<r_expr_node *>();
+| NOT R_Expr {   vector<r_expr_node *> *args = new vector<r_expr_node *>();
 			args->push_back($2);
 			$$ = new method_call_node($2, "NOT", args, @1.first_line); 
 }
 // Introduces 19 shift-reduce errors
-//| '-' R_Expr %prec NEG {   list<r_expr_node *> *args = new list<r_expr_node *>();
+//| '-' R_Expr %prec NEG {   vector<r_expr_node *> *args = new vector<r_expr_node *>();
 //			args->push_back($2);
 //			$$ = new method_call_node($2, "NEG", args, @1.first_line); 
 //}
 
 R_Expr: '(' R_Expr ')' { $$ = $2; }
-| R_Expr '+' R_Expr {   list<r_expr_node *> *args = new list<r_expr_node *>();
+| R_Expr '+' R_Expr {   vector<r_expr_node *> *args = new vector<r_expr_node *>();
 			args->push_back($1);
 			args->push_back($3);
 			$$ = new method_call_node($1, "PLUS", args, @1.first_line); 
 }
-| R_Expr '-' R_Expr {   list<r_expr_node *> *args = new list<r_expr_node *>();
+| R_Expr '-' R_Expr {   vector<r_expr_node *> *args = new vector<r_expr_node *>();
 			args->push_back($1);
 			args->push_back($3);
 			$$ = new method_call_node($1, "MINUS", args, @1.first_line); 
 }
-| R_Expr '*' R_Expr {   list<r_expr_node *> *args = new list<r_expr_node *>();
+| R_Expr '*' R_Expr {   vector<r_expr_node *> *args = new vector<r_expr_node *>();
 			args->push_back($1);
 			args->push_back($3);
 			$$ = new method_call_node($1, "TIMES", args, @1.first_line); 
 }
-| R_Expr '/' R_Expr {   list<r_expr_node *> *args = new list<r_expr_node *>();
+| R_Expr '/' R_Expr {   vector<r_expr_node *> *args = new vector<r_expr_node *>();
 			args->push_back($1);
 			args->push_back($3);
 			$$ = new method_call_node($1, "DIVIDE", args, @1.first_line); 
@@ -284,8 +284,8 @@ int main (int argc, char **argv)
 
     /*
 
-		list<class_node *>::const_iterator c_iter;
-		for (c_iter = AST_root->class_list->begin(); c_iter != AST_root->class_list->end(); ++c_iter) {
+		vector<class_node *>::const_iterator c_iter;
+		for (c_iter = AST_root->class_vector->begin(); c_iter != AST_root->class_vector->end(); ++c_iter) {
 			class_node *c_node = (*c_iter);
 
 			printf("--- Class %s Symbol Table ---\n", c_node->sig->class_name );
@@ -302,10 +302,10 @@ int main (int argc, char **argv)
 			
 			//printing the method var table
 			
-			list<method_node *>::const_iterator m_iter;
-			list<method_node *> *m_list_ptr = c_node->body->method_list; 
+			vector<method_node *>::const_iterator m_iter;
+			vector<method_node *> *m_vector_ptr = c_node->body->method_vector; 
             
-			for (m_iter = m_list_ptr->begin(); m_iter != m_list_ptr->end(); ++m_iter) {
+			for (m_iter = m_vector_ptr->begin(); m_iter != m_vector_ptr->end(); ++m_iter) {
 				method_node *m_node = (*m_iter);
 				
 				

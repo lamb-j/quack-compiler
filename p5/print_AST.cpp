@@ -2,7 +2,7 @@
 #include <string>
 #include <string.h>
 #include <map>
-#include <list>
+#include <vector>
 #include <cstdio>
 #include "quack.h"
 //#include "class_tree.h"
@@ -22,8 +22,8 @@ void if_node::print(int indent) {
 	if_body->print(indent + 4);
 
 	//elseif
-	list<r_expr_node *>::const_iterator c_iter;
-	list<statement_block_node *>::const_iterator b_iter;
+	vector<r_expr_node *>::const_iterator c_iter;
+	vector<statement_block_node *>::const_iterator b_iter;
 
 	c_iter = elif_pairs->elif_conditions->begin();
 	b_iter = elif_pairs->elif_bodies->begin();
@@ -54,7 +54,7 @@ void while_node::print(int indent) {
 }
 
 void statement_block_node::print(int indent) {
-	list<statement_node *>::const_iterator iter;
+	vector<statement_node *>::const_iterator iter;
 	for (iter = statements->begin(); iter != statements->end(); ++iter) {
 		(*iter)->print(indent + 4);
 	}
@@ -96,14 +96,14 @@ void program_node::print(int indent) {
 	printf("%*sNODE: program\n", indent, "");
 
 	printf("%*sclasses:\n", indent + 2, "");
-	list<class_node *>::const_iterator c_iter;
-	for (c_iter = class_list->begin(); c_iter != class_list->end(); ++c_iter) {
+	vector<class_node *>::const_iterator c_iter;
+	for (c_iter = class_vector->begin(); c_iter != class_vector->end(); ++c_iter) {
 		(*c_iter)->print(indent + 4);
 	}
 
 	printf("%*sstatements:\n", indent + 2, "");
-	list<statement_node *>::const_iterator s_iter;
-	for (s_iter = statement_list->begin(); s_iter != statement_list->end(); ++s_iter) {
+	vector<statement_node *>::const_iterator s_iter;
+	for (s_iter = statement_vector->begin(); s_iter != statement_vector->end(); ++s_iter) {
 		(*s_iter)->print(indent + 4);
 	}
 }
@@ -132,15 +132,15 @@ void class_body_node::print(int indent)
 {
 	printf("%*sNODE: class body\n", indent, "");
 
-	printf("%*sstatement_list:\n", indent + 2, "");
-	list<statement_node *>::const_iterator s_iter;
-	for (s_iter = statement_list->begin(); s_iter != statement_list->end(); ++s_iter) {
+	printf("%*sstatement_vector:\n", indent + 2, "");
+	vector<statement_node *>::const_iterator s_iter;
+	for (s_iter = statement_vector->begin(); s_iter != statement_vector->end(); ++s_iter) {
 		(*s_iter)->print(indent + 4);
 	}
 
-	printf("%*smethod_list:\n", indent + 2, "");
-	list<method_node *>::const_iterator  m_iter;
-	for (m_iter = method_list->begin(); m_iter != method_list->end(); ++m_iter) {
+	printf("%*smethod_vector:\n", indent + 2, "");
+	vector<method_node *>::const_iterator  m_iter;
+	for (m_iter = method_vector->begin(); m_iter != method_vector->end(); ++m_iter) {
 		(*m_iter)->print(indent + 4);
 	}
 }
@@ -193,7 +193,7 @@ void constructor_call_node::print(int indent)
 
 	printf("%*sclass: %s\n", indent + 2, "", c_name);
 
-	// if class not in class list print error
+	// if class not in class vector print error
 
 	//int flag = 1;
 	//for(int i=0; i<class_names.size(); i++)
@@ -204,8 +204,8 @@ void constructor_call_node::print(int indent)
 	//if (flag)	fprintf(stderr,"****class %s not defined****\n",c_name);
 
 	printf("%*sarguments:\n", indent + 2, "");
-	list<r_expr_node *>::const_iterator iter;
-	for (iter = arg_list->begin(); iter != arg_list->end(); ++iter) {
+	vector<r_expr_node *>::const_iterator iter;
+	for (iter = arg_vector->begin(); iter != arg_vector->end(); ++iter) {
 		(*iter)->print(indent + 4);
 	}
 }
@@ -220,8 +220,8 @@ void method_call_node::print(int indent)
 	printf("%*smodifier: %s\n", indent + 2, "", modifier);
 
 	printf("%*sarguments:\n", indent + 2, "");
-	list<r_expr_node *>::const_iterator iter;
-	for (iter = arg_list->begin(); iter != arg_list->end(); ++iter) {
+	vector<r_expr_node *>::const_iterator iter;
+	for (iter = arg_vector->begin(); iter != arg_vector->end(); ++iter) {
 		(*iter)->print(indent + 4);
 	}
 }

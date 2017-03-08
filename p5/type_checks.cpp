@@ -2,7 +2,7 @@
 #include <string>
 #include <string.h>
 #include <map>
-#include <list>
+#include <vector>
 #include <cstdio>
 #include "quack.h"
 //#include "class_tree.h"
@@ -14,7 +14,7 @@ using namespace std;
 
 // external data structures
 extern vector < string > class_names;
-extern list < tree_node *> *tree_list;
+extern vector < tree_node *> *tree_vector;
 extern int error_flag;
 extern int sweep;
 
@@ -37,8 +37,8 @@ string if_node::type_checks( map< string, string > *local, map< string, string >
 	if_body->type_checks(local, field);
 
 	//elseif
-	list<r_expr_node *>::const_iterator c_iter;
-	list<statement_block_node *>::const_iterator b_iter;
+	vector<r_expr_node *>::const_iterator c_iter;
+	vector<statement_block_node *>::const_iterator b_iter;
 
 	c_iter = elif_pairs->elif_conditions->begin();
 	b_iter = elif_pairs->elif_bodies->begin();
@@ -77,9 +77,9 @@ string while_node::type_checks( map< string, string > *local, map< string, strin
 
 string statement_block_node::type_checks( map< string, string > *local, map< string, string > *field ) 
 {
-	list<statement_node *>::const_iterator iter;
-	for (iter = statements->begin(); iter != statements->end(); ++iter) {
-		(*iter)->type_checks(local, field);
+	for (int i=0; i< statements->size(); i++)
+	{
+		(*statements)[i]->type_checks(local,field);
 	}
 	return "Nothing";
 }
@@ -108,8 +108,8 @@ string class_node::type_checks( map< string, string > *local, map< string, strin
 
 	if (class_tree_node->parent->name.compare("")) //if parent is not "" i.e class is not Obj
 	{
-		add_parent_methods( class_tree_node->parent->AST_node->body->method_list, 
-												body->method_list, 
+		add_parent_methods( class_tree_node->parent->AST_node->body->method_vector, 
+												body->method_vector, 
 											string(sig->class_name) );
 		
 
@@ -144,17 +144,13 @@ string program_node::type_checks(tree_node *root)
 	(*stmt_var_table)["true"] = "Boolean";
   (*stmt_var_table)["false"] = "Boolean";
 
-	//list<class_node *>::const_iterator c_iter;
-	//for (c_iter = class_list->begin(); c_iter != class_list->end(); ++c_iter) {
-  //	(*c_iter)->type_checks(NULL, NULL);
-	//}
 
 	// type_check in order from root to children
 	type_check_class(root);
 
-	list<statement_node *>::const_iterator s_iter;
-	for (s_iter = statement_list->begin(); s_iter != statement_list->end(); ++s_iter) {
-		(*s_iter)->type_checks(stmt_var_table, NULL);
+	for(int i = 0; i < statement_vector->size(); i++)
+	{
+		(*statement_vector)[i]->type_checks(stmt_var_table, NULL);
 	}
 
 	return "Nothing";
@@ -177,13 +173,13 @@ string method_node::type_checks( map< string, string > *local, map< string, stri
 
 string class_body_node::type_checks( map< string, string > *local, map< string, string > *field )
 {
-	list<statement_node *>::const_iterator s_iter;
-	for (s_iter = statement_list->begin(); s_iter != statement_list->end(); ++s_iter) {
+	vector<statement_node *>::const_iterator s_iter;
+	for (s_iter = statement_vector->begin(); s_iter != statement_vector->end(); ++s_iter) {
 		(*s_iter)->type_checks(local, field);
 	}
 
-	list<method_node *>::const_iterator  m_iter;
-	for (m_iter = method_list->begin(); m_iter != method_list->end(); ++m_iter) {
+	vector<method_node *>::const_iterator  m_iter;
+	for (m_iter = method_vector->begin(); m_iter != method_vector->end(); ++m_iter) {
 		(*m_iter)->type_checks(local, field);
 	}
 	return "Nothing";
@@ -325,8 +321,8 @@ string assign_node::type_checks( map< string, string > *local, map< string, stri
 string constructor_call_node::type_checks( map< string, string > *local, map< string, string > *field ) 
 {
 
-	list<r_expr_node *>::const_iterator iter;
-	for (iter = arg_list->begin(); iter != arg_list->end(); ++iter) {
+	vector<r_expr_node *>::const_iterator iter;
+	for (iter = arg_vector->begin(); iter != arg_vector->end(); ++iter) {
 		(*iter)->type_checks(local, field);
 	}
 
@@ -351,11 +347,11 @@ string method_call_node::type_checks( map< string, string > *local, map< string,
 		}
 
 
-		// check arg_list (list r_expr_node*)  against AST_method_node->formal_args (vector f_arg_pair*)
-		list<r_expr_node *>::const_iterator iter;
+		// check arg_vector (vector r_expr_node*)  against AST_method_node->formal_args (vector f_arg_pair*)
+		vector<r_expr_node *>::const_iterator iter;
 
-		//check1: length of arg list  vs length of foraml args
-		if( arg_list->size() != AST_method_node->formal_args->size() )
+		//check1: length of arg vector  vs length of foraml args
+		if( arg_vector->size() != AST_method_node->formal_args->size() )
 		{
 		  if (AST_method_node->lineno)
 			fprintf(stderr,"error:%d Incorrect number of arguments for Method  \"%s\" defined at line:%d\n",lineno, AST_method_node->method_name, AST_method_node->lineno);
@@ -365,14 +361,14 @@ string method_call_node::type_checks( map< string, string > *local, map< string,
 			return "Nothing";
 		}
 		int i;	
-		for (iter = arg_list->begin(),i=0; iter != arg_list->end(); ++iter, ++i) {
+		for (iter = arg_vector->begin(),i=0; iter != arg_vector->end(); ++iter, ++i) {
 			string arg_type = (*iter)->type_checks(local, field);
 			string formal_arg_type = (*AST_method_node->formal_args)[i]->return_type;
 
 			if( !is_subclass(arg_type, formal_arg_type) )
 			{
 				fprintf(stderr,"error:%d: argument %d of type %s does not match formal argument of type %s in method %s\n",
-						lineno,  (int) (arg_list->size() - i - 1), arg_type.c_str(), formal_arg_type.c_str(), AST_method_node->method_name);
+						lineno,  (int) (arg_vector->size() - i - 1), arg_type.c_str(), formal_arg_type.c_str(), AST_method_node->method_name);
 				error();
 			}
 

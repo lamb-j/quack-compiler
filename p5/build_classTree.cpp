@@ -2,7 +2,7 @@
 #include <string>
 #include <string.h>
 #include <map>
-#include <list>
+#include <vector>
 #include <cstdio>
 #include "quack.h"
 #include <algorithm>
@@ -12,12 +12,12 @@ using namespace std;
 // Build Class Hierarchy Tree
 // - check duplicate class names
 // - check invald class names (Obj, Int, ...)
-// - build tree_list
+// - build tree_vector
 // - add method names to tree_nodes
 
 // external data structures
 extern vector < string > class_names;
-extern list < tree_node *> *tree_list;
+extern vector < tree_node *> *tree_vector;
 extern int error_flag;
 
 int if_node::build_classTree() {
@@ -25,8 +25,8 @@ int if_node::build_classTree() {
 	if_body->build_classTree();
 
 	//elseif
-	list<r_expr_node *>::const_iterator c_iter;
-	list<statement_block_node *>::const_iterator b_iter;
+	vector<r_expr_node *>::const_iterator c_iter;
+	vector<statement_block_node *>::const_iterator b_iter;
 
 	c_iter = elif_pairs->elif_conditions->begin();
 	b_iter = elif_pairs->elif_bodies->begin();
@@ -53,7 +53,7 @@ int while_node::build_classTree()
 
 int statement_block_node::build_classTree() 
 {
-	list<statement_node *>::const_iterator iter;
+	vector<statement_node *>::const_iterator iter;
 	for (iter = statements->begin(); iter != statements->end(); ++iter) {
 		(*iter)->build_classTree();
 	}
@@ -62,7 +62,7 @@ int statement_block_node::build_classTree()
 
 tree_node * class_sig_node::build_classTree() 
 {
-	// check if parent class is defined (in the list)
+	// check if parent class is defined (in the vector)
 	int flag = 1;
 	for(int i=0; i<class_names.size(); i++)
 	{
@@ -80,11 +80,11 @@ tree_node * class_sig_node::build_classTree()
 		error();
 	}
 
-	// add class to tree_list
+	// add class to tree_vector
 	string p(parent);
 	string c(class_name);
 
-	tree_node * new_tree_node = append_tree(tree_list, p, c); //returns new tree node
+	tree_node * new_tree_node = append_tree(tree_vector, p, c); //returns new tree node
 
 	if (new_tree_node == NULL) {
 		fprintf(stderr, "error:%d:  ill-defined class hierarchy, %s extends %s\n",
@@ -108,7 +108,7 @@ int class_node::build_classTree()
 
 tree_node * program_node::build_classTree() 
 {
-	// add default classes to names list 
+	// add default classes to names vector 
 	class_names.push_back("");
 	class_names.push_back("Obj");
 	class_names.push_back("Int");
@@ -131,49 +131,49 @@ tree_node * program_node::build_classTree()
 	}
 
 	// Class node for Obj
-	list<method_node *> *obj_method_list = new list<method_node *>();
+	vector<method_node *> *obj_method_vector = new vector<method_node *>();
 
 	//Arguments for Obj methods
 	vector <f_arg_pair *> *obj_f_args = new vector <f_arg_pair *>();
 
 	//Method of Obj class
-	obj_method_list->push_back( new method_node("PRINT", 
+	obj_method_vector->push_back( new method_node("PRINT", 
 				obj_f_args, 
 				"Nothing", 
-				new statement_block_node( new list<statement_node*>()),	
+				new statement_block_node( new vector<statement_node*>()),	
 				0) );
-	obj_method_list->push_back( new method_node("STR", 
+	obj_method_vector->push_back( new method_node("STR", 
 				obj_f_args, 
 				"String", 
-				new statement_block_node( new list<statement_node*>()),	
+				new statement_block_node( new vector<statement_node*>()),	
 				0) );
 
-	obj_method_list->push_back( new method_node("EQ", 
+	obj_method_vector->push_back( new method_node("EQ", 
 				obj_f_args, 
 				"Boolean", 
-				new statement_block_node( new list<statement_node*>()),	
+				new statement_block_node( new vector<statement_node*>()),	
 				0) );
 
 	class_node *Obj_class = new class_node(
 			new class_sig_node("Obj", new vector<f_arg_pair *>() , "", 0), 
-			new class_body_node(new list <statement_node *>(), obj_method_list), 
+			new class_body_node(new vector <statement_node *>(), obj_method_vector), 
 			0);
 
 
-	class_list->push_back(Obj_class);
+	class_vector->push_back(Obj_class);
 
 	// Class node for Nothing
-	list<method_node *> *nothing_method_list = new list<method_node *>();
+	vector<method_node *> *nothing_method_vector = new vector<method_node *>();
 
 	class_node *Nothing_class = new class_node(
 			new class_sig_node("Nothing", new vector<f_arg_pair *>() , "Obj", 0), 
-			new class_body_node(new list <statement_node *>(), nothing_method_list), 
+			new class_body_node(new vector <statement_node *>(), nothing_method_vector), 
 			0);
 
-	class_list->push_back(Nothing_class);
+	class_vector->push_back(Nothing_class);
 
 	// Class node for Integer 
-	list<method_node *> *integer_method_list = new list<method_node *>();
+	vector<method_node *> *integer_method_vector = new vector<method_node *>();
 
 	vector <f_arg_pair *> *integer_f_args = new vector <f_arg_pair *>();
 	integer_f_args->push_back( new f_arg_pair("x", "Int"));
@@ -191,48 +191,48 @@ tree_node * program_node::build_classTree()
 	int_operators.push_back("EQUALS");
 
 	for (int i = 0; i < int_operators.size(); i++) {
-		integer_method_list->push_back( 
+		integer_method_vector->push_back( 
 				  new method_node(strdup(int_operators[i].c_str() ), 
 					integer_f_args, 
 					"Int", 
-					new statement_block_node( new list<statement_node*>()),	
+					new statement_block_node( new vector<statement_node*>()),	
 					0) );
 	}
 
 	class_node *Integer_class = new class_node(
 			new class_sig_node("Int", new vector<f_arg_pair *>() , "Obj", 0), 
-			new class_body_node(new list <statement_node *>(), integer_method_list), 
+			new class_body_node(new vector <statement_node *>(), integer_method_vector), 
 			0);
 
-	class_list->push_back(Integer_class);	
+	class_vector->push_back(Integer_class);	
 
 	// Class node for String 
-	list<method_node *> *string_method_list = new list<method_node *>();
+	vector<method_node *> *string_method_vector = new vector<method_node *>();
 
 	vector <f_arg_pair *> *string_f_args = new vector <f_arg_pair *>();
 	string_f_args->push_back( new f_arg_pair("other", "String"));
 
-	string_method_list->push_back( new method_node("PLUS", 
+	string_method_vector->push_back( new method_node("PLUS", 
 				string_f_args, 
 				"String", 
-				new statement_block_node( new list<statement_node*>()),	
+				new statement_block_node( new vector<statement_node*>()),	
 				0) );
 
-	string_method_list->push_back( new method_node("EQUALS", 
+	string_method_vector->push_back( new method_node("EQUALS", 
 				string_f_args, 
 				"Boolean", 
-				new statement_block_node( new list<statement_node*>()),	
+				new statement_block_node( new vector<statement_node*>()),	
 				0) );
 
 	class_node *String_class = new class_node(
 			new class_sig_node("String", new vector<f_arg_pair *>() , "Obj", 0), 
-			new class_body_node(new list <statement_node *>(), string_method_list), 
+			new class_body_node(new vector <statement_node *>(), string_method_vector), 
 			0);
 
-	class_list->push_back(String_class);
+	class_vector->push_back(String_class);
 
 	// Class node for Boolean
-	list<method_node *> *boolean_method_list = new list<method_node *>();
+	vector<method_node *> *boolean_method_vector = new vector<method_node *>();
 
 	vector <f_arg_pair *> *boolean_f_args = new vector <f_arg_pair *>();
 	boolean_f_args->push_back( new f_arg_pair("other", "Boolean"));
@@ -245,31 +245,31 @@ tree_node * program_node::build_classTree()
 
 	for (int i = 0; i < bool_operators.size(); i++) {
 		printf("adding metohod %s for bool\n", bool_operators[i].c_str());
-		boolean_method_list->push_back( new method_node( 
+		boolean_method_vector->push_back( new method_node( 
 					strdup(bool_operators[i].c_str() ),
 					boolean_f_args, 
 					"Boolean", 
-					new statement_block_node( new list<statement_node*>()),	
+					new statement_block_node( new vector<statement_node*>()),	
 					0) );
 	}
 
 	class_node *Boolean_class = new class_node(
 			new class_sig_node("Boolean", new vector<f_arg_pair *>() , "Obj", 0), 
-			new class_body_node(new list <statement_node *>(), boolean_method_list), 
+			new class_body_node(new vector <statement_node *>(), boolean_method_vector), 
 			0);
 
-	class_list->push_back(Boolean_class);
+	class_vector->push_back(Boolean_class);
 
-	// initalize the tree list
-	tree_list = new list <tree_node*>();
+	// initalize the tree vector
+	tree_vector = new vector <tree_node*>();
 
-	list<class_node *>::const_iterator c_iter;
-	for (c_iter = class_list->begin(); c_iter != class_list->end(); ++c_iter) {
+	vector<class_node *>::const_iterator c_iter;
+	for (c_iter = class_vector->begin(); c_iter != class_vector->end(); ++c_iter) {
 		(*c_iter)->build_classTree();
 	}
 
-	list<statement_node *>::const_iterator s_iter;
-	for (s_iter = statement_list->begin(); s_iter != statement_list->end(); ++s_iter) {
+	vector<statement_node *>::const_iterator s_iter;
+	for (s_iter = statement_vector->begin(); s_iter != statement_vector->end(); ++s_iter) {
 		(*s_iter)->build_classTree();
 	}
 
@@ -302,13 +302,13 @@ int method_node::build_classTree(tree_node * class_tree_node)
 
 int class_body_node::build_classTree(tree_node * class_tree_node)
 {
-	list<statement_node *>::const_iterator s_iter;
-	for (s_iter = statement_list->begin(); s_iter != statement_list->end(); ++s_iter) {
+	vector<statement_node *>::const_iterator s_iter;
+	for (s_iter = statement_vector->begin(); s_iter != statement_vector->end(); ++s_iter) {
 		(*s_iter)->build_classTree();
 	}
 
-	list<method_node *>::const_iterator  m_iter;
-	for (m_iter = method_list->begin(); m_iter != method_list->end(); ++m_iter) {
+	vector<method_node *>::const_iterator  m_iter;
+	for (m_iter = method_vector->begin(); m_iter != method_vector->end(); ++m_iter) {
 		// send appropriate class tree_node 
 		(*m_iter)->build_classTree(class_tree_node);
 	}
@@ -343,7 +343,7 @@ int assign_node::build_classTree(){
 
 int constructor_call_node::build_classTree() 
 {
-	// if class not in class list print error
+	// if class not in class vector print error
 	int flag = 1;
 	for(int i=0; i<class_names.size(); i++)
 	{
@@ -356,8 +356,8 @@ int constructor_call_node::build_classTree()
 		error();
 	}
 
-	list<r_expr_node *>::const_iterator iter;
-	for (iter = arg_list->begin(); iter != arg_list->end(); ++iter)
+	vector<r_expr_node *>::const_iterator iter;
+	for (iter = arg_vector->begin(); iter != arg_vector->end(); ++iter)
 	{
 		(*iter)->build_classTree();
 	}
@@ -369,8 +369,8 @@ int method_call_node::build_classTree()
 {
 	instance->build_classTree();
 
-	list<r_expr_node *>::const_iterator iter;
-	for (iter = arg_list->begin(); iter != arg_list->end(); ++iter)
+	vector<r_expr_node *>::const_iterator iter;
+	for (iter = arg_vector->begin(); iter != arg_vector->end(); ++iter)
 	{
 		(*iter)->build_classTree();
 	}

@@ -15,8 +15,8 @@ YFLAGS= -d -t -y
 
 RM = /bin/rm -f
 
-quack: y.tab.o lex.yy.o quack.o class_tree.o print_AST.o build_classTree.o type_checks.o
-	${CCC} ${CCFLAGS} lex.yy.o y.tab.o quack.o class_tree.o print_AST.o build_classTree.o type_checks.o -o quack ${CCLIBS}
+quack: y.tab.o lex.yy.o quack.o class_tree.o print_AST.o build_classTree.o type_checks.o codegen.o
+	${CCC} ${CCFLAGS} lex.yy.o y.tab.o quack.o class_tree.o print_AST.o build_classTree.o type_checks.o codegen.o -o quack ${CCLIBS}
 
 quack.o: quack.cpp quack.h
 	${CCC} -c quack.cpp 
@@ -28,6 +28,8 @@ build_classTree.o: build_classTree.cpp
 	${CCC} -c build_classTree.cpp
 type_checks.o: type_checks.cpp
 	${CCC} -c type_checks.cpp
+codegen.o: codegen.cpp
+	${CCC} -c codegen.cpp
 y.tab.o: quack.y
 	${YACC} ${YFLAGS} quack.y
 	${CCC} ${CCFLAGS} y.tab.c -c 

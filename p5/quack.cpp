@@ -2,7 +2,7 @@
 #include <string>
 #include <string.h>
 #include <map>
-#include <list>
+#include <vector>
 #include <cstdio>
 #include "quack.h"
 using namespace std;
@@ -17,8 +17,8 @@ void error() {
 // Data structure for handling elif conditions
 elif_data::elif_data() 
 {
-	elif_conditions = new list < r_expr_node *>();
-	elif_bodies = new list <statement_block_node*>();
+	elif_conditions = new vector < r_expr_node *>();
+	elif_bodies = new vector <statement_block_node*>();
 
 	size = 0;
 }
@@ -75,7 +75,7 @@ while_node::while_node(r_expr_node *cond, statement_block_node *stmts, int linen
 	lineno = linenum;
 }
 
-statement_block_node::statement_block_node(list <statement_node *> *stmts) 
+statement_block_node::statement_block_node(vector <statement_node *> *stmts) 
 {
 	statements = stmts;
 }
@@ -95,10 +95,10 @@ class_node::class_node(class_sig_node *s, class_body_node *b, int linenum)
 	lineno = linenum;
 }
 
-program_node::program_node(list <class_node *> *c, list <statement_node *> *s)
+program_node::program_node(vector <class_node *> *c, vector <statement_node *> *s)
 {
-	class_list = c;
-	statement_list = s;
+	class_vector = c;
+	statement_vector = s;
 }
 
 method_node::method_node(const char *name, vector < f_arg_pair * > *args, const char *r_type, statement_block_node *b, int linenum)
@@ -110,10 +110,10 @@ method_node::method_node(const char *name, vector < f_arg_pair * > *args, const 
 	lineno = linenum;
 }
 
-class_body_node::class_body_node(list<statement_node *> *s_list, list<method_node *> *m_list)
+class_body_node::class_body_node(vector<statement_node *> *s_vector, vector<method_node *> *m_vector)
 {
-	statement_list = s_list;
-	method_list = m_list;
+	statement_vector = s_vector;
+	method_vector = m_vector;
 }
 
 return_node::return_node(r_expr_node *rv, int linenum) {
@@ -149,19 +149,19 @@ assign_node::assign_node(l_expr_node *left,char *str, r_expr_node *right, int li
 	lineno = linenum;
 }
 
-constructor_call_node::constructor_call_node(char *str, list <r_expr_node *> *args, int linenum) 
+constructor_call_node::constructor_call_node(char *str, vector <r_expr_node *> *args, int linenum) 
 {
 	c_name = str;
-	arg_list = args;
+	arg_vector = args;
 
 	lineno = linenum;
 }
 
-method_call_node::method_call_node(r_expr_node *ins, const char *mod, list <r_expr_node *> *args, int linenum) 
+method_call_node::method_call_node(r_expr_node *ins, const char *mod, vector <r_expr_node *> *args, int linenum) 
 {
 	instance = ins;
 	modifier = mod;
-	arg_list = args;
+	arg_vector = args;
 
 	lineno = linenum;
 }

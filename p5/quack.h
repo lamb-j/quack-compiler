@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <list>
+#include <vector>
 
 using namespace std;
 
@@ -16,16 +16,19 @@ class statement_node {
 		virtual void print(int indent) = 0;
 		virtual int build_classTree() = 0;
 		virtual string type_checks( map< string, string > *local, map< string, string > *fields ) = 0;
+    virtual string codegen() = 0;
 };
 
 class statement_block_node {
 	protected:
-		list <statement_node *> *statements;
+		vector <statement_node *> *statements;
 	public:
-		statement_block_node(list <statement_node *> *stmts);
+		statement_block_node(vector <statement_node *> *stmts);
+
+		void print(int indent);
 		int build_classTree();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
-		void print(int indent);
+    string codegen();
 };
 
 class f_arg_pair {
@@ -48,6 +51,7 @@ class class_sig_node {
 		void print(int indent);
 		tree_node * build_classTree();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
+    string codegen();
 };
 
 class method_node {
@@ -69,19 +73,21 @@ class method_node {
 		int build_classTree(tree_node *);
 
 		string type_checks( map< string, string > *local, map< string, string > *fields );
+    string codegen();
 };
 
 class class_body_node{
 	public:
-		list<statement_node *> *statement_list;
-		list<method_node *> *method_list;
+		vector<statement_node *> *statement_vector;
+		vector<method_node *> *method_vector;
 
-		class_body_node(list<statement_node *> *s_list, list< method_node *> *m_list);
+		class_body_node(vector<statement_node *> *s_vector, vector< method_node *> *m_vector);
 
 		void print(int indent);
 		int build_classTree(tree_node *);
 
 		string type_checks( map< string, string > *local, map< string, string > *fields );
+    string codegen();
 };
 
 class class_node {
@@ -102,14 +108,15 @@ class class_node {
 		int build_classTree();
 
 		string type_checks( map< string, string > *local, map< string, string > *fields );
+    string codegen();
 };
 
 class program_node {
 	public:
-		list <class_node *> *class_list;
-		list <statement_node *> *statement_list;
+		vector <class_node *> *class_vector;
+		vector <statement_node *> *statement_vector;
 
-		program_node(list <class_node *> *c, list <statement_node *> *s);
+		program_node(vector <class_node *> *c, vector <statement_node *> *s);
 
 
 		// map st_var_table
@@ -118,6 +125,7 @@ class program_node {
 		void print(int indent);
 		tree_node * build_classTree();
 		string type_checks(tree_node *root);
+    string codegen(tree_node *root);
 };
 
 class r_expr_node : public statement_node {
@@ -138,10 +146,11 @@ class l_expr_node : public r_expr_node {
 
 		l_expr_node(char *str, int linenum);
 		l_expr_node(r_expr_node *r_node, char* str, int linenum);
+
 		void print(int indent);
 		int build_classTree();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
-
+    string codegen();
 };
 
 class while_node : public statement_node {
@@ -155,12 +164,13 @@ class while_node : public statement_node {
 		int build_classTree();
 
 		string type_checks( map< string, string > *local, map< string, string > *fields );
+    string codegen();
 };
 
 class elif_data {
 	public:
-		list < r_expr_node *> *elif_conditions;
-		list < statement_block_node *> *elif_bodies;
+		vector < r_expr_node *> *elif_conditions;
+		vector < statement_block_node *> *elif_bodies;
 		int size;
 	public:
 		elif_data();
@@ -195,6 +205,7 @@ class if_node : public statement_node {
 		int build_classTree();
 
 		string type_checks( map< string, string > *local, map< string, string > *fields );
+    string codegen();
 };
 
 class return_node : public statement_node {
@@ -202,12 +213,12 @@ class return_node : public statement_node {
 		r_expr_node *return_value;
 
 		return_node(r_expr_node *rv, int linenum);
+		int lineno;
+
 		void print(int indent);
-
-
 		int build_classTree();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
-		int lineno;
+    string codegen();
 };
 
 class assign_node : public statement_node {
@@ -223,32 +234,35 @@ class assign_node : public statement_node {
 		void print(int indent);
 		int build_classTree();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
+    string codegen();
 };
 
 class constructor_call_node : public r_expr_node {
 	public:
 		char *c_name;
-		list <r_expr_node *> *arg_list;
+		vector <r_expr_node *> *arg_vector;
 		int lineno;
 
-		constructor_call_node(char *str, list <r_expr_node *> *args, int linenum);
+		constructor_call_node(char *str, vector <r_expr_node *> *args, int linenum);
 		void print(int indent);
 		int build_classTree();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
+    string codegen();
 };
 
 class method_call_node : public r_expr_node {
 	public:
 		r_expr_node *instance;
 		const char *modifier;
-		list <r_expr_node *> *arg_list;
+		vector <r_expr_node *> *arg_vector;
 		int lineno;
 
 
-		method_call_node(r_expr_node *ins, const char *mod, list <r_expr_node *> *args, int linenum);
+		method_call_node(r_expr_node *ins, const char *mod, vector <r_expr_node *> *args, int linenum);
 		void print(int indent);
 		int build_classTree();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
+    string codegen();
 };
 
 class int_node : public r_expr_node {
@@ -257,6 +271,7 @@ class int_node : public r_expr_node {
 		void print(int indent);
 		int build_classTree();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
+    string codegen();
 };
 
 class str_node : public r_expr_node {
@@ -265,9 +280,10 @@ class str_node : public r_expr_node {
 		void print(int indent);
 		int build_classTree();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
+    string codegen();
 };
 
-// Class Tree Functions
+// class tree functions
 class tree_node {
 	public:
 		string name;
@@ -283,10 +299,10 @@ class tree_node {
 };
 
 int print_tree( tree_node *root, int level );
-tree_node * append_tree( list <tree_node *> *tree_list, string parent_class, string new_class);
-tree_node * get_tree_node(list < tree_node *> *tree_node_list, string cname);
+tree_node * append_tree( vector <tree_node *> *tree_vector, string parent_class, string new_class);
+tree_node * get_tree_node(vector < tree_node *> *tree_node_vector, string cname);
 int class_defines_method(tree_node * class_node, string method_name);
-string least_common_ancestor(string A, string B);
+string least_common_ancestor(string a, string b);
 
 class_node * get_AST_class_node(string class_name);
 method_node * get_AST_method_node(string class_name, string method_name);
@@ -297,7 +313,8 @@ int is_superclass(string super_class, string sub_class);
 
 // add parent methods
 
-void add_parent_methods(list <method_node *> *parent_mlist, list <method_node *> *child_mlist, string child_class);
+void add_parent_methods(vector <method_node *> *parent_mvector, vector <method_node *> *child_mvector, string child_class);
 void add_parent_fields( map <string, string> *parent_fields, map <string, string > *child_fields);
 
 void type_check_class(tree_node *root);
+void codegen_class(tree_node *root);
