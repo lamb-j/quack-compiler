@@ -244,7 +244,6 @@ tree_node * program_node::build_classTree()
 	bool_operators.push_back("NOT");
 
 	for (int i = 0; i < bool_operators.size(); i++) {
-		printf("adding metohod %s for bool\n", bool_operators[i].c_str());
 		boolean_method_vector->push_back( new method_node( 
 					strdup(bool_operators[i].c_str() ),
 					boolean_f_args, 
@@ -375,6 +374,12 @@ int method_call_node::build_classTree()
 		(*iter)->build_classTree();
 	}
 	return 0;	
+}
+
+int plus_node:: build_classTree()
+{
+	left->build_classTree();
+	right->build_classTree();
 }
 
 int int_node::build_classTree() 

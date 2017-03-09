@@ -381,6 +381,25 @@ string method_call_node::type_checks( map< string, string > *local, map< string,
 	return "Dummy";
 }
 
+string plus_node::type_checks( map< string, string > *local, map< string, string > *field )
+{
+	string s1 = left->type_checks(local, field);
+	string s2 = right->type_checks(local, field);
+
+	if (sweep == 2) {
+		if (s1.compare(s2) != 0) {
+			fprintf(stderr,"error:%d: type mismatch %s is not of type %s\n",lineno,s1.c_str(), s2.c_str());
+			error();
+			return "Nothing";
+		}
+		else if (class_defines_method(get_tree_node(tree_vector, s1), "PLUS") == 0){
+			fprintf(stderr,"error:%d: PLUS not defined for class %s\n",lineno,s1.c_str());
+			error();
+			return "Nothing";
+		}
+	}
+	return s1;
+}
 
 string int_node::type_checks( map< string, string > *local, map< string, string > *field ) 
 {

@@ -265,6 +265,19 @@ class method_call_node : public r_expr_node {
     string codegen();
 };
 
+class plus_node: public r_expr_node {
+	public:
+		r_expr_node *left;
+		r_expr_node *right;
+		
+		int lineno;
+		plus_node(r_expr_node *L, r_expr_node *R, int linenum);
+		void print(int indent);
+		int build_classTree();
+		string type_checks( map< string, string > *local, map< string, string > *fields );
+		string codegen();
+};
+
 class int_node : public r_expr_node {
 	public:
 		int_node(int value);

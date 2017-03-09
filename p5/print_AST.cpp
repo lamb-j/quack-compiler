@@ -226,6 +226,14 @@ void method_call_node::print(int indent)
 	}
 }
 
+void plus_node::print(int indent) {
+	  printf("%*sNODE: plus\n", indent, "");
+		printf("%*sleft:\n", indent + 2, "");
+		left->print(indent + 4);
+		printf("%*sright:\n", indent + 2, "");
+		right->print(indent + 4);
+}
+
 void int_node::print(int indent) {
 	printf("%*sNODE: int\n", indent, "");
 	printf("%*svalue: %d\n", indent + 2, "", num);

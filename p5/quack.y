@@ -208,11 +208,13 @@ R_Expr: R_Expr '>' R_Expr {   vector<r_expr_node *> *args = new vector<r_expr_no
 //}
 
 R_Expr: '(' R_Expr ')' { $$ = $2; }
-| R_Expr '+' R_Expr {   vector<r_expr_node *> *args = new vector<r_expr_node *>();
+| R_Expr '+' R_Expr { $$ = new plus_node($1, $3, @1.first_line); }
+
+/*{   vector<r_expr_node *> *args = new vector<r_expr_node *>();
 			args->push_back($1);
 			args->push_back($3);
 			$$ = new method_call_node($1, "PLUS", args, @1.first_line); 
-}
+}*/
 | R_Expr '-' R_Expr {   vector<r_expr_node *> *args = new vector<r_expr_node *>();
 			args->push_back($1);
 			args->push_back($3);

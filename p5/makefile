@@ -1,7 +1,7 @@
-CCC = g++
+CCC = clang++
 UNAME := $(shell uname)
 ifeq ($(UNAME), Linux)
-CCFLAGS= -O2 -std=c++11 
+CCFLAGS= -O2 -I /home/rsawhney/llvm-3.9.1.src/include/
 CCLIBS= -lfl
 endif
 ifeq ($(UNAME), Darwin)
@@ -29,7 +29,7 @@ build_classTree.o: build_classTree.cpp
 type_checks.o: type_checks.cpp
 	${CCC} -c type_checks.cpp
 codegen.o: codegen.cpp
-	${CCC} -c codegen.cpp
+	${CCC} ${CCFLAGS} -c codegen.cpp
 y.tab.o: quack.y
 	${YACC} ${YFLAGS} quack.y
 	${CCC} ${CCFLAGS} y.tab.c -c 
