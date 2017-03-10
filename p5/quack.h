@@ -5,6 +5,19 @@
 #include <map>
 #include <vector>
 
+// llvm includes
+#include "llvm/ADT/APFloat.h"
+#include "llvm/ADT/STLExtras.h"
+#include "llvm/IR/BasicBlock.h"
+#include "llvm/IR/Constants.h"
+#include "llvm/IR/DerivedTypes.h"
+#include "llvm/IR/Function.h"
+#include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/Module.h"
+#include "llvm/IR/Type.h"
+#include "llvm/IR/Verifier.h"
+
 using namespace std;
 
 class tree_node;
@@ -16,7 +29,7 @@ class statement_node {
 		virtual void print(int indent) = 0;
 		virtual int build_classTree() = 0;
 		virtual string type_checks( map< string, string > *local, map< string, string > *fields ) = 0;
-    virtual string codegen() = 0;
+    virtual llvm::Value *codegen() = 0;
 };
 
 class statement_block_node {
@@ -28,7 +41,7 @@ class statement_block_node {
 		void print(int indent);
 		int build_classTree();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
-    string codegen();
+    llvm::Value *codegen();
 };
 
 class f_arg_pair {
@@ -51,7 +64,7 @@ class class_sig_node {
 		void print(int indent);
 		tree_node * build_classTree();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
-    string codegen();
+    llvm::Value *codegen();
 };
 
 class method_node {
@@ -73,7 +86,7 @@ class method_node {
 		int build_classTree(tree_node *);
 
 		string type_checks( map< string, string > *local, map< string, string > *fields );
-    string codegen();
+    llvm::Value *codegen();
 };
 
 class class_body_node{
@@ -87,7 +100,7 @@ class class_body_node{
 		int build_classTree(tree_node *);
 
 		string type_checks( map< string, string > *local, map< string, string > *fields );
-    string codegen();
+    llvm::Value *codegen();
 };
 
 class class_node {
@@ -108,7 +121,7 @@ class class_node {
 		int build_classTree();
 
 		string type_checks( map< string, string > *local, map< string, string > *fields );
-    string codegen();
+    llvm::Value *codegen();
 };
 
 class program_node {
@@ -125,7 +138,7 @@ class program_node {
 		void print(int indent);
 		tree_node * build_classTree();
 		string type_checks(tree_node *root);
-    string codegen(tree_node *root);
+    llvm::Value *codegen(tree_node *root);
 };
 
 class r_expr_node : public statement_node {
@@ -150,7 +163,7 @@ class l_expr_node : public r_expr_node {
 		void print(int indent);
 		int build_classTree();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
-    string codegen();
+    llvm::Value *codegen();
 };
 
 class while_node : public statement_node {
@@ -164,7 +177,7 @@ class while_node : public statement_node {
 		int build_classTree();
 
 		string type_checks( map< string, string > *local, map< string, string > *fields );
-    string codegen();
+    llvm::Value *codegen();
 };
 
 class elif_data {
@@ -205,7 +218,7 @@ class if_node : public statement_node {
 		int build_classTree();
 
 		string type_checks( map< string, string > *local, map< string, string > *fields );
-    string codegen();
+    llvm::Value *codegen();
 };
 
 class return_node : public statement_node {
@@ -218,7 +231,7 @@ class return_node : public statement_node {
 		void print(int indent);
 		int build_classTree();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
-    string codegen();
+    llvm::Value *codegen();
 };
 
 class assign_node : public statement_node {
@@ -234,7 +247,7 @@ class assign_node : public statement_node {
 		void print(int indent);
 		int build_classTree();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
-    string codegen();
+    llvm::Value *codegen();
 };
 
 class constructor_call_node : public r_expr_node {
@@ -247,7 +260,7 @@ class constructor_call_node : public r_expr_node {
 		void print(int indent);
 		int build_classTree();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
-    string codegen();
+    llvm::Value *codegen();
 };
 
 class method_call_node : public r_expr_node {
@@ -262,7 +275,7 @@ class method_call_node : public r_expr_node {
 		void print(int indent);
 		int build_classTree();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
-    string codegen();
+    llvm::Value *codegen();
 };
 
 class plus_node: public r_expr_node {
@@ -275,7 +288,7 @@ class plus_node: public r_expr_node {
 		void print(int indent);
 		int build_classTree();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
-		string codegen();
+		llvm::Value *codegen();
 };
 
 class int_node : public r_expr_node {
@@ -284,7 +297,7 @@ class int_node : public r_expr_node {
 		void print(int indent);
 		int build_classTree();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
-    string codegen();
+    llvm::Value *codegen();
 };
 
 class str_node : public r_expr_node {
@@ -293,7 +306,7 @@ class str_node : public r_expr_node {
 		void print(int indent);
 		int build_classTree();
 		string type_checks( map< string, string > *local, map< string, string > *fields );
-    string codegen();
+    llvm::Value *codegen();
 };
 
 // class tree functions

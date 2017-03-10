@@ -1,11 +1,11 @@
 CCC = clang++
 UNAME := $(shell uname)
 ifeq ($(UNAME), Linux)
-CCFLAGS= -O2 -I /home/rsawhney/llvm-3.9.1.src/include/
+CCFLAGS= -O2 
 CCLIBS= -lfl
 endif
 ifeq ($(UNAME), Darwin)
-CCFLAGS= -std=c++11 -Wno-deprecated-register
+CCFLAGS= -Wno-deprecated-register -std=c++11 -I/usr/local/Cellar/llvm/3.9.1/include
 CCLIBS= -ll 
 endif
 LEX = flex
@@ -16,20 +16,20 @@ YFLAGS= -d -t -y
 RM = /bin/rm -f
 
 quack: y.tab.o lex.yy.o quack.o class_tree.o print_AST.o build_classTree.o type_checks.o codegen.o
-	${CCC} ${CCFLAGS} lex.yy.o y.tab.o quack.o class_tree.o print_AST.o build_classTree.o type_checks.o codegen.o -o quack ${CCLIBS}
+	${CCC} ${CCFLAGS} lex.yy.o y.tab.o quack.o class_tree.o print_AST.o build_classTree.o type_checks.o codegen.o -o quack `llvm-config --cppflags --ldflags --system-libs --libs core` ${CCLIBS} 
 
 quack.o: quack.cpp quack.h
-	${CCC} -c quack.cpp 
+	${CCC} ${CCFLAGS} -c quack.cpp 
 class_tree.o: class_tree.cpp
-	${CCC} -c class_tree.cpp
+	${CCC} ${CCFLAGS} -c class_tree.cpp
 print_AST.o: print_AST.cpp
-	${CCC} -c print_AST.cpp
+	${CCC} ${CCFLAGS} -c print_AST.cpp
 build_classTree.o: build_classTree.cpp
-	${CCC} -c build_classTree.cpp
+	${CCC} ${CCFLAGS} -c build_classTree.cpp
 type_checks.o: type_checks.cpp
-	${CCC} -c type_checks.cpp
+	${CCC} ${CCFLAGS} -c type_checks.cpp
 codegen.o: codegen.cpp
-	${CCC} ${CCFLAGS} -c codegen.cpp
+	${CCC} ${CCFLAGS} -c codegen.cpp 
 y.tab.o: quack.y
 	${YACC} ${YFLAGS} quack.y
 	${CCC} ${CCFLAGS} y.tab.c -c 

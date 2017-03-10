@@ -9,6 +9,9 @@
 #include "quack.h"
 #include  <algorithm>
 
+// llvm includes
+#include "llvm/IR/Module.h"
+
 // external data structures
 extern vector < string > class_names;
 vector <tree_node *> *tree_vector;
@@ -208,13 +211,12 @@ R_Expr: R_Expr '>' R_Expr {   vector<r_expr_node *> *args = new vector<r_expr_no
 //}
 
 R_Expr: '(' R_Expr ')' { $$ = $2; }
-| R_Expr '+' R_Expr { $$ = new plus_node($1, $3, @1.first_line); }
-
-/*{   vector<r_expr_node *> *args = new vector<r_expr_node *>();
+| R_Expr '+' R_Expr //{ $$ = new plus_node($1, $3, @1.first_line); }
+{   vector<r_expr_node *> *args = new vector<r_expr_node *>();
 			args->push_back($1);
 			args->push_back($3);
 			$$ = new method_call_node($1, "PLUS", args, @1.first_line); 
-}*/
+}
 | R_Expr '-' R_Expr {   vector<r_expr_node *> *args = new vector<r_expr_node *>();
 			args->push_back($1);
 			args->push_back($3);
@@ -336,6 +338,20 @@ int main (int argc, char **argv)
 		printf("--- Syntax Tree ---\n");
 		AST_root->print(0);
 
-	}
+		printf("--- Code Generation ---\n");
+		extern std::unique_ptr<llvm::Module> TheModule;
+		extern llvm::LLVMContext TheContext;
+		TheModule = llvm::make_unique<llvm::Module>("quack llvm", TheContext);
 
+		AST_root->codegen(class_root);
+
+    printf("\n");
+		printf("--- LLVM ---\n");
+	  //TheModule->dump();
+		TheModule->print(llvm::errs(), nullptr);
+
+	}
+  
+	printf("exiting Main\n");
+	return 0;
 }

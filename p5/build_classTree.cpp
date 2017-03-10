@@ -137,22 +137,22 @@ tree_node * program_node::build_classTree()
 	vector <f_arg_pair *> *obj_f_args = new vector <f_arg_pair *>();
 
 	//Method of Obj class
-	obj_method_vector->push_back( new method_node("PRINT", 
-				obj_f_args, 
-				"Nothing", 
-				new statement_block_node( new vector<statement_node*>()),	
-				0) );
-	obj_method_vector->push_back( new method_node("STR", 
-				obj_f_args, 
-				"String", 
-				new statement_block_node( new vector<statement_node*>()),	
-				0) );
-
-	obj_method_vector->push_back( new method_node("EQ", 
-				obj_f_args, 
-				"Boolean", 
-				new statement_block_node( new vector<statement_node*>()),	
-				0) );
+//	obj_method_vector->push_back( new method_node("PRINT", 
+//				obj_f_args, 
+//				"Nothing", 
+//				new statement_block_node( new vector<statement_node*>()),	
+//				0) );
+//	obj_method_vector->push_back( new method_node("STR", 
+//				obj_f_args, 
+//				"String", 
+//				new statement_block_node( new vector<statement_node*>()),	
+//				0) );
+//
+//	obj_method_vector->push_back( new method_node("EQ", 
+//				obj_f_args, 
+//				"Boolean", 
+//				new statement_block_node( new vector<statement_node*>()),	
+//				0) );
 
 	class_node *Obj_class = new class_node(
 			new class_sig_node("Obj", new vector<f_arg_pair *>() , "", 0), 
@@ -181,14 +181,14 @@ tree_node * program_node::build_classTree()
 
 	vector <string> int_operators;
 	int_operators.push_back("PLUS");
-	int_operators.push_back("MINUS");
-	int_operators.push_back("TIMES");
-	int_operators.push_back("DIVIDE");
-	int_operators.push_back("ATMOST");
-	int_operators.push_back("ATLEAST");
-	int_operators.push_back("LESS");
-	int_operators.push_back("MORE");
-	int_operators.push_back("EQUALS");
+	//int_operators.push_back("MINUS");
+	//int_operators.push_back("TIMES");
+	//int_operators.push_back("DIVIDE");
+	//int_operators.push_back("ATMOST");
+	//int_operators.push_back("ATLEAST");
+	//int_operators.push_back("LESS");
+	//int_operators.push_back("MORE");
+	//int_operators.push_back("EQUALS");
 
 	for (int i = 0; i < int_operators.size(); i++) {
 		integer_method_vector->push_back( 
@@ -380,6 +380,8 @@ int plus_node:: build_classTree()
 {
 	left->build_classTree();
 	right->build_classTree();
+
+	return 0;
 }
 
 int int_node::build_classTree() 
