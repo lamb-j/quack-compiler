@@ -1,15 +1,3 @@
-#include "llvm/ADT/APFloat.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/IR/BasicBlock.h"
-#include "llvm/IR/Constants.h"
-#include "llvm/IR/DerivedTypes.h"
-#include "llvm/IR/Function.h"
-#include "llvm/IR/IRBuilder.h"
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/Module.h"
-#include "llvm/IR/Type.h"
-#include "llvm/IR/Verifier.h"
-
 #include <stdlib.h>
 #include <string>
 #include <string.h>
@@ -17,19 +5,24 @@
 #include <vector>
 #include <cstdio>
 #include "quack.h"
-using namespace std;
+using namespace llvm;
 
 // external data structures
-extern vector < tree_node *> *tree_vector;
+extern std::vector < tree_node *> *tree_vector;
 extern int error_flag;
 
-string if_node::codegen()
+llvm::LLVMContext TheContext;
+llvm::IRBuilder<> Builder(TheContext);
+std::map<std::string, llvm::Value *> NamedValues;
+std::unique_ptr<llvm::Module> TheModule;
+
+Value *if_node::codegen()
 {
 	if_body->codegen();
 
 	//elseif
-	vector<r_expr_node *>::const_iterator c_iter;
-	vector<statement_block_node *>::const_iterator b_iter;
+	std::vector<r_expr_node *>::const_iterator c_iter;
+	std::vector<statement_block_node *>::const_iterator b_iter;
 
 	c_iter = elif_pairs->elif_conditions->begin();
 	b_iter = elif_pairs->elif_bodies->begin();
@@ -44,61 +37,110 @@ string if_node::codegen()
 	{	
 		else_body->codegen();
 	}
-	return "Nothing";
+	return nullptr;
 }
 
-string while_node::codegen()
+Value *while_node::codegen()
 {
 	condition->codegen();
 	body->codegen();
 
-	return "Nothing";
+	return nullptr;
 }
 
-string statement_block_node::codegen()
+Value *statement_block_node::codegen()
 {
-	vector<statement_node *>::const_iterator iter;
-	for (iter = statements->begin(); iter != statements->end(); ++iter) {
-		(*iter)->codegen();
+	Value *v;
+	for (int i = 0; i < statements->size(); i++) { 
+		v = (*statements)[i]->codegen();
 	}
-	return "Nothing";
+	return nullptr;
 }
 
-string class_sig_node::codegen()
+Value *class_sig_node::codegen()
 {
 
-	return "Nothing";
+	return nullptr;
 }
 //local and field map are NULL. Maps are generated here
-string class_node::codegen()
+Value *class_node::codegen()
 {
 
 	sig->codegen();
 	body->codegen();
-	return "Nothing";
+	return nullptr;
 }
 
-string program_node::codegen(tree_node *root)
+Value *program_node::codegen(tree_node *root)
 {
 
-	codegen_class(root);
+	//codegen_class(root);
+  tree_node *test_int_node =	get_tree_node(tree_vector, "Int");
+	test_int_node->AST_node->codegen();
 
-	vector<statement_node *>::const_iterator s_iter;
-	for (s_iter = statement_vector->begin(); s_iter != statement_vector->end(); ++s_iter) {
-		(*s_iter)->codegen();
+	for (int i = 0; i < statement_vector->size(); i++) {
+		(*statement_vector)[i]->codegen();
 	}
 
-	return "Nothing";
+	return nullptr;
 }
 
-string method_node::codegen()
+Value *method_node::codegen()
 {
+
+	// Prototype
+	// Make the function type
+	std::vector<Type *> mTypes(formal_args->size(), Type::getDoubleTy(TheContext) );
+	FunctionType *FT = FunctionType::get(Type::getDoubleTy(TheContext), mTypes, false);
+	Function *F = Function::Create(FT, Function::ExternalLinkage, string(method_name), TheModule.get() );
+
+	//for (int i = 0; i < formal_args->size(); i++) {
+	//	mTypes[i] = (*formal_args)[i]->return_type;
+	//}
+
+	unsigned Idx = 0;
+	for (auto &Arg : F->args()) {
+		string name = string( (* formal_args)[Idx++]->name );
+		Arg.setName( name );
+	}
+
+	// Function 
+  BasicBlock *BB = BasicBlock::Create(TheContext, "entry", F);
+	Builder.SetInsertPoint(BB);
+
+	NamedValues.clear();
+	for (auto &Arg : F->args())
+		NamedValues[Arg.getName()] = &Arg;
+
+	if (!strcmp(method_name, "PLUS") ) {
+		Value *x = NamedValues["x"];
+		Value *y = NamedValues["y"];
+
+		Value *b = Builder.CreateFAdd(x, y, "addtmp");
+		Builder.CreateRet(b);
+
+		verifyFunction(*F);
+		printf("Succesfully made function '%s'\n", method_name); 
+
+		F->print(errs());
+		return F;
+	}
+
+
+	else if (Value *RetVal = body->codegen() ) {
+		Builder.CreateRet(RetVal);
+ 
+		verifyFunction(*F);
+		printf("Succesfully made function '%s'\n", method_name); 
 	
-	body->codegen();
-	return "Nothing";
+		return F;
+	}
+
+	F->eraseFromParent();
+	return nullptr;
 }
 
-string class_body_node::codegen()
+Value *class_body_node::codegen()
 {
 	for (int i = 0;  i < statement_vector->size(); ++i) {
 		(*statement_vector)[i]->codegen();
@@ -108,70 +150,89 @@ string class_body_node::codegen()
 		(*method_vector)[i]->codegen();
 	}
 
-	return "Nothing";
+	return nullptr;
 }
 
-string return_node::codegen()
+Value *return_node::codegen()
 {
 
 	if (return_value != NULL ) {
 		return_value->codegen();
 	}
 
-	return "Nothing";
+	return nullptr;
 }
 
-string l_expr_node::codegen()
+Value *l_expr_node::codegen()
 {
 
-return "Nothing";
+return nullptr;
 }
 
-string assign_node::codegen()
+Value *assign_node::codegen()
 {
   lhs->codegen();
   rhs->codegen();
 
-	return "Nothing";
+	return nullptr;
 }
 
-string constructor_call_node::codegen()
+Value *constructor_call_node::codegen()
 {
 
 	for (int i = 0; i < arg_vector->size(); ++i) {
 		(*arg_vector)[i]->codegen();
 	}
 
-	return "Nothing";
+	return nullptr;
 }
 
-// may need to push this out to static_checks.cpp to avoid wrong error messages
-string method_call_node::codegen()
+//call_expr
+Value *method_call_node::codegen()
 {
+	//instance->codegen();
 
-	instance->codegen();
+	Function *CalleeF = TheModule->getFunction( string(modifier) );
 
-	for (int i = 0; i < arg_vector->size(); ++i) {
-		(*arg_vector)[i]->codegen();
+	if (!CalleeF) {
+		fprintf(stderr, "error:%d: Unknown function %s referenced\n", lineno, modifier);
+		error();
 	}
 
-	return "Nothing";
+	if (CalleeF->arg_size() != arg_vector->size() ) {
+		fprintf(stderr, "error:%d: Arg sizes in codegen don't match\n", lineno);
+		error();
+	}
+
+	std::vector<Value *> ArgsV;
+	for (int i = 0; i < arg_vector->size(); ++i) {
+		ArgsV.push_back( (*arg_vector)[i]->codegen() );
+		if (!ArgsV.back())
+			return nullptr;
+	}
+
+	return Builder.CreateCall(CalleeF, ArgsV, "calltmp");
+	
 }
 
-string plus_node::codegen()
+Value *plus_node::codegen()
 {
-	left->codegen();
-	right->codegen();
+	Value *L = left->codegen();
+	Value *R = right->codegen();
 
-	return "Nothing";
+	Value *b = Builder.CreateFAdd(L, R, "addtmp");
+
+	return b;
 }
 
-string int_node::codegen()
+Value *int_node::codegen()
 {
-	return "Nothing";
+	Value *v = ConstantFP::get(TheContext, APFloat((float) num));
+
+	return v;
 }
 
-string str_node::codegen()
+Value *str_node::codegen()
 {
-	return "Nothing";
+	return nullptr;
 }
