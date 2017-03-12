@@ -74,69 +74,141 @@ Value *class_node::codegen()
 Value *program_node::codegen(tree_node *root)
 {
 
+	// Generate C functions
+  // printf
+	std::vector<Type*> printf_arg_types;
+	printf_arg_types.push_back(Type::getInt8PtrTy(TheContext));
+
+	FunctionType* printf_type =
+		FunctionType::get(
+				Type::getInt32Ty(TheContext), printf_arg_types, true);
+
+	Function *func = Function::Create(
+			printf_type, Function::ExternalLinkage,
+			Twine("printf"),
+			TheModule.get()
+			);
+	func->setCallingConv(CallingConv::C);
+
 	//codegen_class(root);
   tree_node *test_int_node =	get_tree_node(tree_vector, "Int");
 	test_int_node->AST_node->codegen();
 
+	printf("making main\n");
+	// Main Function 
+	printf("created main block\n");
+	FunctionType *FT = FunctionType::get(Type::getInt32Ty(TheContext), false);
+	Function *F = Function::Create(FT, Function::ExternalLinkage, "main",  TheModule.get() );
+
+  BasicBlock *BB = BasicBlock::Create(TheContext, "entry", F);
+	Builder.SetInsertPoint(BB);
+
+	// Generate Code for statements
 	for (int i = 0; i < statement_vector->size(); i++) {
 		(*statement_vector)[i]->codegen();
 	}
 
+	verifyFunction(*F);
+	printf("Succesfully made function 'main'\n"); 
+
+	Builder.CreateRet( ConstantInt::get(TheContext, APInt( 32, 0, false )  ) );
+	return F;
+
+	F->eraseFromParent();
 	return nullptr;
 }
 
 Value *method_node::codegen()
 {
-
-	// Prototype
-	// Make the function type
-	std::vector<Type *> mTypes(formal_args->size(), Type::getDoubleTy(TheContext) );
-	FunctionType *FT = FunctionType::get(Type::getDoubleTy(TheContext), mTypes, false);
-	Function *F = Function::Create(FT, Function::ExternalLinkage, string(method_name), TheModule.get() );
-
-	//for (int i = 0; i < formal_args->size(); i++) {
-	//	mTypes[i] = (*formal_args)[i]->return_type;
-	//}
-
-	unsigned Idx = 0;
-	for (auto &Arg : F->args()) {
-		string name = string( (* formal_args)[Idx++]->name );
-		Arg.setName( name );
-	}
-
-	// Function 
-  BasicBlock *BB = BasicBlock::Create(TheContext, "entry", F);
-	Builder.SetInsertPoint(BB);
-
-	NamedValues.clear();
-	for (auto &Arg : F->args())
-		NamedValues[Arg.getName()] = &Arg;
-
 	if (!strcmp(method_name, "PLUS") ) {
+
+		// Prototype
+		std::vector<Type *> mTypes(formal_args->size(), Type::getInt32Ty(TheContext) );
+		FunctionType *FT = FunctionType::get(Type::getInt32Ty(TheContext), mTypes, false);
+		Function *F = Function::Create(FT, Function::ExternalLinkage, string(method_name), TheModule.get() );
+
+		unsigned Idx = 0;
+		for (auto &Arg : F->args()) {
+			string name = string( (* formal_args)[Idx++]->name );
+			Arg.setName( name );
+		}
+
+		NamedValues.clear();
+		for (auto &Arg : F->args())
+			NamedValues[Arg.getName()] = &Arg;
+
+
+		// Function Body
+		BasicBlock *BB = BasicBlock::Create(TheContext, "entry", F);
+		Builder.SetInsertPoint(BB);
+
 		Value *x = NamedValues["x"];
 		Value *y = NamedValues["y"];
 
-		Value *b = Builder.CreateFAdd(x, y, "addtmp");
+		Value *b = Builder.CreateAdd(x, y, "addtmp");
 		Builder.CreateRet(b);
 
 		verifyFunction(*F);
 		printf("Succesfully made function '%s'\n", method_name); 
 
-		F->print(errs());
+		//F->print(errs());
 		return F;
 	}
 
+	if (!strcmp(method_name, "PRINT") ) {
 
-	else if (Value *RetVal = body->codegen() ) {
-		Builder.CreateRet(RetVal);
- 
+		// Prototype
+		std::vector<Type *> mTypes;
+		mTypes.push_back( llvm::Type::getInt32Ty(TheContext) );
+
+		FunctionType *FT = FunctionType::get(
+				Type::getInt32Ty(TheContext), mTypes, false);
+
+		Function *F = Function::Create(FT, Function::ExternalLinkage, "PRINT",  TheModule.get() );
+
+		unsigned Idx = 0;
+		for (auto &Arg : F->args()) {
+			string name = string( (* formal_args)[Idx++]->name );
+			Arg.setName( name );
+		}
+
+		NamedValues.clear();
+		for (auto &Arg : F->args())
+			NamedValues[Arg.getName()] = &Arg;
+
+		// Funciton Body
+		BasicBlock *BB = BasicBlock::Create(TheContext, "entry", F);
+		Builder.SetInsertPoint(BB);
+
+		Value* this_val = NamedValues["this"];
+		Value *formatStr = Builder.CreateGlobalStringPtr("value = %d\n");
+
+		std::vector<Value *> ArgsV;
+		ArgsV.push_back(formatStr);
+		ArgsV.push_back(this_val);
+
+		Function *CalleeF = TheModule->getFunction( "printf" );
+		
+	  Value* b = Builder.CreateCall(CalleeF, ArgsV, "calltemp");
+		Builder.CreateRet(b);
+
 		verifyFunction(*F);
 		printf("Succesfully made function '%s'\n", method_name); 
-	
+
+		//F->print(errs());
 		return F;
 	}
 
-	F->eraseFromParent();
+//	else if (Value *RetVal = body->codegen() ) {
+//		Builder.CreateRet(RetVal);
+//
+//		verifyFunction(*F);
+//		printf("Succesfully made function '%s'\n", method_name); 
+//
+//		return F;
+//	}
+//
+//	F->eraseFromParent();
 	return nullptr;
 }
 
@@ -166,13 +238,13 @@ Value *return_node::codegen()
 Value *l_expr_node::codegen()
 {
 
-return nullptr;
+	return nullptr;
 }
 
 Value *assign_node::codegen()
 {
-  lhs->codegen();
-  rhs->codegen();
+	lhs->codegen();
+	rhs->codegen();
 
 	return nullptr;
 }
@@ -212,7 +284,7 @@ Value *method_call_node::codegen()
 	}
 
 	return Builder.CreateCall(CalleeF, ArgsV, "calltmp");
-	
+
 }
 
 Value *plus_node::codegen()
@@ -227,7 +299,8 @@ Value *plus_node::codegen()
 
 Value *int_node::codegen()
 {
-	Value *v = ConstantFP::get(TheContext, APFloat((float) num));
+	//	Value *v = ConstantFP::get(TheContext, APFloat((float) num));
+	Value *v = ConstantInt::get(TheContext, APInt(32, num, false));
 
 	return v;
 }

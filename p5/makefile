@@ -39,4 +39,4 @@ lex.yy.o: quack.l
 	${CCC} ${CCFLAGS} lex.yy.c -c 
 
 clean:
-	/bin/rm -f lex.yy.* y.tab.* *.o quack
+	/bin/rm -f lex.yy.* y.tab.* *.o quack *.ll

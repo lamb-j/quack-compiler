@@ -179,6 +179,9 @@ tree_node * program_node::build_classTree()
 	integer_f_args->push_back( new f_arg_pair("x", "Int"));
 	integer_f_args->push_back( new f_arg_pair("y", "Int"));
 
+	vector <f_arg_pair *> *integer_f_args_print = new vector <f_arg_pair *>();
+	integer_f_args_print->push_back( new f_arg_pair("this", "Int"));
+
 	vector <string> int_operators;
 	int_operators.push_back("PLUS");
 	//int_operators.push_back("MINUS");
@@ -198,6 +201,13 @@ tree_node * program_node::build_classTree()
 					new statement_block_node( new vector<statement_node*>()),	
 					0) );
 	}
+
+	integer_method_vector->push_back( 
+			new method_node("PRINT", 
+				integer_f_args_print, 
+				"Int", 
+				new statement_block_node( new vector<statement_node*>()),	
+				0) );
 
 	class_node *Integer_class = new class_node(
 			new class_sig_node("Int", new vector<f_arg_pair *>() , "Obj", 0), 

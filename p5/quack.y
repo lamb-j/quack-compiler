@@ -9,9 +9,6 @@
 #include "quack.h"
 #include  <algorithm>
 
-// llvm includes
-#include "llvm/IR/Module.h"
-
 // external data structures
 extern vector < string > class_names;
 vector <tree_node *> *tree_vector;
@@ -121,8 +118,12 @@ Class_Body: '{' Statements Methods '}' { $$ = new class_body_node( $2, $3 ); }
 Methods: /* empty */ { $$ = new vector<method_node *>(); }
 | Methods Method { $$ = $1; $1 -> push_back($2); }
 
-Method: DEF IDENT '(' Formal_Args ')' Statement_Block { $$ = new method_node($2, $4, "Nothing", $6, @1.first_line); }
-| DEF IDENT '(' Formal_Args ')' ':' IDENT Statement_Block { $$ = new method_node($2, $4, $7, $8, @1.first_line); }
+Method: DEF IDENT '(' Formal_Args ')' Statement_Block 
+											{ $4->push_back( new f_arg_pair( "this", "Obj" ) ); 
+												$$ = new method_node($2, $4, "Nothing", $6, @1.first_line); }
+| DEF IDENT '(' Formal_Args ')' ':' IDENT Statement_Block 
+											{ $4->push_back( new f_arg_pair( "this", "Obj" ) ); 
+												$$ = new method_node($2, $4, $7, $8, @1.first_line); }
 
 Formal_Args: /* empty */ {$$ = new vector< f_arg_pair * >(); }
 | IDENT ':' IDENT Formal_Args { $$ = $4; $4 -> push_back( new f_arg_pair($1, $3) ); }
@@ -156,7 +157,9 @@ L_Expr: IDENT { $$ = new l_expr_node($1, @1.first_line); }
 
 R_Expr: L_Expr {$$ = $1;}
 
-R_Expr: R_Expr '.' IDENT '(' Actual_Args ')' { $$ = new method_call_node($1, $3, $5, @1.first_line); }
+R_Expr: R_Expr '.' IDENT '(' Actual_Args ')' { 
+													$5->push_back($1);
+													$$ = new method_call_node($1, $3, $5, @1.first_line); }
 
 R_Expr: IDENT '(' Actual_Args ')' { $$ = new constructor_call_node($1, $3, @1.first_line); }
 
@@ -350,8 +353,20 @@ int main (int argc, char **argv)
 	  //TheModule->dump();
 		TheModule->print(llvm::errs(), nullptr);
 
+    printf("\n");
+		printf("--- Execution Engine ---\n");
+
+//    llvm::Function *main_func = TheModule->getFunction( "main" );
+//   
+//
+//		llvm::ExecutionEngine *engine =
+//			llvm::EngineBuilder(std::move(TheModule))
+//			.create();
+//		engine->finalizeObject(); 
+//		engine->runFunction(main_func, std::vector<llvm::GenericValue>());
+
 	}
-  
+
 	printf("exiting Main\n");
 	return 0;
 }
