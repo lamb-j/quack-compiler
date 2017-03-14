@@ -18,32 +18,117 @@ std::unique_ptr<llvm::Module> TheModule;
 
 Value *if_node::codegen()
 {
-	if_body->codegen();
 
-	//elseif
-	std::vector<r_expr_node *>::const_iterator c_iter;
-	std::vector<statement_block_node *>::const_iterator b_iter;
+	Value *if_cond_v = if_condition->codegen();
 
-	c_iter = elif_pairs->elif_conditions->begin();
-	b_iter = elif_pairs->elif_bodies->begin();
-
-	for (int i = 0; i < elif_pairs->size; i++, c_iter++, b_iter++) {
-		(*c_iter)->codegen();
-		(*b_iter)->codegen();
+	if( !if_cond_v ) {
+		return nullptr;
 	}
 
-	//else
-	if(else_body != NULL)
-	{	
-		else_body->codegen();
+	if_cond_v = Builder.CreateICmpEQ( if_cond_v, ConstantInt::get(TheContext, APInt( 32, 0, false )), "if_cond" );
+
+	Function *F = Builder.GetInsertBlock()->getParent();
+
+	// Setting up the bulding blocks for if and else
+	BasicBlock *ifBB = BasicBlock::Create(TheContext, "if_body", F);
+	BasicBlock *elseBB = BasicBlock::Create(TheContext, "else_body");
+
+	vector <BasicBlock *> elif_body_BB;
+	vector <BasicBlock *> elif_inter_BB;
+	for (int i = 0; i < elif_pairs->size; i++) {
+		elif_body_BB.push_back ( BasicBlock::Create(TheContext, "elif_body") );
+		elif_inter_BB.push_back ( BasicBlock::Create(TheContext, "elif_inter") ); 
 	}
+
+	BasicBlock *mergeBB = BasicBlock::Create(TheContext, "if_cont");
+
+	BasicBlock *next;
+
+	if (elif_pairs->size) 
+		next = elif_inter_BB[0];
+	else
+		next = elseBB;
+
+	// if condition
+	Builder.CreateCondBr(if_cond_v, ifBB, next);
+
+	// Emit the if_body
+	Builder.SetInsertPoint(ifBB);
+	Value *if_body_v = if_body->codegen();
+
+	Builder.CreateBr(mergeBB);
+	Builder.GetInsertBlock();
+	
+	// Emit the else_if body(s)
+	for (int i = 0; i < elif_pairs->size; i++) {
+
+		if (elif_pairs->size - 1 == i) 
+			next = elseBB;
+		else
+			next = elif_inter_BB[i + 1];
+
+		// Emit intermediate node code
+		F->getBasicBlockList().push_back(elif_inter_BB[i] );
+		Builder.SetInsertPoint(elif_inter_BB[i] );
+
+		Value *elif_cond_v = (*elif_pairs->elif_conditions)[i]->codegen();
+
+		elif_cond_v = Builder.CreateICmpEQ( elif_cond_v, ConstantInt::get(TheContext, APInt( 32, 0, false )), "elif_cond" );
+		Builder.CreateCondBr(elif_cond_v, elif_body_BB[i], next);
+		
+		// Emit elif body code
+		F->getBasicBlockList().push_back(elif_body_BB[i]);
+		Builder.SetInsertPoint(elif_body_BB[i]);
+		Value *elif_body_v = (*elif_pairs->elif_bodies)[i]->codegen();
+
+		Builder.CreateBr(mergeBB);
+		Builder.GetInsertBlock();
+	}
+
+
+	// Emit the else_body
+	F->getBasicBlockList().push_back(elseBB);
+	Builder.SetInsertPoint(elseBB);
+
+	if (else_body != NULL) else_body->codegen();
+
+	Builder.CreateBr(mergeBB);
+	Builder.GetInsertBlock();
+	
+	// Emit the merge block
+	F->getBasicBlockList().push_back(mergeBB);
+	Builder.SetInsertPoint(mergeBB);
+
+	verifyFunction(*F);
 	return nullptr;
+	//return PN;
 }
 
 Value *while_node::codegen()
 {
-	condition->codegen();
+	Function *F = Builder.GetInsertBlock()->getParent();
+	BasicBlock *loop_inter_BB = BasicBlock::Create(TheContext, "loop_inter", F);
+	BasicBlock *loopBB = BasicBlock::Create(TheContext, "loop", F);
+	BasicBlock *afterBB = BasicBlock::Create(TheContext, "afterloop", F);
+
+	Builder.CreateBr(loop_inter_BB);
+
+	// inter
+	Builder.SetInsertPoint(loop_inter_BB);
+
+	Value *loop_cond_v = condition->codegen();
+
+	loop_cond_v = Builder.CreateICmpEQ( loop_cond_v, ConstantInt::get(TheContext, APInt( 32, 0, false )), "loop_cond" );
+	Builder.CreateCondBr(loop_cond_v, loopBB, afterBB);
+
+	// loop body
+	Builder.SetInsertPoint( loopBB );
 	body->codegen();
+
+	Builder.CreateBr(loop_inter_BB);
+
+	//after loop block
+	Builder.SetInsertPoint(afterBB);
 
 	return nullptr;
 }
@@ -54,7 +139,7 @@ Value *statement_block_node::codegen()
 	for (int i = 0; i < statements->size(); i++) { 
 		v = (*statements)[i]->codegen();
 	}
-	return nullptr;
+	return v;
 }
 
 Value *class_sig_node::codegen()
@@ -94,9 +179,7 @@ Value *program_node::codegen(tree_node *root)
   tree_node *test_int_node =	get_tree_node(tree_vector, "Int");
 	test_int_node->AST_node->codegen();
 
-	printf("making main\n");
 	// Main Function 
-	printf("created main block\n");
 	FunctionType *FT = FunctionType::get(Type::getInt32Ty(TheContext), false);
 	Function *F = Function::Create(FT, Function::ExternalLinkage, "main",  TheModule.get() );
 
@@ -109,13 +192,12 @@ Value *program_node::codegen(tree_node *root)
 	}
 
 	verifyFunction(*F);
-	printf("Succesfully made function 'main'\n"); 
 
 	Builder.CreateRet( ConstantInt::get(TheContext, APInt( 32, 0, false )  ) );
 	return F;
 
-	F->eraseFromParent();
-	return nullptr;
+	//F->eraseFromParent();
+	//return nullptr;
 }
 
 Value *method_node::codegen()
@@ -149,7 +231,6 @@ Value *method_node::codegen()
 		Builder.CreateRet(b);
 
 		verifyFunction(*F);
-		printf("Succesfully made function '%s'\n", method_name); 
 
 		//F->print(errs());
 		return F;
@@ -193,7 +274,6 @@ Value *method_node::codegen()
 		Builder.CreateRet(b);
 
 		verifyFunction(*F);
-		printf("Succesfully made function '%s'\n", method_name); 
 
 		//F->print(errs());
 		return F;
@@ -203,7 +283,6 @@ Value *method_node::codegen()
 //		Builder.CreateRet(RetVal);
 //
 //		verifyFunction(*F);
-//		printf("Succesfully made function '%s'\n", method_name); 
 //
 //		return F;
 //	}
@@ -229,8 +308,10 @@ Value *return_node::codegen()
 {
 
 	if (return_value != NULL ) {
-		return_value->codegen();
+		Builder.CreateRet(return_value->codegen());
 	}
+	else
+		Builder.CreateRetVoid();
 
 	return nullptr;
 }
@@ -284,7 +365,6 @@ Value *method_call_node::codegen()
 	}
 
 	return Builder.CreateCall(CalleeF, ArgsV, "calltmp");
-
 }
 
 Value *plus_node::codegen()
@@ -299,7 +379,6 @@ Value *plus_node::codegen()
 
 Value *int_node::codegen()
 {
-	//	Value *v = ConstantFP::get(TheContext, APFloat((float) num));
 	Value *v = ConstantInt::get(TheContext, APInt(32, num, false));
 
 	return v;

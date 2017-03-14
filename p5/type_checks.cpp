@@ -30,8 +30,8 @@ string if_node::type_checks( map< string, string > *local, map< string, string >
 	lca = least_common_ancestor(c, "Boolean");
 
 	if (lca.compare("Boolean") != 0) {
-		fprintf(stderr, "error:%d: if condition is of type \"%s\", type Boolean needed\n", lineno, c.c_str()); 
-		error();
+		//fprintf(stderr, "error:%d: if condition is of type \"%s\", type Boolean needed\n", lineno, c.c_str()); 
+		//error();
 	}
 
 	if_body->type_checks(local, field);
@@ -47,8 +47,8 @@ string if_node::type_checks( map< string, string > *local, map< string, string >
 		c = (*c_iter)->type_checks(local, field);
 		lca = least_common_ancestor(c,"Boolean");
 		if (lca.compare("Boolean") != 0) {
-			fprintf(stderr, "error:%d: elif condition is of type \"%s\", type Boolean needed\n", lineno, c.c_str()); 
-			error();
+			//fprintf(stderr, "error:%d: elif condition is of type \"%s\", type Boolean needed\n", lineno, c.c_str()); 
+			//error();
 		}
 		(*b_iter)->type_checks(local, field);
 	}
@@ -66,8 +66,8 @@ string while_node::type_checks( map< string, string > *local, map< string, strin
 	string s1 = condition->type_checks(local, field);
 	string lca = least_common_ancestor(s1,"Boolean");
 	if (lca.compare("Boolean") != 0) {
-		fprintf(stderr, "error:%d: while condition is of type \"%s\", type Boolean needed\n", lineno, s1.c_str()); 
-		error();
+		//fprintf(stderr, "error:%d: while condition is of type \"%s\", type Boolean needed\n", lineno, s1.c_str()); 
+		//error();
 	}
 
 	body->type_checks(local, field);
@@ -148,6 +148,8 @@ string program_node::type_checks(tree_node *root)
 	// type_check in order from root to children
 	type_check_class(root);
 
+	current_method = "MAIN";
+
 	for(int i = 0; i < statement_vector->size(); i++)
 	{
 		(*statement_vector)[i]->type_checks(stmt_var_table, NULL);
@@ -188,6 +190,13 @@ string class_body_node::type_checks( map< string, string > *local, map< string, 
 string return_node::type_checks( map< string, string > *local, map< string, string > *field ) 
 {
 	string s;
+
+	if (!current_method.compare("MAIN")) {
+		//fprintf( stderr, "error:%d: Return statement not allowed outside of method definitions\n", lineno);
+		//error();
+		return "Nothing";
+	}
+
 	method_node * calling_method = get_AST_method_node(current_class, current_method);
 
 	if (return_value != NULL && calling_method->return_type != NULL) {
@@ -195,8 +204,8 @@ string return_node::type_checks( map< string, string > *local, map< string, stri
 
 		string lca = least_common_ancestor(s, string(calling_method->return_type));
 		if (string(calling_method->return_type).compare( lca ) != 0) {
-			fprintf(stderr, "error:%d: Return type of %s does not match declared return type of %s\n",
-					lineno, s.c_str(), calling_method->return_type);
+			fprintf(stderr, "error:%d: Return type of %s does not match declared return type of %s for method %s\n",
+					lineno, s.c_str(), calling_method->return_type, current_method.c_str() );
 			error();
 			return "Nothing";
 		}
