@@ -321,6 +321,10 @@ void add_parent_fields( map <string, string> *parent_fields, map <string, string
 	string c_fname, c_ftype;
 
 	
+	//if parent has no fields, return to class_node
+	if(parent_fields->empty())
+		return;
+	
 	for(p_fields_iter = parent_fields->begin(); p_fields_iter != parent_fields->end(); ++p_fields_iter)
 	{
 		string p_fname = string(p_fields_iter->first);

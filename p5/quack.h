@@ -89,6 +89,7 @@ class method_node {
 		int build_classTree(tree_node *);
 
 		string type_checks( map< string, string > *local, map< string, string > *fields );
+    llvm::Value *builtins();
     llvm::Value *codegen();
 };
 
@@ -280,7 +281,7 @@ class method_call_node : public r_expr_node {
 		string type_checks( map< string, string > *local, map< string, string > *fields );
     llvm::Value *codegen();
 };
-
+/*
 class plus_node: public r_expr_node {
 	public:
 		r_expr_node *left;
@@ -293,7 +294,7 @@ class plus_node: public r_expr_node {
 		string type_checks( map< string, string > *local, map< string, string > *fields );
 		llvm::Value *codegen();
 };
-
+*/
 class int_node : public r_expr_node {
 	public:
 		int_node(int value);

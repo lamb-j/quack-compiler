@@ -1,7 +1,7 @@
 CCC = clang++
 UNAME := $(shell uname)
 ifeq ($(UNAME), Linux)
-CCFLAGS= -O2 
+CCFLAGS= -std=c++11 -I /usr/include/llvm-3.9 -I /usr/include/llvm-c-3.9  -Wno-deprecated-register 
 CCLIBS= -lfl
 endif
 ifeq ($(UNAME), Darwin)

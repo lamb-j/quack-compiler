@@ -165,14 +165,14 @@ method_call_node::method_call_node(r_expr_node *ins, const char *mod, vector <r_
 
 	lineno = linenum;
 }
-
+/*
 plus_node::plus_node(r_expr_node *L, r_expr_node *R, int linenum)
 {
 	left = L;
 	right = R;
 	lineno = linenum;
 }
-
+*/
 int_node::int_node(int value) {
 	num = value;
 }

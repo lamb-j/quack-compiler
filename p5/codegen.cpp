@@ -236,6 +236,39 @@ Value *method_node::codegen()
 		return F;
 	}
 
+	if (!strcmp(method_name, "MINUS") ) {
+
+		// Prototype
+		std::vector<Type *> mTypes(formal_args->size(), Type::getInt32Ty(TheContext) );
+		FunctionType *FT = FunctionType::get(Type::getInt32Ty(TheContext), mTypes, false);
+		Function *F = Function::Create(FT, Function::ExternalLinkage, string(method_name), TheModule.get() );
+
+		unsigned Idx = 0;
+		for (auto &Arg : F->args()) {
+			string name = string( (* formal_args)[Idx++]->name );
+			Arg.setName( name );
+		}
+
+		NamedValues.clear();
+		for (auto &Arg : F->args())
+			NamedValues[Arg.getName()] = &Arg;
+
+
+		// Function Body
+		BasicBlock *BB = BasicBlock::Create(TheContext, "entry", F);
+		Builder.SetInsertPoint(BB);
+
+		Value *x = NamedValues["x"];
+		Value *y = NamedValues["y"];
+
+		Value *b = Builder.CreateSub(x, y, "minus_tmp");
+		Builder.CreateRet(b);
+
+		verifyFunction(*F);
+
+		//F->print(errs());
+		return F;
+	}
 	if (!strcmp(method_name, "PRINT") ) {
 
 		// Prototype
@@ -366,7 +399,7 @@ Value *method_call_node::codegen()
 
 	return Builder.CreateCall(CalleeF, ArgsV, "calltmp");
 }
-
+/*
 Value *plus_node::codegen()
 {
 	Value *L = left->codegen();
@@ -376,6 +409,7 @@ Value *plus_node::codegen()
 
 	return b;
 }
+*/
 
 Value *int_node::codegen()
 {

@@ -390,6 +390,7 @@ string method_call_node::type_checks( map< string, string > *local, map< string,
 	return "Dummy";
 }
 
+/*
 string plus_node::type_checks( map< string, string > *local, map< string, string > *field )
 {
 	string s1 = left->type_checks(local, field);
@@ -409,6 +410,7 @@ string plus_node::type_checks( map< string, string > *local, map< string, string
 	}
 	return s1;
 }
+*/
 
 string int_node::type_checks( map< string, string > *local, map< string, string > *field ) 
 {
