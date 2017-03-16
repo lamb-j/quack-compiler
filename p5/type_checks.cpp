@@ -341,7 +341,6 @@ string constructor_call_node::type_checks( map< string, string > *local, map< st
 	return s;
 }
 
-// may need to push this out to static_checks.cpp to avoid wrong error messages
 string method_call_node::type_checks( map< string, string > *local, map< string, string > *field ) 
 {
 
@@ -352,11 +351,10 @@ string method_call_node::type_checks( map< string, string > *local, map< string,
 		method_node *AST_method_node = get_AST_method_node (s1, string(modifier) ); 
 
 		if (AST_method_node == NULL) {
-			fprintf(stderr, "error:%d: Method %s not found in class %s\n", lineno, modifier, s1.c_str());
-			error();
+			//fprintf(stderr, "error:%d: Method %s not found in class %s\n", lineno, modifier, s1.c_str());
+			//error();
 			return "Nothing";
 		}
-
 
 		// check arg_vector (vector r_expr_node*)  against AST_method_node->formal_args (vector f_arg_pair*)
 		vector<r_expr_node *>::const_iterator iter;
@@ -391,28 +389,6 @@ string method_call_node::type_checks( map< string, string > *local, map< string,
 
 	return "Dummy";
 }
-
-/*
-string plus_node::type_checks( map< string, string > *local, map< string, string > *field )
-{
-	string s1 = left->type_checks(local, field);
-	string s2 = right->type_checks(local, field);
-
-	if (sweep == 2) {
-		if (s1.compare(s2) != 0) {
-			fprintf(stderr,"error:%d: type mismatch %s is not of type %s\n",lineno,s1.c_str(), s2.c_str());
-			error();
-			return "Nothing";
-		}
-		else if (class_defines_method(get_tree_node(tree_vector, s1), "PLUS") == 0){
-			fprintf(stderr,"error:%d: PLUS not defined for class %s\n",lineno,s1.c_str());
-			error();
-			return "Nothing";
-		}
-	}
-	return s1;
-}
-*/
 
 string int_node::type_checks( map< string, string > *local, map< string, string > *field ) 
 {

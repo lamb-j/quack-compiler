@@ -228,22 +228,14 @@ Value *method_node::codegen()
 
 		NamedValues.clear();
 		for (auto &Arg : F->args()) {
-		  printf("Arg: %s\n", Arg.getName().str().c_str()) ;
 			NamedValues[Arg.getName()] = &Arg;
     }
-
-		if (NamedValues.find("x") == NamedValues.end()) {
-			printf("VAL NOT IN MAP\n");
-		}
-    else
-      printf("VAL IN MAP!\n");
 
 		// Function Body
 		BasicBlock *BB = BasicBlock::Create(TheContext, "entry", F);
 		Builder.SetInsertPoint(BB);
 
-		Value *RetVal = body->codegen(); 
-		Builder.CreateRet(RetVal);
+		body->codegen(); 
 
  	  verifyFunction(*F);
 
@@ -284,31 +276,9 @@ Value *return_node::codegen()
 
 Value *l_expr_node::codegen()
 {
-	printf("in l_expr_node\n");
-printf("---\n");
-for(auto it = NamedValues.cbegin(); it != NamedValues.cend(); ++it)
-{
-    std::cout << it->first << " " << it->second << "\n";
-}
-printf("---\n");
+	Value *v = NamedValues["x"] ;
 
-  printf("find x\n");
-  NamedValues.find("x");
-  printf("find end\n");
-  NamedValues.end();
-
-  printf("compare\n");
-
-  if ( NamedValues.find("x") == NamedValues.end() ) {
-		printf("VAL NOT IN MAP\n");
-	}
-
-	Value *v = NamedValues[string(var)] ;
-
-  if ( !v ) printf("BAD VALUE\n");
-
-  Value *b = Builder.CreateLoad(v, "load_var");
-	return b; 
+	return v; 
 }
 
 Value *assign_node::codegen()
@@ -366,20 +336,23 @@ Value *method_call_node::codegen()
 	}
 
 	std::vector<Value *> ArgsV;
-	printf("arg vec size:%lu\n",arg_vector->size());
 	for (int i = 0; i < arg_vector->size(); ++i) {
-		printf("looping over args\n");
-		(*arg_vector)[i]->print(0);
-		ArgsV.push_back( (*arg_vector)[i]->codegen() );
-		printf("hereee\n");
+
+		Value *arg = (*arg_vector)[i]->codegen();
+
+		// Load any pointer variables 
+		if ( ( arg->getType() )->isPointerTy() )
+		  arg = Builder.CreateLoad(Type::getInt32Ty(TheContext), arg, "load_var_arg");
+
+		ArgsV.push_back( arg );
+
 		if (!ArgsV.back()) {
       printf("Bad Args\n");
 			return nullptr;
 		}
+
 	}
 
-
-	printf("Creating method call\n");
 	return Builder.CreateCall(CalleeF, ArgsV, "calltmp");
 }
 

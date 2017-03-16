@@ -193,11 +193,20 @@ tree_node * program_node::build_classTree()
 //	int_operators.push_back("MORE");
 //	int_operators.push_back("EQUALS");
 
-	for (int i = 0; i < int_operators.size(); i++) {
+	for (int i = 0; i < 4; i++) {
 		integer_method_vector->push_back( 
 				  new method_node(strdup(int_operators[i].c_str() ), 
 					integer_f_args, 
 					"Int", 
+					new statement_block_node( new vector<statement_node*>()),	
+					0) );
+	}
+
+	for (int i = 4; i < 5; i++) {
+		integer_method_vector->push_back( 
+				  new method_node(strdup(int_operators[i].c_str() ), 
+					integer_f_args, 
+					"Boolean", 
 					new statement_block_node( new vector<statement_node*>()),	
 					0) );
 	}
