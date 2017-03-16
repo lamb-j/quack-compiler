@@ -30,8 +30,8 @@ string if_node::type_checks( map< string, string > *local, map< string, string >
 	lca = least_common_ancestor(c, "Boolean");
 
 	if (lca.compare("Boolean") != 0) {
-		//fprintf(stderr, "error:%d: if condition is of type \"%s\", type Boolean needed\n", lineno, c.c_str()); 
-		//error();
+		fprintf(stderr, "error:%d: if condition is of type \"%s\", type Boolean needed\n", lineno, c.c_str()); 
+		error();
 	}
 
 	if_body->type_checks(local, field);
@@ -47,8 +47,8 @@ string if_node::type_checks( map< string, string > *local, map< string, string >
 		c = (*c_iter)->type_checks(local, field);
 		lca = least_common_ancestor(c,"Boolean");
 		if (lca.compare("Boolean") != 0) {
-			//fprintf(stderr, "error:%d: elif condition is of type \"%s\", type Boolean needed\n", lineno, c.c_str()); 
-			//error();
+			fprintf(stderr, "error:%d: elif condition is of type \"%s\", type Boolean needed\n", lineno, c.c_str()); 
+			error();
 		}
 		(*b_iter)->type_checks(local, field);
 	}
@@ -66,8 +66,8 @@ string while_node::type_checks( map< string, string > *local, map< string, strin
 	string s1 = condition->type_checks(local, field);
 	string lca = least_common_ancestor(s1,"Boolean");
 	if (lca.compare("Boolean") != 0) {
-		//fprintf(stderr, "error:%d: while condition is of type \"%s\", type Boolean needed\n", lineno, s1.c_str()); 
-		//error();
+		fprintf(stderr, "error:%d: while condition is of type \"%s\", type Boolean needed\n", lineno, s1.c_str()); 
+		error();
 	}
 
 	body->type_checks(local, field);
@@ -283,6 +283,8 @@ string assign_node::type_checks( map< string, string > *local, map< string, stri
 	// var case
 	if (lhs->var != NULL) {
 		string s1 = string(lhs->var);
+
+		var_name = s1;
 		string s2 = rhs->type_checks(local, field);
 
 		// add var to table with least_common_ancestor of rhs, and vars old type

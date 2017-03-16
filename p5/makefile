@@ -15,8 +15,8 @@ YFLAGS= -d -t -y
 
 RM = /bin/rm -f
 
-quack: y.tab.o lex.yy.o quack.o class_tree.o print_AST.o build_classTree.o type_checks.o codegen.o
-	${CCC} ${CCFLAGS} lex.yy.o y.tab.o quack.o class_tree.o print_AST.o build_classTree.o type_checks.o codegen.o -o quack `llvm-config --cppflags --ldflags --system-libs --libs core` ${CCLIBS} 
+quack: y.tab.o lex.yy.o quack.o class_tree.o print_AST.o build_classTree.o type_checks.o codegen.o defaults.o
+	${CCC} ${CCFLAGS} lex.yy.o y.tab.o quack.o class_tree.o print_AST.o build_classTree.o type_checks.o codegen.o defaults.o -o quack `llvm-config --cppflags --ldflags --system-libs --libs core` ${CCLIBS} 
 
 quack.o: quack.cpp quack.h
 	${CCC} ${CCFLAGS} -c quack.cpp 
@@ -30,10 +30,11 @@ type_checks.o: type_checks.cpp
 	${CCC} ${CCFLAGS} -c type_checks.cpp
 codegen.o: codegen.cpp
 	${CCC} ${CCFLAGS} -c codegen.cpp 
+defaults.o: defaults.cpp
+	${CCC} ${CCFLAGS} -c defaults.cpp 
 y.tab.o: quack.y
 	${YACC} ${YFLAGS} quack.y
 	${CCC} ${CCFLAGS} y.tab.c -c 
-
 lex.yy.o: quack.l
 	${LEX} $(LFLAGS) quack.l
 	${CCC} ${CCFLAGS} lex.yy.c -c 

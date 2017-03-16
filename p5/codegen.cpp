@@ -25,7 +25,7 @@ Value *if_node::codegen()
 		return nullptr;
 	}
 
-	if_cond_v = Builder.CreateICmpEQ( if_cond_v, ConstantInt::get(TheContext, APInt( 32, 0, false )), "if_cond" );
+	if_cond_v = Builder.CreateICmpEQ( if_cond_v, ConstantInt::get(TheContext, APInt( 1, 1, false )), "if_cond" );
 
 	Function *F = Builder.GetInsertBlock()->getParent();
 
@@ -85,7 +85,6 @@ Value *if_node::codegen()
 		Builder.GetInsertBlock();
 	}
 
-
 	// Emit the else_body
 	F->getBasicBlockList().push_back(elseBB);
 	Builder.SetInsertPoint(elseBB);
@@ -118,7 +117,8 @@ Value *while_node::codegen()
 
 	Value *loop_cond_v = condition->codegen();
 
-	loop_cond_v = Builder.CreateICmpEQ( loop_cond_v, ConstantInt::get(TheContext, APInt( 32, 0, false )), "loop_cond" );
+	loop_cond_v = Builder.CreateICmpEQ( loop_cond_v, 
+			ConstantInt::get(TheContext, APInt( 1, 1, false )), "loop_cond" );
 	Builder.CreateCondBr(loop_cond_v, loopBB, afterBB);
 
 	// loop body
@@ -135,6 +135,7 @@ Value *while_node::codegen()
 
 Value *statement_block_node::codegen()
 {
+	printf("in SBN\n");
 	Value *v;
 	for (int i = 0; i < statements->size(); i++) { 
 		v = (*statements)[i]->codegen();
@@ -158,6 +159,7 @@ Value *class_node::codegen()
 
 Value *program_node::codegen(tree_node *root)
 {
+	printf("In pgm node\n");
 
 	// Generate C functions
   // printf
@@ -176,10 +178,12 @@ Value *program_node::codegen(tree_node *root)
 	func->setCallingConv(CallingConv::C);
 
 	//codegen_class(root);
-  tree_node *test_int_node =	get_tree_node(tree_vector, "Int");
-	test_int_node->AST_node->codegen();
+	get_tree_node(tree_vector, "Int")->AST_node->codegen();
+	get_tree_node(tree_vector, "A")->AST_node->codegen();
 
 	// Main Function 
+  NamedValues.clear();
+
 	FunctionType *FT = FunctionType::get(Type::getInt32Ty(TheContext), false);
 	Function *F = Function::Create(FT, Function::ExternalLinkage, "main",  TheModule.get() );
 
@@ -202,12 +206,19 @@ Value *program_node::codegen(tree_node *root)
 
 Value *method_node::codegen()
 {
-	if (!strcmp(method_name, "PLUS") ) {
+	Function *F;
 
-		// Prototype
-		std::vector<Type *> mTypes(formal_args->size(), Type::getInt32Ty(TheContext) );
+	// check if method is a built-in method
+  F = builtins();
+
+	if ( F ) {
+		return F;
+	}
+	else {
+		std::vector<Type *> mTypes( formal_args->size() , Type::getInt32Ty(TheContext) );
 		FunctionType *FT = FunctionType::get(Type::getInt32Ty(TheContext), mTypes, false);
-		Function *F = Function::Create(FT, Function::ExternalLinkage, string(method_name), TheModule.get() );
+		Function *F = Function::Create(FT, Function::ExternalLinkage,
+				string(method_name), TheModule.get() );
 
 		unsigned Idx = 0;
 		for (auto &Arg : F->args()) {
@@ -216,111 +227,32 @@ Value *method_node::codegen()
 		}
 
 		NamedValues.clear();
-		for (auto &Arg : F->args())
+		for (auto &Arg : F->args()) {
+		  printf("Arg: %s\n", Arg.getName().str().c_str()) ;
 			NamedValues[Arg.getName()] = &Arg;
+    }
 
+		if (NamedValues.find("x") == NamedValues.end()) {
+			printf("VAL NOT IN MAP\n");
+		}
+    else
+      printf("VAL IN MAP!\n");
 
 		// Function Body
 		BasicBlock *BB = BasicBlock::Create(TheContext, "entry", F);
 		Builder.SetInsertPoint(BB);
 
-		Value *x = NamedValues["x"];
-		Value *y = NamedValues["y"];
+		Value *RetVal = body->codegen(); 
+		Builder.CreateRet(RetVal);
 
-		Value *b = Builder.CreateAdd(x, y, "addtmp");
-		Builder.CreateRet(b);
+ 	  verifyFunction(*F);
 
-		verifyFunction(*F);
-
-		//F->print(errs());
 		return F;
 	}
 
-	if (!strcmp(method_name, "MINUS") ) {
+	printf("ERROR, NO FUNCTION BUILT\n");
 
-		// Prototype
-		std::vector<Type *> mTypes(formal_args->size(), Type::getInt32Ty(TheContext) );
-		FunctionType *FT = FunctionType::get(Type::getInt32Ty(TheContext), mTypes, false);
-		Function *F = Function::Create(FT, Function::ExternalLinkage, string(method_name), TheModule.get() );
-
-		unsigned Idx = 0;
-		for (auto &Arg : F->args()) {
-			string name = string( (* formal_args)[Idx++]->name );
-			Arg.setName( name );
-		}
-
-		NamedValues.clear();
-		for (auto &Arg : F->args())
-			NamedValues[Arg.getName()] = &Arg;
-
-
-		// Function Body
-		BasicBlock *BB = BasicBlock::Create(TheContext, "entry", F);
-		Builder.SetInsertPoint(BB);
-
-		Value *x = NamedValues["x"];
-		Value *y = NamedValues["y"];
-
-		Value *b = Builder.CreateSub(x, y, "minus_tmp");
-		Builder.CreateRet(b);
-
-		verifyFunction(*F);
-
-		//F->print(errs());
-		return F;
-	}
-	if (!strcmp(method_name, "PRINT") ) {
-
-		// Prototype
-		std::vector<Type *> mTypes;
-		mTypes.push_back( llvm::Type::getInt32Ty(TheContext) );
-
-		FunctionType *FT = FunctionType::get(
-				Type::getInt32Ty(TheContext), mTypes, false);
-
-		Function *F = Function::Create(FT, Function::ExternalLinkage, "PRINT",  TheModule.get() );
-
-		unsigned Idx = 0;
-		for (auto &Arg : F->args()) {
-			string name = string( (* formal_args)[Idx++]->name );
-			Arg.setName( name );
-		}
-
-		NamedValues.clear();
-		for (auto &Arg : F->args())
-			NamedValues[Arg.getName()] = &Arg;
-
-		// Funciton Body
-		BasicBlock *BB = BasicBlock::Create(TheContext, "entry", F);
-		Builder.SetInsertPoint(BB);
-
-		Value* this_val = NamedValues["this"];
-		Value *formatStr = Builder.CreateGlobalStringPtr("value = %d\n");
-
-		std::vector<Value *> ArgsV;
-		ArgsV.push_back(formatStr);
-		ArgsV.push_back(this_val);
-
-		Function *CalleeF = TheModule->getFunction( "printf" );
-		
-	  Value* b = Builder.CreateCall(CalleeF, ArgsV, "calltemp");
-		Builder.CreateRet(b);
-
-		verifyFunction(*F);
-
-		//F->print(errs());
-		return F;
-	}
-
-//	else if (Value *RetVal = body->codegen() ) {
-//		Builder.CreateRet(RetVal);
-//
-//		verifyFunction(*F);
-//
-//		return F;
-//	}
-//
-//	F->eraseFromParent();
+	F->eraseFromParent();
 	return nullptr;
 }
 
@@ -339,6 +271,7 @@ Value *class_body_node::codegen()
 
 Value *return_node::codegen()
 {
+	printf("in RET node\n");
 
 	if (return_value != NULL ) {
 		Builder.CreateRet(return_value->codegen());
@@ -351,20 +284,59 @@ Value *return_node::codegen()
 
 Value *l_expr_node::codegen()
 {
+	printf("in l_expr_node\n");
+printf("---\n");
+for(auto it = NamedValues.cbegin(); it != NamedValues.cend(); ++it)
+{
+    std::cout << it->first << " " << it->second << "\n";
+}
+printf("---\n");
 
-	return nullptr;
+  printf("find x\n");
+  NamedValues.find("x");
+  printf("find end\n");
+  NamedValues.end();
+
+  printf("compare\n");
+
+  if ( NamedValues.find("x") == NamedValues.end() ) {
+		printf("VAL NOT IN MAP\n");
+	}
+
+	Value *v = NamedValues[string(var)] ;
+
+  if ( !v ) printf("BAD VALUE\n");
+
+  Value *b = Builder.CreateLoad(v, "load_var");
+	return b; 
 }
 
 Value *assign_node::codegen()
 {
-	lhs->codegen();
-	rhs->codegen();
+	printf("in ASS node\n");
+  
+	Value *lhs_v;
+	// Get var name
+	if(!NamedValues[var_name])
+	{
+		lhs_v = Builder.CreateAlloca(Type::getInt32Ty(TheContext), nullptr, var_name);
+		NamedValues[var_name] = lhs_v;
+	}
+	else
+		lhs_v = NamedValues[var_name];
+		
+	Value *rhs_v = rhs->codegen();
 
-	return nullptr;
+  Value *v = 	Builder.CreateStore(rhs_v, lhs_v, false);
+
+	// add lhs to map
+
+	return v; 
 }
 
 Value *constructor_call_node::codegen()
 {
+	printf("in CCall node\n");
 
 	for (int i = 0; i < arg_vector->size(); ++i) {
 		(*arg_vector)[i]->codegen();
@@ -376,10 +348,13 @@ Value *constructor_call_node::codegen()
 //call_expr
 Value *method_call_node::codegen()
 {
+
 	//instance->codegen();
+	printf("in method_call_node: %s\n", modifier);
 
 	Function *CalleeF = TheModule->getFunction( string(modifier) );
 
+	printf("created CALEEF\n");
 	if (!CalleeF) {
 		fprintf(stderr, "error:%d: Unknown function %s referenced\n", lineno, modifier);
 		error();
@@ -391,28 +366,26 @@ Value *method_call_node::codegen()
 	}
 
 	std::vector<Value *> ArgsV;
+	printf("arg vec size:%lu\n",arg_vector->size());
 	for (int i = 0; i < arg_vector->size(); ++i) {
+		printf("looping over args\n");
+		(*arg_vector)[i]->print(0);
 		ArgsV.push_back( (*arg_vector)[i]->codegen() );
-		if (!ArgsV.back())
+		printf("hereee\n");
+		if (!ArgsV.back()) {
+      printf("Bad Args\n");
 			return nullptr;
+		}
 	}
 
+
+	printf("Creating method call\n");
 	return Builder.CreateCall(CalleeF, ArgsV, "calltmp");
 }
-/*
-Value *plus_node::codegen()
-{
-	Value *L = left->codegen();
-	Value *R = right->codegen();
-
-	Value *b = Builder.CreateFAdd(L, R, "addtmp");
-
-	return b;
-}
-*/
 
 Value *int_node::codegen()
 {
+	printf("in INT node\n");
 	Value *v = ConstantInt::get(TheContext, APInt(32, num, false));
 
 	return v;
@@ -420,5 +393,6 @@ Value *int_node::codegen()
 
 Value *str_node::codegen()
 {
+	printf("in STR node\n");
 	return nullptr;
 }

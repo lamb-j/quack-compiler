@@ -89,7 +89,7 @@ class method_node {
 		int build_classTree(tree_node *);
 
 		string type_checks( map< string, string > *local, map< string, string > *fields );
-    llvm::Value *builtins();
+    llvm::Function *builtins();
     llvm::Value *codegen();
 };
 
@@ -243,6 +243,8 @@ class assign_node : public statement_node {
 		r_expr_node *rhs;
 		l_expr_node *lhs;
 		char *c_name;
+
+		string var_name;
 		int lineno;
 
 		assign_node(l_expr_node *left, r_expr_node *right, int linenum);

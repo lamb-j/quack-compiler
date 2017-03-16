@@ -185,13 +185,13 @@ tree_node * program_node::build_classTree()
 	vector <string> int_operators;
 	int_operators.push_back("PLUS");
 	int_operators.push_back("MINUS");
-	//int_operators.push_back("TIMES");
-	//int_operators.push_back("DIVIDE");
-	//int_operators.push_back("ATMOST");
-	//int_operators.push_back("ATLEAST");
-	//int_operators.push_back("LESS");
-	//int_operators.push_back("MORE");
-	//int_operators.push_back("EQUALS");
+	int_operators.push_back("TIMES");
+	int_operators.push_back("DIVIDE");
+	int_operators.push_back("ATMOST");
+//	int_operators.push_back("ATLEAST");
+//	int_operators.push_back("LESS");
+//	int_operators.push_back("MORE");
+//	int_operators.push_back("EQUALS");
 
 	for (int i = 0; i < int_operators.size(); i++) {
 		integer_method_vector->push_back( 
