@@ -308,11 +308,16 @@ Value *constructor_call_node::codegen()
 {
 	printf("in CCall node\n");
 
-	for (int i = 0; i < arg_vector->size(); ++i) {
-		(*arg_vector)[i]->codegen();
-	}
+	//for (int i = 0; i < arg_vector->size(); ++i) {
+	//	(*arg_vector)[i]->codegen();
+	//}
 
-	return nullptr;
+	//return nullptr;
+
+	Value *v = ConstantInt::get(TheContext, APInt(32, 0, false));
+
+	return v;
+
 }
 
 //call_expr

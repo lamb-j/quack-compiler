@@ -395,16 +395,6 @@ int method_call_node::build_classTree()
 	return 0;	
 }
 
-/*
-int plus_node:: build_classTree()
-{
-	left->build_classTree();
-	right->build_classTree();
-
-	return 0;
-}
-*/
-
 int int_node::build_classTree() 
 {
 

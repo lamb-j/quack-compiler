@@ -12,6 +12,6 @@ class A () {
   }
 }
 
-x = 0;
-//x = x.TEST(x);
-x.PRINT();
+x = A();
+
+x.TEST(3);

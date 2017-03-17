@@ -192,8 +192,8 @@ string return_node::type_checks( map< string, string > *local, map< string, stri
 	string s;
 
 	if (!current_method.compare("MAIN")) {
-		//fprintf( stderr, "error:%d: Return statement not allowed outside of method definitions\n", lineno);
-		//error();
+		fprintf( stderr, "error:%d: Return statement not allowed outside of method definitions\n", lineno);
+		error();
 		return "Nothing";
 	}
 
@@ -351,8 +351,8 @@ string method_call_node::type_checks( map< string, string > *local, map< string,
 		method_node *AST_method_node = get_AST_method_node (s1, string(modifier) ); 
 
 		if (AST_method_node == NULL) {
-			//fprintf(stderr, "error:%d: Method %s not found in class %s\n", lineno, modifier, s1.c_str());
-			//error();
+			fprintf(stderr, "error:%d: Method %s not found in class %s\n", lineno, modifier, s1.c_str());
+			error();
 			return "Nothing";
 		}
 
