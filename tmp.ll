@@ -3,101 +3,41 @@ source_filename = "tmp.cpp"
 target datalayout = "e-m:o-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-apple-macosx10.12.0"
 
-%ident_t = type { i32, i32, i32, i32, i8* }
+%"class.std::__1::basic_ostream" = type { i32 (...)**, %"class.std::__1::basic_ios.base" }
+%"class.std::__1::basic_ios.base" = type <{ %"class.std::__1::ios_base", %"class.std::__1::basic_ostream"*, i32 }>
+%"class.std::__1::ios_base" = type { i32 (...)**, i32, i64, i64, i32, i32, i8*, i8*, void (i32, %"class.std::__1::ios_base"*, i32)**, i32*, i64, i64, i64*, i64, i64, i8**, i64, i64 }
+%class.A = type { i8 }
 
-@.str = private unnamed_addr constant [23 x i8] c";unknown;unknown;0;0;;\00", align 1
-@0 = private unnamed_addr constant %ident_t { i32 0, i32 2, i32 0, i32 0, i8* getelementptr inbounds ([23 x i8], [23 x i8]* @.str, i32 0, i32 0) }, align 8
+@_ZNSt3__14coutE = external global %"class.std::__1::basic_ostream", align 8
 
-; Function Attrs: ssp uwtable
-define i32 @_Z3tmpv() #0 {
-  %1 = alloca i32, align 4
-  call void (%ident_t*, i32, void (i32*, i32*, ...)*, ...) @__kmpc_fork_call(%ident_t* @0, i32 1, void (i32*, i32*, ...)* bitcast (void (i32*, i32*, i32*)* @.omp_outlined. to void (i32*, i32*, ...)*), i32* %1)
+; Function Attrs: norecurse ssp uwtable
+define i32 @main() #0 {
+  %1 = alloca %class.A, align 1
+  %2 = call i32 @_ZN1A3tmpEi(%class.A* %1, i32 3)
+  %3 = call dereferenceable(160) %"class.std::__1::basic_ostream"* @_ZNSt3__113basic_ostreamIcNS_11char_traitsIcEEElsEi(%"class.std::__1::basic_ostream"* @_ZNSt3__14coutE, i32 %2)
   ret i32 0
 }
 
+declare dereferenceable(160) %"class.std::__1::basic_ostream"* @_ZNSt3__113basic_ostreamIcNS_11char_traitsIcEEElsEi(%"class.std::__1::basic_ostream"*, i32) #1
+
 ; Function Attrs: nounwind ssp uwtable
-define internal void @.omp_outlined.(i32* noalias, i32* noalias, i32* dereferenceable(4)) #1 {
-  %4 = alloca i32*, align 8
-  %5 = alloca i32*, align 8
-  %6 = alloca i32*, align 8
-  %7 = alloca i32, align 4
-  %8 = alloca i32, align 4
-  %9 = alloca i32, align 4
-  %10 = alloca i32, align 4
-  %11 = alloca i32, align 4
-  %12 = alloca i32, align 4
-  store i32* %0, i32** %4, align 8
-  store i32* %1, i32** %5, align 8
-  store i32* %2, i32** %6, align 8
-  %13 = load i32*, i32** %6, align 8
-  store i32 0, i32* %8, align 4
-  store i32 9, i32* %9, align 4
-  store i32 1, i32* %10, align 4
-  store i32 0, i32* %11, align 4
-  %14 = load i32*, i32** %4, align 8
-  %15 = load i32, i32* %14, align 4
-  call void @__kmpc_for_static_init_4(%ident_t* @0, i32 %15, i32 34, i32* %11, i32* %8, i32* %9, i32* %10, i32 1, i32 1)
-  %16 = load i32, i32* %9, align 4
-  %17 = icmp sgt i32 %16, 9
-  br i1 %17, label %18, label %19
-
-; <label>:18:                                     ; preds = %3
-  br label %21
-
-; <label>:19:                                     ; preds = %3
-  %20 = load i32, i32* %9, align 4
-  br label %21
-
-; <label>:21:                                     ; preds = %19, %18
-  %22 = phi i32 [ 9, %18 ], [ %20, %19 ]
-  store i32 %22, i32* %9, align 4
-  %23 = load i32, i32* %8, align 4
-  store i32 %23, i32* %7, align 4
-  br label %24
-
-; <label>:24:                                     ; preds = %34, %21
-  %25 = load i32, i32* %7, align 4
-  %26 = load i32, i32* %9, align 4
-  %27 = icmp sle i32 %25, %26
-  br i1 %27, label %28, label %37
-
-; <label>:28:                                     ; preds = %24
-  %29 = load i32, i32* %7, align 4
-  %30 = mul nsw i32 %29, 1
-  %31 = add nsw i32 0, %30
-  store i32 %31, i32* %12, align 4
-  %32 = load i32, i32* %12, align 4
-  store i32 %32, i32* %13, align 4
-  br label %33
-
-; <label>:33:                                     ; preds = %28
-  br label %34
-
-; <label>:34:                                     ; preds = %33
-  %35 = load i32, i32* %7, align 4
-  %36 = add nsw i32 %35, 1
-  store i32 %36, i32* %7, align 4
-  br label %24
-
-; <label>:37:                                     ; preds = %24
-  br label %38
-
-; <label>:38:                                     ; preds = %37
-  call void @__kmpc_for_static_fini(%ident_t* @0, i32 %15)
-  ret void
+define linkonce_odr i32 @_ZN1A3tmpEi(%class.A*, i32) #2 align 2 {
+  %3 = alloca %class.A*, align 8
+  %4 = alloca i32, align 4
+  store %class.A* %0, %class.A** %3, align 8
+  store i32 %1, i32* %4, align 4
+  %5 = load %class.A*, %class.A** %3, align 8
+  store i32 56, i32* %4, align 4
+  %6 = load i32, i32* %4, align 4
+  ret i32 %6
 }
 
-declare void @__kmpc_for_static_init_4(%ident_t*, i32, i32, i32*, i32*, i32*, i32*, i32, i32)
-
-declare void @__kmpc_for_static_fini(%ident_t*, i32)
-
-declare void @__kmpc_fork_call(%ident_t*, i32, void (i32*, i32*, ...)*, ...)
-
-attributes #0 = { ssp uwtable "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="core2" "target-features"="+cx16,+fxsr,+mmx,+sse,+sse2,+sse3,+ssse3,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
-attributes #1 = { nounwind ssp uwtable "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="core2" "target-features"="+cx16,+fxsr,+mmx,+sse,+sse2,+sse3,+ssse3,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #0 = { norecurse ssp uwtable "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="penryn" "target-features"="+cx16,+fxsr,+mmx,+sse,+sse2,+sse3,+sse4.1,+ssse3" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #1 = { "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="penryn" "target-features"="+cx16,+fxsr,+mmx,+sse,+sse2,+sse3,+sse4.1,+ssse3" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #2 = { nounwind ssp uwtable "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="penryn" "target-features"="+cx16,+fxsr,+mmx,+sse,+sse2,+sse3,+sse4.1,+ssse3" "unsafe-fp-math"="false" "use-soft-float"="false" }
 
 !llvm.module.flags = !{!0}
 !llvm.ident = !{!1}
 
 !0 = !{i32 1, !"PIC Level", i32 2}
-!1 = !{!"clang version 3.9.1 (tags/RELEASE_391/final)"}
+!1 = !{!"Apple LLVM version 8.0.0 (clang-800.0.42.1)"}

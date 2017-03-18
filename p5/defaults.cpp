@@ -44,7 +44,6 @@ Function *method_node::builtins()
 	if (!strcmp(method_name, "PRINT") ) return Int_PRINT_codegen(formal_args);
 
 	// no default function matched
-	printf("ERROR not default function\n");
 	return nullptr;
 }
 

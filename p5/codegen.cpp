@@ -7,7 +7,7 @@
 #include "quack.h"
 using namespace llvm;
 
-#define DEBUG 0
+#define DEBUG_FLAG 0
 
 // external data structures
 extern std::vector < tree_node *> *tree_vector;
@@ -20,7 +20,7 @@ std::unique_ptr<llvm::Module> TheModule;
 
 Value *if_node::codegen()
 {
-  #if DEBUG
+  #if DEBUG_FLAG
 	printf("in SBN\n");
   #endif
 
@@ -110,7 +110,7 @@ Value *if_node::codegen()
 
 Value *while_node::codegen()
 {
-  #if DEBUG
+  #if DEBUG_FLAG
 	printf("in SBN\n");
   #endif
 	Function *F = Builder.GetInsertBlock()->getParent();
@@ -143,7 +143,7 @@ Value *while_node::codegen()
 
 Value *statement_block_node::codegen()
 {
-  #if DEBUG
+  #if DEBUG_FLAG
 	printf("in SBN\n");
   #endif
 
@@ -170,7 +170,7 @@ Value *class_node::codegen()
 
 Value *program_node::codegen(tree_node *root)
 {
-  #if DEBUG
+  #if DEBUG_FLAG
 	printf("In pgm node\n");
   #endif
 
@@ -220,7 +220,7 @@ Value *program_node::codegen(tree_node *root)
 
 Value *method_node::codegen()
 {
-  #if DEBUG
+  #if DEBUG_FLAG
   printf("In method node\n");
   #endif
 
@@ -290,7 +290,7 @@ Value *class_body_node::codegen()
 
 Value *return_node::codegen()
 {
-  #if DEBUG
+  #if DEBUG_FLAG
 	printf("in RET node\n");
   #endif
 
@@ -319,7 +319,7 @@ Value *l_expr_node::codegen()
 
 Value *assign_node::codegen()
 {
-  #if DEBUG
+  #if DEBUG_FLAG
 	printf("in ASS node\n");
   #endif
   
@@ -348,7 +348,7 @@ Value *assign_node::codegen()
 
 Value *constructor_call_node::codegen()
 {
-  #if DEBUG
+  #if DEBUG_FLAG
 	printf("in CCall node\n");
   #endif
 
@@ -369,7 +369,7 @@ Value *method_call_node::codegen()
 {
 
 	//instance->codegen();
-  #if DEBUG
+  #if DEBUG_FLAG
 	printf("in method_call_node: %s\n", modifier);
   #endif
 
@@ -407,7 +407,7 @@ Value *method_call_node::codegen()
 
 Value *int_node::codegen()
 {
-  #if DEBUG
+  #if DEBUG_FLAG
 	printf("in INT node\n");
   #endif
 
@@ -418,7 +418,7 @@ Value *int_node::codegen()
 
 Value *str_node::codegen()
 {
-  #if DEBUG
+  #if DEBUG_FLAG
 	printf("in STR node\n");
   #endif 
 
