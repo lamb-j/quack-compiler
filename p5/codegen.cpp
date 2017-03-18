@@ -7,6 +7,8 @@
 #include "quack.h"
 using namespace llvm;
 
+#define DEBUG 0
+
 // external data structures
 extern std::vector < tree_node *> *tree_vector;
 extern int error_flag;
@@ -18,6 +20,9 @@ std::unique_ptr<llvm::Module> TheModule;
 
 Value *if_node::codegen()
 {
+  #if DEBUG
+	printf("in SBN\n");
+  #endif
 
 	Value *if_cond_v = if_condition->codegen();
 
@@ -105,6 +110,9 @@ Value *if_node::codegen()
 
 Value *while_node::codegen()
 {
+  #if DEBUG
+	printf("in SBN\n");
+  #endif
 	Function *F = Builder.GetInsertBlock()->getParent();
 	BasicBlock *loop_inter_BB = BasicBlock::Create(TheContext, "loop_inter", F);
 	BasicBlock *loopBB = BasicBlock::Create(TheContext, "loop", F);
@@ -135,7 +143,10 @@ Value *while_node::codegen()
 
 Value *statement_block_node::codegen()
 {
+  #if DEBUG
 	printf("in SBN\n");
+  #endif
+
 	Value *v;
 	for (int i = 0; i < statements->size(); i++) { 
 		v = (*statements)[i]->codegen();
@@ -159,7 +170,9 @@ Value *class_node::codegen()
 
 Value *program_node::codegen(tree_node *root)
 {
+  #if DEBUG
 	printf("In pgm node\n");
+  #endif
 
 	// Generate C functions
   // printf
@@ -180,6 +193,7 @@ Value *program_node::codegen(tree_node *root)
 	//codegen_class(root);
 	get_tree_node(tree_vector, "Int")->AST_node->codegen();
 	get_tree_node(tree_vector, "A")->AST_node->codegen();
+	get_tree_node(tree_vector, "B")->AST_node->codegen();
 
 	// Main Function 
   NamedValues.clear();
@@ -206,6 +220,10 @@ Value *program_node::codegen(tree_node *root)
 
 Value *method_node::codegen()
 {
+  #if DEBUG
+  printf("In method node\n");
+  #endif
+
 	Function *F;
 
 	// check if method is a built-in method
@@ -235,6 +253,15 @@ Value *method_node::codegen()
 		BasicBlock *BB = BasicBlock::Create(TheContext, "entry", F);
 		Builder.SetInsertPoint(BB);
 
+		for (auto &Arg : F->args()) {
+      string Arg_ptr_name = Arg.getName().str() + "_ptr";
+
+		  Value *Arg_ptr = Builder.CreateAlloca(Type::getInt32Ty(TheContext), nullptr, Arg_ptr_name);
+      Builder.CreateStore( &Arg, Arg_ptr, false );
+
+			NamedValues[Arg_ptr_name] = Arg_ptr;
+    }
+
 		body->codegen(); 
 
  	  verifyFunction(*F);
@@ -263,7 +290,9 @@ Value *class_body_node::codegen()
 
 Value *return_node::codegen()
 {
+  #if DEBUG
 	printf("in RET node\n");
+  #endif
 
 	if (return_value != NULL ) {
 		Builder.CreateRet(return_value->codegen());
@@ -276,14 +305,23 @@ Value *return_node::codegen()
 
 Value *l_expr_node::codegen()
 {
-	Value *v = NamedValues["x"] ;
+	Value *v = NamedValues[string(var)];
+
+  // If the var isn't a pointer (came from function arg), get the pointer equivalent (var_ptr)
+	if ( !( v->getType()->isPointerTy() ) ) {
+
+	  v = NamedValues[string(var) + "_ptr"];
+		v = Builder.CreateLoad(Type::getInt32Ty(TheContext), v, "load_var_ptr");
+  }
 
 	return v; 
 }
 
 Value *assign_node::codegen()
 {
+  #if DEBUG
 	printf("in ASS node\n");
+  #endif
   
 	Value *lhs_v;
 	// Get var name
@@ -297,16 +335,22 @@ Value *assign_node::codegen()
 		
 	Value *rhs_v = rhs->codegen();
 
-  Value *v = 	Builder.CreateStore(rhs_v, lhs_v, false);
+  // If lhs is not a pointer, we need to get the pointer before the store
+	if ( !( lhs_v->getType()->isPointerTy() ) ) {
+	  lhs_v = NamedValues[var_name + "_ptr"];
+  }
 
-	// add lhs to map
+  // putting rhs in lhs (must be ptr)
+  Value *v = 	Builder.CreateStore(rhs_v, lhs_v, false);
 
 	return v; 
 }
 
 Value *constructor_call_node::codegen()
 {
+  #if DEBUG
 	printf("in CCall node\n");
+  #endif
 
 	//for (int i = 0; i < arg_vector->size(); ++i) {
 	//	(*arg_vector)[i]->codegen();
@@ -325,11 +369,12 @@ Value *method_call_node::codegen()
 {
 
 	//instance->codegen();
+  #if DEBUG
 	printf("in method_call_node: %s\n", modifier);
+  #endif
 
 	Function *CalleeF = TheModule->getFunction( string(modifier) );
 
-	printf("created CALEEF\n");
 	if (!CalleeF) {
 		fprintf(stderr, "error:%d: Unknown function %s referenced\n", lineno, modifier);
 		error();
@@ -342,7 +387,6 @@ Value *method_call_node::codegen()
 
 	std::vector<Value *> ArgsV;
 	for (int i = 0; i < arg_vector->size(); ++i) {
-
 		Value *arg = (*arg_vector)[i]->codegen();
 
 		// Load any pointer variables 
@@ -363,7 +407,10 @@ Value *method_call_node::codegen()
 
 Value *int_node::codegen()
 {
+  #if DEBUG
 	printf("in INT node\n");
+  #endif
+
 	Value *v = ConstantInt::get(TheContext, APInt(32, num, false));
 
 	return v;
@@ -371,6 +418,9 @@ Value *int_node::codegen()
 
 Value *str_node::codegen()
 {
+  #if DEBUG
 	printf("in STR node\n");
+  #endif 
+
 	return nullptr;
 }

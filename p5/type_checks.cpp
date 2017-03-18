@@ -138,12 +138,12 @@ string class_node::type_checks( map< string, string > *local, map< string, strin
 string program_node::type_checks(tree_node *root) 
 {
 
-	if( stmt_var_table == NULL)
+	if ( sweep == 1 ) {
 		stmt_var_table = new map< string, string>();
+  }
 
 	(*stmt_var_table)["true"] = "Boolean";
   (*stmt_var_table)["false"] = "Boolean";
-
 
 	// type_check in order from root to children
 	type_check_class(root);

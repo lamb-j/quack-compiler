@@ -72,6 +72,15 @@ Function *Int_PLUS_codegen(vector <f_arg_pair *> *formal_args)
 	Value *x = NamedValues["x"];
 	Value *y = NamedValues["y"];
 
+  Value *x_ptr = Builder.CreateAlloca(Type::getInt32Ty(TheContext), nullptr, "x_ptr");
+  Value *y_ptr = Builder.CreateAlloca(Type::getInt32Ty(TheContext), nullptr, "y_ptr");
+
+  Builder.CreateStore(x, x_ptr, false);
+  Builder.CreateStore(y, y_ptr, false);
+
+  x = Builder.CreateLoad(Type::getInt32Ty(TheContext), x_ptr, "x_load");
+  y = Builder.CreateLoad(Type::getInt32Ty(TheContext), y_ptr, "y_load");
+
 	Value *b = Builder.CreateAdd(x, y, "addtmp");
 	Builder.CreateRet(b);
 
