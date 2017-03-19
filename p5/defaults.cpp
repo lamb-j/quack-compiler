@@ -22,9 +22,9 @@ Function *Int_TIMES_codegen		(vector <f_arg_pair *> *formal_args);
 Function *Int_DIVIDE_codegen	(vector <f_arg_pair *> *formal_args);
 Function *Int_ATMOST_codegen	(vector <f_arg_pair *> *formal_args);
 Function *Int_ATLEAST_codegen	(vector <f_arg_pair *> *formal_args);
-//Function *Int_LESS_codegen		(vector <f_arg_pair *> *formal_args);
-//Function *Int_MORE_codegen		(vector <f_arg_pair *> *formal_args);
-//Function *Int_EQUALS_codegen	(vector <f_arg_pair *> *formal_args);
+Function *Int_LESS_codegen		(vector <f_arg_pair *> *formal_args);
+Function *Int_MORE_codegen		(vector <f_arg_pair *> *formal_args);
+Function *Int_EQUALS_codegen	(vector <f_arg_pair *> *formal_args);
 
 Function *Int_PRINT_codegen(vector <f_arg_pair *> *formal_args);
 
@@ -37,9 +37,9 @@ Function *method_node::builtins()
 	if (!strcmp(method_name, "DIVIDE") )	return Int_DIVIDE_codegen(formal_args);
 	if (!strcmp(method_name, "ATMOST") )	return Int_ATMOST_codegen(formal_args);
 	if (!strcmp(method_name, "ATLEAST") ) return Int_ATLEAST_codegen(formal_args);
-	//if (!strcmp(method_name, "LESS") )		return Int_ATMOST_codegen(formal_args);
-	//if (!strcmp(method_name, "MORE") )		return Int_ATMOST_codegen(formal_args);
-	//if (!strcmp(method_name, "EQUALS") )	return Int_ATMOST_codegen(formal_args);
+	if (!strcmp(method_name, "LESS") )		return Int_LESS_codegen(formal_args);
+	if (!strcmp(method_name, "MORE") )		return Int_MORE_codegen(formal_args);
+	if (!strcmp(method_name, "EQUALS") )	return Int_EQUALS_codegen(formal_args);
 
 	if (!strcmp(method_name, "PRINT") ) return Int_PRINT_codegen(formal_args);
 
@@ -266,18 +266,15 @@ Function *Int_ATLEAST_codegen(vector <f_arg_pair *> *formal_args)
 	Function *F = Function::Create(FT, Function::ExternalLinkage, 
 			"ATLEAST", TheModule.get() );
 	
-	printf("done with header\n");
 	unsigned Idx = 0;
 	for (auto &Arg : F->args()) {
 		string name = string( (* formal_args)[Idx++]->name );
 		Arg.setName( name );
 	}
 	
-	printf("got name or args\n");
 	NamedValues.clear();
 	for (auto &Arg : F->args())
 		NamedValues[Arg.getName()] = &Arg;
-	printf("done with namedvalues\n");
 	// Function Body
 	
 	BasicBlock *BB = BasicBlock::Create(TheContext, "entry", F);
@@ -296,6 +293,132 @@ Function *Int_ATLEAST_codegen(vector <f_arg_pair *> *formal_args)
   y = Builder.CreateLoad(Type::getInt32Ty(TheContext), y_ptr, "y_load");
 	
 	Value *b = Builder.CreateICmpUGE( x, y, "cmptmp");
+
+	Builder.CreateRet(b);
+
+	verifyFunction(*F);
+
+	return F;
+}
+
+Function *Int_LESS_codegen(vector <f_arg_pair *> *formal_args) 
+{
+	std::vector<Type *> mTypes(2, Type::getInt32Ty(TheContext) );
+	FunctionType *FT = FunctionType::get(Type::getInt1Ty(TheContext), mTypes, false);
+	Function *F = Function::Create(FT, Function::ExternalLinkage, 
+			"LESS", TheModule.get() );
+	
+	unsigned Idx = 0;
+	for (auto &Arg : F->args()) {
+		string name = string( (* formal_args)[Idx++]->name );
+		Arg.setName( name );
+	}
+	
+	NamedValues.clear();
+	for (auto &Arg : F->args())
+		NamedValues[Arg.getName()] = &Arg;
+	// Function Body
+	
+	BasicBlock *BB = BasicBlock::Create(TheContext, "entry", F);
+	Builder.SetInsertPoint(BB);
+
+	Value *x = NamedValues["x"];
+	Value *y = NamedValues["y"];
+
+  Value *x_ptr = Builder.CreateAlloca(Type::getInt32Ty(TheContext), nullptr, "x_ptr");
+  Value *y_ptr = Builder.CreateAlloca(Type::getInt32Ty(TheContext), nullptr, "y_ptr");
+
+  Builder.CreateStore(x, x_ptr, false);
+  Builder.CreateStore(y, y_ptr, false);
+
+  x = Builder.CreateLoad(Type::getInt32Ty(TheContext), x_ptr, "x_load");
+  y = Builder.CreateLoad(Type::getInt32Ty(TheContext), y_ptr, "y_load");
+	
+	Value *b = Builder.CreateICmpULT( x, y, "cmptmp");
+
+	Builder.CreateRet(b);
+
+	verifyFunction(*F);
+
+	return F;
+}
+
+Function *Int_MORE_codegen(vector <f_arg_pair *> *formal_args) 
+{
+	std::vector<Type *> mTypes(2, Type::getInt32Ty(TheContext) );
+	FunctionType *FT = FunctionType::get(Type::getInt1Ty(TheContext), mTypes, false);
+	Function *F = Function::Create(FT, Function::ExternalLinkage, 
+			"MORE", TheModule.get() );
+	
+	unsigned Idx = 0;
+	for (auto &Arg : F->args()) {
+		string name = string( (* formal_args)[Idx++]->name );
+		Arg.setName( name );
+	}
+	
+	NamedValues.clear();
+	for (auto &Arg : F->args())
+		NamedValues[Arg.getName()] = &Arg;
+	// Function Body
+	
+	BasicBlock *BB = BasicBlock::Create(TheContext, "entry", F);
+	Builder.SetInsertPoint(BB);
+
+	Value *x = NamedValues["x"];
+	Value *y = NamedValues["y"];
+
+  Value *x_ptr = Builder.CreateAlloca(Type::getInt32Ty(TheContext), nullptr, "x_ptr");
+  Value *y_ptr = Builder.CreateAlloca(Type::getInt32Ty(TheContext), nullptr, "y_ptr");
+
+  Builder.CreateStore(x, x_ptr, false);
+  Builder.CreateStore(y, y_ptr, false);
+
+  x = Builder.CreateLoad(Type::getInt32Ty(TheContext), x_ptr, "x_load");
+  y = Builder.CreateLoad(Type::getInt32Ty(TheContext), y_ptr, "y_load");
+	
+	Value *b = Builder.CreateICmpUGT( x, y, "cmptmp");
+
+	Builder.CreateRet(b);
+
+	verifyFunction(*F);
+
+	return F;
+}
+
+Function *Int_EQUALS_codegen(vector <f_arg_pair *> *formal_args) 
+{
+	std::vector<Type *> mTypes(2, Type::getInt32Ty(TheContext) );
+	FunctionType *FT = FunctionType::get(Type::getInt1Ty(TheContext), mTypes, false);
+	Function *F = Function::Create(FT, Function::ExternalLinkage, 
+			"EQUALS", TheModule.get() );
+	
+	unsigned Idx = 0;
+	for (auto &Arg : F->args()) {
+		string name = string( (* formal_args)[Idx++]->name );
+		Arg.setName( name );
+	}
+	
+	NamedValues.clear();
+	for (auto &Arg : F->args())
+		NamedValues[Arg.getName()] = &Arg;
+	// Function Body
+	
+	BasicBlock *BB = BasicBlock::Create(TheContext, "entry", F);
+	Builder.SetInsertPoint(BB);
+
+	Value *x = NamedValues["x"];
+	Value *y = NamedValues["y"];
+
+  Value *x_ptr = Builder.CreateAlloca(Type::getInt32Ty(TheContext), nullptr, "x_ptr");
+  Value *y_ptr = Builder.CreateAlloca(Type::getInt32Ty(TheContext), nullptr, "y_ptr");
+
+  Builder.CreateStore(x, x_ptr, false);
+  Builder.CreateStore(y, y_ptr, false);
+
+  x = Builder.CreateLoad(Type::getInt32Ty(TheContext), x_ptr, "x_load");
+  y = Builder.CreateLoad(Type::getInt32Ty(TheContext), y_ptr, "y_load");
+	
+	Value *b = Builder.CreateICmpEQ( x, y, "cmptmp");
 
 	Builder.CreateRet(b);
 

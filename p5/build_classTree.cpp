@@ -189,9 +189,9 @@ tree_node * program_node::build_classTree()
 	int_operators.push_back("DIVIDE");
 	int_operators.push_back("ATMOST");
 	int_operators.push_back("ATLEAST");
-//	int_operators.push_back("LESS");
-//	int_operators.push_back("MORE");
-//	int_operators.push_back("EQUALS");
+	int_operators.push_back("LESS");
+	int_operators.push_back("MORE");
+	int_operators.push_back("EQUALS");
 
 	for (int i = 0; i < 4; i++) {
 		integer_method_vector->push_back( 
@@ -202,7 +202,7 @@ tree_node * program_node::build_classTree()
 					0) );
 	}
 
-	for (int i = 4; i < 6; i++) {
+	for (int i = 4; i < 9; i++) {
 		integer_method_vector->push_back( 
 				  new method_node(strdup(int_operators[i].c_str() ), 
 					integer_f_args, 
