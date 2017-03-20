@@ -28,6 +28,8 @@ Function *Int_EQUALS_codegen	(vector <f_arg_pair *> *formal_args);
 
 Function *Int_PRINT_codegen(vector <f_arg_pair *> *formal_args);
 
+Function *String_PLUS_codegen( vector <f_arg_pair *> *formal_args);
+
 Function *method_node::builtins()
 {
 	// Int methods
@@ -43,6 +45,11 @@ Function *method_node::builtins()
 
 	if (!strcmp(method_name, "PRINT") ) return Int_PRINT_codegen(formal_args);
 
+	//String methods
+	if (!strcmp(method_name, "PLUS") )		return String_PLUS_codegen(formal_args);
+	
+	//	if (!strcmp(method_name, "EQUALS") )		return String_EQUALS_codegen(formal_args);
+	
 	// no default function matched
 	return nullptr;
 }
@@ -468,3 +475,48 @@ Function *Int_PRINT_codegen(vector <f_arg_pair *> *formal_args)
 
 	return F;
 }
+
+Function *String_PLUS_codegen(vector <f_arg_pair *> *formal_args) 
+{
+	//setting up the function header
+	std::vector<Type *> mTypes(2, Type::getInt8Ty(TheContext) );
+	FunctionType *FT = FunctionType::get(Type::getInt8Ty(TheContext), mTypes, false);
+	Function *F = Function::Create(FT, Function::ExternalLinkage, 
+			"PLUS", TheModule.get() );
+	
+	
+	unsigned Idx = 0;
+	for (auto &Arg : F->args()) {
+		string name = string( (* formal_args)[Idx++]->name );
+		Arg.setName( name );
+	}
+
+	//storing args in NamedValue map
+	NamedValues.clear();
+	for (auto &Arg : F->args())
+		NamedValues[Arg.getName()] = &Arg;
+
+	// Function Body
+	BasicBlock *BB = BasicBlock::Create(TheContext, "entry", F);
+	Builder.SetInsertPoint(BB);
+
+	Value *x = NamedValues["x"];
+	Value *y = NamedValues["y"];
+
+  Value *x_ptr = Builder.CreateAlloca(Type::getInt8Ty(TheContext), nullptr, "x_ptr");
+  Value *y_ptr = Builder.CreateAlloca(Type::getInt8Ty(TheContext), nullptr, "y_ptr");
+
+  Builder.CreateStore(x, x_ptr, false);
+  Builder.CreateStore(x, y_ptr, false);
+
+  x = Builder.CreateLoad(Type::getInt8Ty(TheContext), x_ptr, "x_load");
+  y = Builder.CreateLoad(Type::getInt8Ty(TheContext), y_ptr, "y_load");
+
+	Value *b = Builder.CreateAdd(x, y, "addtmp");
+	Builder.CreateRet(b);
+
+	verifyFunction(*F);
+
+	return F;
+}
+
