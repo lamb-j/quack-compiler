@@ -233,19 +233,19 @@ tree_node * program_node::build_classTree()
 	string_f_args->push_back( new f_arg_pair("this", "String"));
 
 	//Methods for String class
-	vector <string> string_operators;
-	string_operators.push_back("PLUS");
-	string_operators.push_back("EQUALS");
-	
-
-	for (int i = 0; i < 2; i++) {
-		string_method_vector->push_back( 
-				  new method_node(strdup(string_operators[i].c_str() ), 
-					string_f_args, 
-					"String", 
-					new statement_block_node( new vector<statement_node*>()),	
-					0) );
-	}
+//	vector <string> string_operators;
+//	string_operators.push_back("PLUS");
+//	string_operators.push_back("EQUALS");
+//	
+//
+//	for (int i = 0; i < 2; i++) {
+//		string_method_vector->push_back( 
+//				  new method_node(strdup(string_operators[i].c_str() ), 
+//					string_f_args, 
+//					"String", 
+//					new statement_block_node( new vector<statement_node*>()),	
+//					0) );
+//	}
 	/*
 	string_method_vector->push_back( new method_node("PLUS", 
 				string_f_args, 

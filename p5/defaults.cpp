@@ -28,7 +28,7 @@ Function *Int_EQUALS_codegen	(vector <f_arg_pair *> *formal_args);
 
 Function *Int_PRINT_codegen(vector <f_arg_pair *> *formal_args);
 
-Function *String_PLUS_codegen( vector <f_arg_pair *> *formal_args);
+//Function *String_PLUS_codegen( vector <f_arg_pair *> *formal_args);
 
 Function *method_node::builtins()
 {
@@ -46,7 +46,7 @@ Function *method_node::builtins()
 	if (!strcmp(method_name, "PRINT") ) return Int_PRINT_codegen(formal_args);
 
 	//String methods
-	if (!strcmp(method_name, "PLUS") )		return String_PLUS_codegen(formal_args);
+//	if (!strcmp(method_name, "PLUS") )		return String_PLUS_codegen(formal_args);
 	
 	//	if (!strcmp(method_name, "EQUALS") )		return String_EQUALS_codegen(formal_args);
 	
@@ -476,6 +476,7 @@ Function *Int_PRINT_codegen(vector <f_arg_pair *> *formal_args)
 	return F;
 }
 
+/*
 Function *String_PLUS_codegen(vector <f_arg_pair *> *formal_args) 
 {
 	//setting up the function header
@@ -519,4 +520,4 @@ Function *String_PLUS_codegen(vector <f_arg_pair *> *formal_args)
 
 	return F;
 }
-
+*/
