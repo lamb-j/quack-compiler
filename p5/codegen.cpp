@@ -295,8 +295,18 @@ Value *return_node::codegen()
 	printf("in RET node\n");
   #endif
 
-	if (return_value != NULL ) {
-		Builder.CreateRet(return_value->codegen());
+	if (return_value != NULL ) 
+	{
+		Value *rv = return_value->codegen();
+//Builder.CreateRet(return_value->codegen());
+
+		if (  rv->getType()->isPointerTy()  )
+		{	
+			rv = Builder.CreateLoad(Type::getInt32Ty(TheContext), rv, "rv_load");
+			Builder.CreateRet(rv);
+		}
+		else
+			Builder.CreateRet(rv);
 	}
 	else
 		Builder.CreateRetVoid();
@@ -317,7 +327,7 @@ Value *l_expr_node::codegen()
 
 	  
 		v = NamedValues[string(var) + "_ptr"];
-		v = Builder.CreateLoad(Type::getInt8Ty(TheContext), v, "load_var_ptr");
+		v = Builder.CreateLoad(Type::getInt32Ty(TheContext), v, "load_var_ptr");
   }
 
 	return v; 
