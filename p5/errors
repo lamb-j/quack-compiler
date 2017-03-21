@@ -1,0 +1,32 @@
+build_classTree.cpp:		fprintf(stderr, "error:%d:  parent class %s not defined\n", lineno, parent);
+build_classTree.cpp:		fprintf(stderr, "error:%d: class %s cannot extend %s\n",lineno, class_name,parent);
+build_classTree.cpp:		fprintf(stderr, "error:%d:  ill-defined class hierarchy, %s extends %s\n",
+build_classTree.cpp:			fprintf(stderr,"error: duplicate class name %s\n", class_names[i].c_str());
+build_classTree.cpp:		fprintf(stderr, "error:%d : Method %s already defined for class %s\n", 
+build_classTree.cpp:		fprintf(stderr,"error: %d:  class %s not defined\n", lineno, c_name);
+
+class_tree.cpp:	fprintf(stderr,"error : class name \"%s\" not in tree vector\n",cname.c_str() );
+class_tree.cpp:	//fprintf(stderr, "error:%d: Method %s not found in class %s\n", lineno, method_name.c_str(), class_name.c_str());
+class_tree.cpp:					fprintf(stderr,"error:%d: return type \"%s\" for method \"%s\" in subclass"
+class_tree.cpp:					fprintf(stderr,"error:%d: formal arg vector size for method %s"
+class_tree.cpp:							fprintf(stderr,"error:%d: argument %d of type %s in method \"%s\""
+class_tree.cpp:				fprintf(stderr,"error: field member \"%s\" of type \"%s\" must match superclass' field type \"%s\"\n",
+class_tree.cpp:			fprintf(stderr,"error: subclass must have field \"%s\" from superclass\n",p_fname.c_str());
+class_tree.cpp:			fprintf(stderr, "error: ill-defined class hierarchy, see class %s\n", (*iter)->name.c_str());
+
+
+type_checks.cpp:		fprintf(stderr, "error:%d: if condition is of type \"%s\", type Boolean needed\n", lineno, c.c_str()); 
+type_checks.cpp:			fprintf(stderr, "error:%d: elif condition is of type \"%s\", type Boolean needed\n", lineno, c.c_str()); 
+type_checks.cpp:		fprintf(stderr, "error:%d: while condition is of type \"%s\", type Boolean needed\n", lineno, s1.c_str()); 
+type_checks.cpp:		fprintf( stderr, "error:%d: Return statement not allowed outside of method definitions\n", lineno);
+type_checks.cpp:			fprintf(stderr, "error:%d: Return type of %s does not match declared return type of %s for method %s\n",
+type_checks.cpp:		fprintf(stderr, "error:%d: Method does not define return type, return type of %s present\n", lineno, s.c_str());
+type_checks.cpp:		fprintf(stderr, "error:%d: return statement must be of type %s\n", lineno, calling_method->return_type);
+type_checks.cpp:			fprintf(stderr, "error:%d : uninitalized variable %s\n", lineno, s.c_str() );
+type_checks.cpp:		fprintf(stderr, "error:%d: cannot access field values outside class\n", lineno);
+type_checks.cpp:			fprintf(stderr, "error:%d : uninitalized field %s\n", lineno, s.c_str() );
+type_checks.cpp:			fprintf(stderr, "error:%d: cannot access field values outside class\n", lineno);
+type_checks.cpp:			fprintf(stderr, "error:%d: Method %s not found in class %s\n", lineno, modifier, s1.c_str());
+type_checks.cpp:			fprintf(stderr,"error:%d Incorrect number of arguments for Method  \"%s\" defined at line:%d\n",lineno, AST_method_node->method_name, AST_method_node->lineno);
+type_checks.cpp:			fprintf(stderr,"error:%d Incorrect number of arguments for Method \"%s\" from default class\n",lineno, AST_method_node->method_name); 
+type_checks.cpp:				fprintf(stderr,"error:%d: argument %d of type %s does not match formal argument of type %s in method %s\n",
