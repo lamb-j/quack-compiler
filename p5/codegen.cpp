@@ -297,7 +297,6 @@ Value *return_node::codegen()
 	if (return_value != NULL ) 
 	{
 		Value *rv = return_value->codegen();
-//Builder.CreateRet(return_value->codegen());
 
 		if (  rv->getType()->isPointerTy()  )
 		{	
