@@ -7,7 +7,7 @@
 #include "quack.h"
 using namespace llvm;
 
-#define DEBUG_FLAG 0
+#define DEBUG_FLAG 1 
 
 // external data structures
 extern std::vector < tree_node *> *tree_vector;
@@ -192,6 +192,7 @@ Value *program_node::codegen(tree_node *root)
 
 	//codegen_class(root);
 	get_tree_node(tree_vector, "Int")->AST_node->codegen();
+	get_tree_node(tree_vector, "String")->AST_node->codegen();
 	get_tree_node(tree_vector, "A")->AST_node->codegen();
 	get_tree_node(tree_vector, "B")->AST_node->codegen();
 
@@ -305,13 +306,18 @@ Value *return_node::codegen()
 
 Value *l_expr_node::codegen()
 {
+	#if DEBUG_FLAG
+	printf("in l-expr_node \n");
+	#endif
+	
 	Value *v = NamedValues[string(var)];
-
+	
   // If the var isn't a pointer (came from function arg), get the pointer equivalent (var_ptr)
 	if ( !( v->getType()->isPointerTy() ) ) {
 
-	  v = NamedValues[string(var) + "_ptr"];
-		v = Builder.CreateLoad(Type::getInt32Ty(TheContext), v, "load_var_ptr");
+	  
+		v = NamedValues[string(var) + "_ptr"];
+		v = Builder.CreateLoad(Type::getInt8Ty(TheContext), v, "load_var_ptr");
   }
 
 	return v; 

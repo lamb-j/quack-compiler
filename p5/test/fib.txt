@@ -1,0 +1,26 @@
+class B() {}
+class A()
+{
+	def fib(x:Int):Int
+	{
+	  a = A();
+		res = 0;
+		if(x <= 2)
+		{
+			res =  1;
+		}
+		else
+		{
+			res = a.fib(x-1) + a.fib(x-2);
+		}
+		res.PRINT();
+//		return res;
+	}
+	
+}
+
+z = A();
+
+z.fib(20);
+
+//i.PRINT();
