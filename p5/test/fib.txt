@@ -3,8 +3,10 @@ class A()
 {
 	def fib(x:Int):Int
 	{
+		x.PRINT();
 	  a = A();
 		res = 0;
+		res.PRINT();
 		if(x <= 2)
 		{
 			res =  1;
@@ -13,14 +15,13 @@ class A()
 		{
 			res = a.fib(x-1) + a.fib(x-2);
 		}
-		res.PRINT();
-//		return res;
+		return res;
 	}
 	
 }
 
 z = A();
 
-z.fib(20);
+z.fib(5);
 
 //i.PRINT();
