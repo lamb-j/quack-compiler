@@ -8,6 +8,7 @@
 #include <string.h>
 #include "quack.h"
 #include  <algorithm>
+#include <fstream>
 
 // external data structures
 extern vector < string > class_names;
@@ -214,7 +215,7 @@ R_Expr: R_Expr '>' R_Expr {   vector<r_expr_node *> *args = new vector<r_expr_no
 //}
 
 R_Expr: '(' R_Expr ')' { $$ = $2; }
-| R_Expr '+' R_Expr //{ $$ = new plus_node($1, $3, @1.first_line); }
+| R_Expr '+' R_Expr 
 {   vector<r_expr_node *> *args = new vector<r_expr_node *>();
 			args->push_back($1);
 			args->push_back($3);
@@ -242,11 +243,13 @@ R_Expr: INT_LIT { $$ = new int_node($1); }
 
 %%
 
+#define DEBUG_FLAG 0
+
 /* main program here */
 int main (int argc, char **argv) 
 {
-	if (argc < 2) {
-		printf("usage: scanner inputfile\n");
+	if (argc < 3) {
+		printf("usage: quack inputfile codegen_flag(0 | 1)\n");
 		exit(0);
 	}
 	yyin = fopen(argv[1], "r");
@@ -256,6 +259,7 @@ int main (int argc, char **argv)
 		exit(0);
 	}
 
+  #if DEBUG_FLAG
 	#ifdef __llvm__
 	printf("LLVM-GCC compiler\n");
 	#endif
@@ -263,34 +267,42 @@ int main (int argc, char **argv)
 	#ifdef __clang__
 	printf("LLVM clang compiler\n");
 	#endif
+  #endif
 
 	//yyrestart(f);
 
 	int condition = yyparse();
 
+
+  #if DEBUG_FLAG
 	printf("Finished parse with result %d\n", condition);
+  #endif
 
 	if (condition) exit(0);
 
 	if (AST_root != NULL)
 	{
-		printf("--- Class Errors ---\n");
+    #if DEBUG_FLAG
+		printf("\n--- Class Errors ---\n");
+    #endif 
+
 		tree_node * class_root = AST_root->build_classTree();
 		if (error_flag) return 0;
-		printf("\n");
 
     // two sweeps
-		printf("--- Type Check Errors ---\n");
+    #if DEBUG_FLAG
+		printf("\n--- Type Check Errors ---\n");
+    #endif
+
 		sweep = 1;
 		AST_root->type_checks(class_root);
 		if (error_flag) return 0;
 		sweep = 2;
 		AST_root->type_checks(class_root);
 		if (error_flag) return 0;
+
+    #if DEBUG_FLAG
 		printf("\n");
-
-    /*
-
 		vector<class_node *>::const_iterator c_iter;
 		for (c_iter = AST_root->class_vector->begin(); c_iter != AST_root->class_vector->end(); ++c_iter) {
 			class_node *c_node = (*c_iter);
@@ -331,42 +343,49 @@ int main (int argc, char **argv)
 		{
 			printf("  var:%s\ttype:%s\n",iter->first.c_str(), iter->second.c_str());
 		}
-		printf("\n");
-	*/
+    #endif
 
-		printf("--- Class Tree ---\n");
+    #if DEBUG_FLAG
+		printf("\n--- Class Tree ---\n");
 		print_tree(class_root, 0);
-		printf("\n");
 
-		printf("--- Syntax Tree ---\n");
+		printf("\n--- Syntax Tree ---\n");
 		AST_root->print(0);
+    #endif
 
-		printf("--- Code Generation ---\n");
+    // Check codegen flag
+    if (argv[2] == 0) exit(0);
+
+    #if DEBUG_FLAG
+		printf("\n--- Code Generation ---\n");
+    #endif
 		extern std::unique_ptr<llvm::Module> TheModule;
 		extern llvm::LLVMContext TheContext;
 		TheModule = llvm::make_unique<llvm::Module>("quack llvm", TheContext);
 
 		AST_root->codegen(class_root);
 
-    printf("\n");
-		printf("--- LLVM ---\n");
-	  //TheModule->dump();
+    #if DEBUG_FLAG
+		printf("\n--- LLVM ---\n");
 		TheModule->print(llvm::errs(), nullptr);
+    #endif
 
-    printf("\n");
-		printf("--- Execution Engine ---\n");
+    //Create output file name (file.ll)
+    string i_name = string(argv[1]);
+    string o_name = i_name.substr(0, i_name.find(".", 0) ); 
+    o_name = o_name + ".ll";
 
-//    llvm::Function *main_func = TheModule->getFunction( "main" );
-//   
-//
-//		llvm::ExecutionEngine *engine =
-//			llvm::EngineBuilder(std::move(TheModule))
-//			.create();
-//		engine->finalizeObject(); 
-//		engine->runFunction(main_func, std::vector<llvm::GenericValue>());
+    llvm::raw_ostream *os;
+
+    std::error_code EC;
+    os = new llvm::raw_fd_ostream(o_name, EC, llvm::sys::fs::F_None);
+		TheModule->print( *os, nullptr);
 
 	}
 
+  #if DEBUG_FLAG
 	printf("exiting Main\n");
+  #endif
+
 	return 0;
 }

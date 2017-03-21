@@ -7,7 +7,6 @@
 #include "quack.h"
 using namespace llvm;
 
-#define DEBUG_FLAG 1 
 
 // external data structures
 extern std::vector < tree_node *> *tree_vector;
