@@ -10,7 +10,7 @@ using namespace llvm;
 // external data structures
 extern std::vector < tree_node *> *tree_vector;
 extern int error_flag;
-
+extern vector < string> class_names;
 llvm::LLVMContext TheContext;
 llvm::IRBuilder<> Builder(TheContext);
 std::map<std::string, llvm::Value *> NamedValues;
@@ -189,11 +189,20 @@ Value *program_node::codegen(tree_node *root)
 	func->setCallingConv(CallingConv::C);
 
 	//codegen_class(root);
+
 	get_tree_node(tree_vector, "Int")->AST_node->codegen();
-	get_tree_node(tree_vector, "String")->AST_node->codegen();
-	//get_tree_node(tree_vector, "A")->AST_node->codegen();
-	//get_tree_node(tree_vector, "B")->AST_node->codegen();
-	get_tree_node(tree_vector, "Fib")->AST_node->codegen();
+	
+	//codegen for all classes in class_names (except default classes )
+	
+	vector < string > ignore_class {"Obj", "Int", "String", "Nothing", "Boolean", ""};
+	for( int i = 0; i < class_names.size(); i++ )
+	{
+		// if not any of these classes, generate code
+		if(!( find(begin(ignore_class), end(ignore_class), class_names[i] ) != end(ignore_class) ) ) 
+		{
+			get_tree_node(tree_vector, class_names[i])->AST_node->codegen();
+		}
+	}
 
 	// Main Function 
   NamedValues.clear();
