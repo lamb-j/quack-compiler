@@ -32,12 +32,18 @@ Typechecking:
 
   ./quack file.q 0  (the 0 disables the codegen pass)
 
-  Correct programs in ./good:
-    ...
+  Correct programs in ./test/good:
+	  GoodWalk.qk
+		schroedinger.qk
 
-  Incorrect programs in ./bad:
-    ...
-
+  Incorrect programs in ./test/bad:
+	  bad_classes.qk
+		bad_methods.qk
+		bad_override.qk
+		hands.qk
+		not_a_duck.qk
+		robot.qk
+		SqrDecl.qk
 
 Code Generation:
   Code generation is currently only supported for a subset of the Quack language. We
@@ -45,8 +51,8 @@ Code Generation:
 
     - the Int class and integer operations
     - boolean expressions involving integers
+		- control flow (if, elif, else, while)
     - method calls within classes
-
 
   The following Quack language features are unsupported:
 
@@ -55,9 +61,14 @@ Code Generation:
     - short-circuit evaluation 
     - Setting and accessing field variables in classes
     - class constructors with arguments "A(x : Int)"
+		- dynamic dispatching
 
   The following test files contain only supported features, and can be used to 
   test code generation. They can be compiled and run by:
 
      ./quack file.q 1  (The "1" flag enables code generation)
      lli file.ll        (This compiles and executes the llvm code)
+
+     Programs in ./test/codegen
+		   fib.qk
+       control_flow.qk
