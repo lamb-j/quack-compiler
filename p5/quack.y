@@ -354,7 +354,7 @@ int main (int argc, char **argv)
     #endif
 
     // Check codegen flag
-    if (argv[2] == 0) exit(0);
+    if (!strcmp(argv[2], "0")) exit(0);
 
     #if DEBUG_FLAG
 		printf("\n--- Code Generation ---\n");
@@ -380,7 +380,6 @@ int main (int argc, char **argv)
     std::error_code EC;
     os = new llvm::raw_fd_ostream(o_name, EC, llvm::sys::fs::F_None);
 		TheModule->print( *os, nullptr);
-
 	}
 
   #if DEBUG_FLAG
