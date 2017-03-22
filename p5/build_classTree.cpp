@@ -70,13 +70,15 @@ tree_node * class_sig_node::build_classTree()
 	}
 
 	if (flag)	{
-		fprintf(stderr, "error:%d:  parent class %s not defined\n", lineno, parent);
+		fprintf(stderr, "error:%d: parent class '%s' not defined\n", lineno, parent);
+    // remove parent class from tree vector
 		error();
 	}
 
 	//check if class extends itself
 	if( strcmp( parent, class_name) == 0) {
-		fprintf(stderr, "error:%d: class %s cannot extend %s\n",lineno, class_name,parent);
+		fprintf(stderr, "error:%d: class '%s' cannot extend '%s'\n",lineno, class_name,parent);
+    // remove class from tree vector
 		error();
 	}
 
@@ -87,7 +89,7 @@ tree_node * class_sig_node::build_classTree()
 	tree_node * new_tree_node = append_tree(tree_vector, p, c); //returns new tree node
 
 	if (new_tree_node == NULL) {
-		fprintf(stderr, "error:%d:  ill-defined class hierarchy, %s extends %s\n",
+		fprintf(stderr, "error:%d:  ill-defined class hierarchy, '%s' extends '%s'\n",
 				lineno, c.c_str(), p.c_str());
 		error();
 		exit(0);
@@ -125,7 +127,7 @@ tree_node * program_node::build_classTree()
 	{
 		if ( class_names[i].compare(class_names[i-1] ) == 0)
 		{
-			fprintf(stderr,"error: duplicate class name %s\n", class_names[i].c_str());
+			fprintf(stderr,"error: duplicate class name '%s'\n", class_names[i].c_str());
 			error();
 		}
 	}
@@ -302,6 +304,8 @@ tree_node * program_node::build_classTree()
 		(*c_iter)->build_classTree();
 	}
 
+  check_class_tree_hierarchy();
+
 	vector<statement_node *>::const_iterator s_iter;
 	for (s_iter = statement_vector->begin(); s_iter != statement_vector->end(); ++s_iter) {
 		(*s_iter)->build_classTree();
@@ -320,7 +324,7 @@ int method_node::build_classTree(tree_node * class_tree_node)
 	tree_node *v = class_tree_node;
 	if (find(v->method_names.begin(), v->method_names.end(), str_mname) != v->method_names.end())
 	{
-		fprintf(stderr, "error:%d : Method %s already defined for class %s\n", 
+		fprintf(stderr, "error:%d : Method '%s' already defined for class '%s'\n", 
 				lineno, str_mname.c_str(), v->name.c_str() );	
 		error();
 	}
@@ -386,7 +390,7 @@ int constructor_call_node::build_classTree()
 
 	if (flag)
 	{
-		fprintf(stderr,"error: %d:  class %s not defined\n", lineno, c_name);
+		fprintf(stderr,"error: %d: class '%s' not defined\n", lineno, c_name);
 		error();
 	}
 

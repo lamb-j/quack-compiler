@@ -351,3 +351,6 @@ void add_parent_fields( map <string, string> *parent_fields, map <string, string
 
 void type_check_class(tree_node *root);
 void codegen_class(tree_node *root);
+
+void check_class_tree_hierarchy();
+void tree_vector_remove(string class_name);

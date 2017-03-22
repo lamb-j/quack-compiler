@@ -126,7 +126,7 @@ tree_node * get_tree_node(vector < tree_node *> *tree_node_vector, string cname)
 	for (iter = tree_node_vector->begin(); iter != tree_node_vector->end(); ++iter) {
 		if ( (*iter)->name.compare(cname) == 0 ) return (*iter);
 	}
-	fprintf(stderr,"error : class name \"%s\" not in tree vector\n",cname.c_str() );
+	printf("CLASS NAME '%s' not in tree vector\n",cname.c_str() );
 	exit(0);
 
 }
@@ -254,8 +254,8 @@ void add_parent_methods(vector <method_node *> *parent_mvector, vector <method_n
 				//since pname = cname: check for overriding methods
 				if(!is_subclass(c_mtype,p_mtype))
 				{
-					fprintf(stderr,"error:%d: return type \"%s\" for method \"%s\" in subclass"
-							" \"%s\" is not subtype of overriden method \n",
+					fprintf(stderr,"error:%d: return type '%s' for method '%s' in subclass"
+							" '%s' is not subtype of overriden method \n",
 							(*cvector_iter)->lineno, c_mtype, c_mname, child_class.c_str() );
 					error();
 				}
@@ -263,8 +263,8 @@ void add_parent_methods(vector <method_node *> *parent_mvector, vector <method_n
 				//check number of args for each method
 				if((*pvector_iter)->formal_args->size() != (*cvector_iter)->formal_args->size() )
 				{
-					fprintf(stderr,"error:%d: formal arg vector size for method %s"
-							" in subclass \"%s\" does not match superclass\n",
+					fprintf(stderr,"error:%d: number of formal arguments for method '%s'"
+							" in subclass '%s' does not match superclass\n",
 							(*cvector_iter)->lineno, c_mname, child_class.c_str() );
 					error();
 				}
@@ -282,9 +282,9 @@ void add_parent_methods(vector <method_node *> *parent_mvector, vector <method_n
 					{
 						if(! is_subclass( (*p_arg_vec)[i]->return_type , (*c_arg_vec)[i]->return_type ) )
 						{
-							fprintf(stderr,"error:%d: argument %d of type %s in method \"%s\""
-									" of subclass \"%s\" "
-									" is not a supertype of overridden method argument type %s\n",
+							fprintf(stderr,"error:%d: argument %d of type '%s' in method '%s'"
+									" of subclass '%s' "
+									" is not a supertype of overridden method argument type '%s'\n",
 									(*cvector_iter)->lineno,
 									(int) p_arg_vec->size() - 1 - i,
 									(*c_arg_vec)[i]->return_type,
@@ -338,14 +338,14 @@ void add_parent_fields( map <string, string> *parent_fields, map <string, string
 			string c_ftype = (*child_fields)[p_fname];
 			if( c_ftype.compare(p_ftype) != 0  ) //type not same
 			{
-				fprintf(stderr,"error: field member \"%s\" of type \"%s\" must match superclass' field type \"%s\"\n",
+				fprintf(stderr,"error: field member '%s' of type '%s' must match superclass' field type '%s'\n",
 							p_fname.c_str(), c_ftype.c_str(), p_ftype.c_str()) ;
 				error();
 			}
 		}
 		else
 		{
-			fprintf(stderr,"error: subclass must have field \"%s\" from superclass\n",p_fname.c_str());
+			fprintf(stderr,"error: subclass must have field '%s' from superclass\n",p_fname.c_str());
 			error();
 		}
 	}
@@ -357,8 +357,25 @@ void check_class_tree_hierarchy() {
 
 	for (iter = tree_vector->begin(); iter != tree_vector->end(); ++iter) {
     if ( (*iter)->name.compare("") && !is_subclass( (*iter)->name, "Obj") ) {
-			fprintf(stderr, "error: ill-defined class hierarchy, see class %s\n", (*iter)->name.c_str());
+			fprintf(stderr, "error: ill-defined class hierarchy, see class '%s'\n", (*iter)->name.c_str());
 			error();
 		}
 	}
+}
+
+void tree_vector_remove(string class_name) {
+
+  for (int i = 0; i < tree_vector->size(); i++) {
+    string name = (*tree_vector)[i]->name;
+    printf("name: %s\n", name.c_str());
+
+    if ( ! name.compare(class_name) ) {
+      tree_vector->erase(tree_vector->begin() + i);
+      return;
+    }
+
+  }
+  fprintf(stderr, "ERROR COULD NOT REMOVE CLASS\n");
+
+  return;
 }

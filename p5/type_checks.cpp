@@ -108,12 +108,13 @@ string class_node::type_checks( map< string, string > *local, map< string, strin
 
 	if (class_tree_node->parent->name.compare("")) //if parent is not "" i.e class is not Obj
 	{
-		add_parent_methods( class_tree_node->parent->AST_node->body->method_vector, 
+		if (sweep == 2) {
+      add_parent_methods( class_tree_node->parent->AST_node->body->method_vector, 
 												body->method_vector, 
-											string(sig->class_name) );
+											  string(sig->class_name) );
 		
 
-		if (sweep == 2) {
+		//if (sweep == 2) {
 			map<string,string> *tmp = class_tree_node->parent->AST_node->field_var_table;
 
 			if (tmp == NULL) printf("NULL ERROR\n");
@@ -204,7 +205,7 @@ string return_node::type_checks( map< string, string > *local, map< string, stri
 
 		string lca = least_common_ancestor(s, string(calling_method->return_type));
 		if (string(calling_method->return_type).compare( lca ) != 0) {
-			fprintf(stderr, "error:%d: Return type of %s does not match declared return type of %s for method %s\n",
+			fprintf(stderr, "error:%d: Return type of '%s' does not match declared return type of '%s' for method '%s'\n",
 					lineno, s.c_str(), calling_method->return_type, current_method.c_str() );
 			error();
 			return "Nothing";
@@ -214,7 +215,7 @@ string return_node::type_checks( map< string, string > *local, map< string, stri
 	else if (return_value != NULL && calling_method->return_type == NULL) {
 		s = return_value->type_checks(local, field);
 
-		fprintf(stderr, "error:%d: Method does not define return type, return type of %s present\n", lineno, s.c_str());
+		fprintf(stderr, "error:%d: Method does not define return type, return type of '%s' present\n", lineno, s.c_str());
 		error();
   }
 	else if (return_value == NULL && calling_method->return_type == NULL) {
@@ -222,7 +223,7 @@ string return_node::type_checks( map< string, string > *local, map< string, stri
 	}
 
 	else {
-		fprintf(stderr, "error:%d: return statement must be of type %s\n", lineno, calling_method->return_type);
+		fprintf(stderr, "error:%d: return statement must be of type '%s'\n", lineno, calling_method->return_type);
 		error();
 	}
 
@@ -245,7 +246,7 @@ string l_expr_node::type_checks( map< string, string > *local, map< string, stri
 		}
 		else 
 		{
-			fprintf(stderr, "error:%d : uninitalized variable %s\n", lineno, s.c_str() );
+			fprintf(stderr, "error:%d : uninitalized variable '%s'\n", lineno, s.c_str() );
 			error();
 			return "Nothing";
 		}
@@ -268,7 +269,7 @@ string l_expr_node::type_checks( map< string, string > *local, map< string, stri
 		}
 		else 
 		{
-			fprintf(stderr, "error:%d : uninitalized field %s\n", lineno, s.c_str() );
+			fprintf(stderr, "error:%d : uninitalized field '%s'\n", lineno, s.c_str() );
 			error();
 			return "Nothing";
 		}
@@ -351,7 +352,7 @@ string method_call_node::type_checks( map< string, string > *local, map< string,
 		method_node *AST_method_node = get_AST_method_node (s1, string(modifier) ); 
 
 		if (AST_method_node == NULL) {
-			fprintf(stderr, "error:%d: Method %s not found in class %s\n", lineno, modifier, s1.c_str());
+			fprintf(stderr, "error:%d: Method '%s' not found in class '%s'\n", lineno, modifier, s1.c_str());
 			error();
 			return "Nothing";
 		}
