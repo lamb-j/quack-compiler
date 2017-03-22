@@ -1,0 +1,22 @@
+// Generate typecheck errors for bad class declarations and hierarchy
+
+class Obj () {}           // Obj cannot extend Obj (default), also dupilcate class
+class A () extends A {}   // A cannot extend A
+class B () extends N{}    // N not defined
+class B () {}             // Duplicate class B
+
+class C () {             // Duplicate methods
+
+  def foo () {
+
+  }
+
+  def foo () {
+
+  }
+}
+class X () extends Y {}   // bad class hierarchy
+class Y () extends Z {}
+class Z () extends X {}
+
+var = D();                // class D not defined

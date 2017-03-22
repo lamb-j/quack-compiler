@@ -1,0 +1,24 @@
+
+class A () {
+
+  this.x = 0;
+  this.x = this.y;        // error, uninitalized field
+
+  def foo () {            // error, no return type declared
+    return 0;
+  }
+
+  def foo2 () : Int {     // error, wrong return type 
+    return "cat";
+  }
+
+  def bar(x : Int, y : Int) : Int {
+    return this.x;
+  }
+}
+
+a = A();
+a.x = 1;        // error, x is private
+a = b;          // error, b uninitalized
+
+return 0;       // error, return not allowed here

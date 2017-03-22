@@ -1,0 +1,21 @@
+class A () {
+
+  def foo (x : Int, y : Int) : Int {}
+
+  def bar (x : Int) {}
+}
+
+class B() extends A {
+
+  // error, number of args and return type don't match
+  def foo (x : Int) : String {}
+
+  // error, argument type doesn't match
+  def bar (a : String) {}
+}
+
+A().foo(0);             // error, incorrect number of argumetns
+A().foo("cat", "dog");  // error, type mismatch
+A().foobar();           // error, method not in class
+
+
