@@ -1,0 +1,16 @@
+// Demonstrate working of a while loop to countdown from a given number
+
+class COUNTDOWN()
+{
+	def print_num ( x : Int) : Int
+	{
+		while( x > 0 )
+		{
+			x.PRINT();
+			x = x - 1;
+		}
+	}
+}
+
+COUNTDOWN().print_num(5);
+
