@@ -191,8 +191,9 @@ Value *program_node::codegen(tree_node *root)
 	//codegen_class(root);
 	get_tree_node(tree_vector, "Int")->AST_node->codegen();
 	get_tree_node(tree_vector, "String")->AST_node->codegen();
-	get_tree_node(tree_vector, "A")->AST_node->codegen();
-	get_tree_node(tree_vector, "B")->AST_node->codegen();
+	//get_tree_node(tree_vector, "A")->AST_node->codegen();
+	//get_tree_node(tree_vector, "B")->AST_node->codegen();
+	get_tree_node(tree_vector, "Fib")->AST_node->codegen();
 
 	// Main Function 
   NamedValues.clear();
@@ -262,6 +263,7 @@ Value *method_node::codegen()
     }
 
 		body->codegen(); 
+		Builder.CreateRet( ConstantInt::get(TheContext, APInt( 32, 0, false )  ) );
 
  	  verifyFunction(*F);
 

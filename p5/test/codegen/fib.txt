@@ -13,7 +13,7 @@ class Fib()
 			return Fib().fib(x-1) + Fib().fib(x-2);
 		}
 
-    return 0;
+ //   return 0;
 	}
 }
 

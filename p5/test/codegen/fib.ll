@@ -153,5 +153,7 @@ define i32 @main() {
 entry:
   %calltmp = call i32 @fib(i32 10, i32 0)
   %calltmp1 = call i32 @PRINT(i32 %calltmp)
+  %calltmp2 = call i32 @fib(i32 15, i32 0)
+  %calltmp3 = call i32 @PRINT(i32 %calltmp2)
   ret i32 0
 }
