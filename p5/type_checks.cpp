@@ -108,13 +108,13 @@ string class_node::type_checks( map< string, string > *local, map< string, strin
 
 	if (class_tree_node->parent->name.compare("")) //if parent is not "" i.e class is not Obj
 	{
-		if (sweep == 2) {
+		//if (sweep == 2) {
       add_parent_methods( class_tree_node->parent->AST_node->body->method_vector, 
 												body->method_vector, 
 											  string(sig->class_name) );
 		
 
-		//if (sweep == 2) {
+		if (sweep == 2) {
 			map<string,string> *tmp = class_tree_node->parent->AST_node->field_var_table;
 
 			if (tmp == NULL) printf("NULL ERROR\n");
@@ -363,10 +363,13 @@ string method_call_node::type_checks( map< string, string > *local, map< string,
 		//check1: length of arg vector  vs length of foraml args
 		if( arg_vector->size() != AST_method_node->formal_args->size() )
 		{
-		  if (AST_method_node->lineno)
-			fprintf(stderr,"error:%d Incorrect number of arguments for Method  \"%s\" defined at line:%d\n",lineno, AST_method_node->method_name, AST_method_node->lineno);
-		  else
-			fprintf(stderr,"error:%d Incorrect number of arguments for Method \"%s\" from default class\n",lineno, AST_method_node->method_name); 
+      printf("arg size: %d, formal size: %d\n", arg_vector->size(), AST_method_node->formal_args->size() );
+		  if (AST_method_node->lineno) {
+        fprintf(stderr,"error:%d Incorrect number of arguments for method  \"%s\" defined at line:%d\n",lineno, AST_method_node->method_name, AST_method_node->lineno);
+      }
+		  else {
+        fprintf(stderr,"error:%d Incorrect number of arguments for method \"%s\" from default class\n",lineno, AST_method_node->method_name); 
+      }
 			error();
 			return "Nothing";
 		}
