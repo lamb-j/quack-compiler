@@ -137,11 +137,13 @@ tree_node * program_node::build_classTree()
 
 	//Arguments for Obj methods
 	vector <f_arg_pair *> *obj_f_args = new vector <f_arg_pair *>();
+	
+	obj_f_args->push_back( new f_arg_pair("this", "Obj"));
 
   //Methods of Obj class
 	obj_method_vector->push_back( new method_node("PRINT", 
 				obj_f_args, 
-				"Nothing", 
+				"Obj", 
 				new statement_block_node( new vector<statement_node*>()),	
 				0) );
 	obj_method_vector->push_back( new method_node("STR", 
