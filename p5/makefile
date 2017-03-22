@@ -1,13 +1,24 @@
-CCC = clang++
 UNAME := $(shell uname)
+HOSTNAME := $(shell hostname)
 ifeq ($(UNAME), Linux)
+CCC= clang++
 CCFLAGS= -std=c++11 -I /usr/include/llvm-3.9 -I /usr/include/llvm-c-3.9  -Wno-deprecated-register 
 CCLIBS= -lfl
+LLVM_CONFIG=llvm-config
 endif
 ifeq ($(UNAME), Darwin)
+CCC= clang++
 CCFLAGS= -Wno-deprecated-register -std=c++11 -I/usr/local/Cellar/llvm/3.9.1/include
 CCLIBS= -ll 
+LLVM_CONFIG=llvm-config
 endif
+ifeq ($(HOSTNAME), ix-xenial)
+CCC=  ~michal/tools/llvm/clang+llvm-3.9.1-x86_64-linux-gnu-ubuntu-16.04/bin/clang++
+CCFLAGS= -Wno-deprecated-register -std=c++11 -I /home/faculty/michal/tools/llvm/clang+llvm-3.9.1-x86_64-linux-gnu-ubuntu-16.04/include 
+CCLIBS= -ll 
+LLVM_CONFIG=~michal/tools/llvm/clang+llvm-3.9.1-x86_64-linux-gnu-ubuntu-16.04/bin/llvm-config
+endif
+
 LEX = flex
 LFLAGS= -8     
 YACC= bison 
@@ -16,7 +27,7 @@ YFLAGS= -d -t -y
 RM = /bin/rm -f
 
 quack: y.tab.o lex.yy.o quack.o class_tree.o print_AST.o build_classTree.o type_checks.o codegen.o defaults.o
-	${CCC} ${CCFLAGS} lex.yy.o y.tab.o quack.o class_tree.o print_AST.o build_classTree.o type_checks.o codegen.o defaults.o -o quack `llvm-config --cppflags --ldflags --system-libs --libs core` ${CCLIBS} 
+	${CCC} ${CCFLAGS} lex.yy.o y.tab.o quack.o class_tree.o print_AST.o build_classTree.o type_checks.o codegen.o defaults.o -o quack `${LLVM_CONFIG} --cppflags --ldflags --system-libs --libs core` ${CCLIBS} 
 
 quack.o: quack.cpp quack.h
 	${CCC} ${CCFLAGS} -c quack.cpp 
