@@ -138,23 +138,23 @@ tree_node * program_node::build_classTree()
 	//Arguments for Obj methods
 	vector <f_arg_pair *> *obj_f_args = new vector <f_arg_pair *>();
 
-	//Method of Obj class
-//	obj_method_vector->push_back( new method_node("PRINT", 
-//				obj_f_args, 
-//				"Nothing", 
-//				new statement_block_node( new vector<statement_node*>()),	
-//				0) );
-//	obj_method_vector->push_back( new method_node("STR", 
-//				obj_f_args, 
-//				"String", 
-//				new statement_block_node( new vector<statement_node*>()),	
-//				0) );
-//
-//	obj_method_vector->push_back( new method_node("EQ", 
-//				obj_f_args, 
-//				"Boolean", 
-//				new statement_block_node( new vector<statement_node*>()),	
-//				0) );
+  //Methods of Obj class
+	obj_method_vector->push_back( new method_node("PRINT", 
+				obj_f_args, 
+				"Nothing", 
+				new statement_block_node( new vector<statement_node*>()),	
+				0) );
+	obj_method_vector->push_back( new method_node("STR", 
+				obj_f_args, 
+				"String", 
+				new statement_block_node( new vector<statement_node*>()),	
+				0) );
+
+	obj_method_vector->push_back( new method_node("EQ", 
+				obj_f_args, 
+				"Boolean", 
+				new statement_block_node( new vector<statement_node*>()),	
+				0) );
 
 	class_node *Obj_class = new class_node(
 			new class_sig_node("Obj", new vector<f_arg_pair *>() , "", 0), 
@@ -181,8 +181,8 @@ tree_node * program_node::build_classTree()
 	integer_f_args->push_back( new f_arg_pair("x", "Int"));
 	integer_f_args->push_back( new f_arg_pair("y", "Int"));
 
-	vector <f_arg_pair *> *integer_f_args_print = new vector <f_arg_pair *>();
-	integer_f_args_print->push_back( new f_arg_pair("this", "Int"));
+//	vector <f_arg_pair *> *integer_f_args_print = new vector <f_arg_pair *>();
+//	integer_f_args_print->push_back( new f_arg_pair("this", "Int"));
 
 	vector <string> int_operators;
 	int_operators.push_back("PLUS");
@@ -213,13 +213,13 @@ tree_node * program_node::build_classTree()
 					0) );
 	}
 
-	integer_method_vector->push_back( 
-			new method_node("PRINT", 
-				integer_f_args_print, 
-				"Int", 
-				new statement_block_node( new vector<statement_node*>()),	
-				0) );
-
+//	integer_method_vector->push_back( 
+//			new method_node("PRINT", 
+//				integer_f_args_print, 
+//				"Int", 
+//				new statement_block_node( new vector<statement_node*>()),	
+//				0) );
+//
 	class_node *Integer_class = new class_node(
 			new class_sig_node("Int", new vector<f_arg_pair *>() , "Obj", 0), 
 			new class_body_node(new vector <statement_node *>(), integer_method_vector), 
@@ -235,20 +235,21 @@ tree_node * program_node::build_classTree()
 	string_f_args->push_back( new f_arg_pair("this", "String"));
 
 	//Methods for String class
-//	vector <string> string_operators;
-//	string_operators.push_back("PLUS");
-//	string_operators.push_back("EQUALS");
-//	
-//
-//	for (int i = 0; i < 2; i++) {
-//		string_method_vector->push_back( 
-//				  new method_node(strdup(string_operators[i].c_str() ), 
-//					string_f_args, 
-//					"String", 
-//					new statement_block_node( new vector<statement_node*>()),	
-//					0) );
-//	}
+	vector <string> string_operators;
+	string_operators.push_back("PLUS");
+	string_operators.push_back("EQUALS");
+	
 	/*
+	for (int i = 0; i < 2; i++) {
+		string_method_vector->push_back( 
+				  new method_node(strdup(string_operators[i].c_str() ), 
+					string_f_args, 
+					"String", 
+					new statement_block_node( new vector<statement_node*>()),	
+					0) );
+	}
+	*/
+
 	string_method_vector->push_back( new method_node("PLUS", 
 				string_f_args, 
 				"String", 
@@ -260,7 +261,7 @@ tree_node * program_node::build_classTree()
 				"Boolean", 
 				new statement_block_node( new vector<statement_node*>()),	
 				0) );
-*/
+
 	class_node *String_class = new class_node(
 			new class_sig_node("String", new vector<f_arg_pair *>() , "Obj", 0), 
 			new class_body_node(new vector <statement_node *>(), string_method_vector), 
