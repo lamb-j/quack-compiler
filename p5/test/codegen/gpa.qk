@@ -4,37 +4,42 @@ class GRADES()
 {
 	def calc_GPA( points : Int, max : Int ) : Int
 	{
-	  points.PRINT();
-		max.PRINT();
+	  //points.PRINT();
+		//max.PRINT();
 		GPA = 0;
 		score = 0;
 		score =  ( points * 100 ) / max ; 
-		score.PRINT();
-		if( score >= 95 )
-		{
-			GPA = 4;
-			//return GPA;
-		}
-//		elif( score < 95 )
-//		{
-//			if ( score >= 80 )
-//			{
-//				GPA = 3;
-//			}
-//			else
-//			{
-//				GPA = 2;
-//			}
-//		}
-		else
-		{
-			GPA = 3;
-			return GPA;
-		}
-		GPA.PRINT();
+		//score.PRINT();
+
+    if (score <= 50)
+    {
+      GPA = 1;
+    }
+    elif (score <= 60 )
+    {
+      GPA = 2;
+    }
+    elif (score <= 70 )
+    {
+      GPA = 3;
+    }
+    elif (score <= 80 )
+    {
+      GPA = 4;
+    }
+    else 
+    {
+      GPA = 5;
+    }
+    
+		//GPA.PRINT();
 		return GPA;
 	}
 }
 
-GRADES().calc_GPA(99,150).PRINT(); //GPA = 4
+x = 99;
 
+while (x >= 50) {
+	GRADES().calc_GPA(x,100).PRINT(); //GPA = 4, 3, 2, 1
+	x = x - 10;
+}
