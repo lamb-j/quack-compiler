@@ -363,7 +363,6 @@ string method_call_node::type_checks( map< string, string > *local, map< string,
 		//check1: length of arg vector  vs length of foraml args
 		if( arg_vector->size() != AST_method_node->formal_args->size() )
 		{
-      printf("arg size: %d, formal size: %d\n", arg_vector->size(), AST_method_node->formal_args->size() );
 		  if (AST_method_node->lineno) {
         fprintf(stderr,"error:%d Incorrect number of arguments for method  \"%s\" defined at line:%d\n",lineno, AST_method_node->method_name, AST_method_node->lineno);
       }

@@ -289,6 +289,14 @@ int main (int argc, char **argv)
 		tree_node * class_root = AST_root->build_classTree();
 		if (error_flag) return 0;
 
+    #if DEBUG_FLAG
+		printf("\n--- Class Tree ---\n");
+		print_tree(class_root, 0);
+
+		printf("\n--- Syntax Tree ---\n");
+		AST_root->print(0);
+    #endif
+
     // two sweeps
     #if DEBUG_FLAG
 		printf("\n--- Type Check Errors ---\n");
@@ -345,13 +353,6 @@ int main (int argc, char **argv)
 		}
     #endif
 
-    #if DEBUG_FLAG
-		printf("\n--- Class Tree ---\n");
-		print_tree(class_root, 0);
-
-		printf("\n--- Syntax Tree ---\n");
-		AST_root->print(0);
-    #endif
 
     // Check codegen flag
     if (!strcmp(argv[2], "0")) exit(0);
