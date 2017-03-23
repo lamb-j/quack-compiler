@@ -1,0 +1,19 @@
+class FunInt(x : Int) extends Int {
+	this.value = x;
+
+	def factorial() : FunInt {
+		val = this.value;
+		res = 1;
+
+		while(not(val == 0)){
+			res = res * val;
+			val = val - 1;
+		}
+
+		return FunInt(res);
+	}
+}
+
+x = FunInt(5);
+y = x.factorial();
+

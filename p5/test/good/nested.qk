@@ -1,0 +1,10 @@
+class foo(x : Int) {
+	this.x = x;
+
+	def bar(x : Int) : Int {
+		return this.x*x;
+	}
+}
+
+a = foo(foo(2).bar(3)).bar(foo(2).bar(1));
+
