@@ -76,9 +76,7 @@ Value *if_node::codegen()
 
 		Value *elif_cond_v = (*elif_pairs->elif_conditions)[i]->codegen();
 
-    printf("HERE\n");
 		elif_cond_v = Builder.CreateICmpEQ( elif_cond_v, ConstantInt::get(TheContext, APInt( 1, 1, false )), "elif_cond" );
-    printf("HERE2\n");
 		Builder.CreateCondBr(elif_cond_v, elif_body_BB[i], next);
 		
 		// Emit elif body code
