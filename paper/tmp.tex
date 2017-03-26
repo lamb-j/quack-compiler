@@ -1,0 +1,222 @@
+
+\documentclass[11pt,journal]{IEEEtran}
+\usepackage{blindtext}
+\usepackage{graphicx}
+\usepackage{float}
+\graphicspath{ {images/} }
+\usepackage{chngpage}
+\usepackage{calc}
+
+
+%
+\ifCLASSINFOpdf
+  % \usepackage[pdftex]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../pdf/}{../jpeg/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.pdf,.jpeg,.png}
+\else
+  % or other class option (dvipsone, dvipdf, if not using dvips). graphicx
+  % will default to the driver specified in the system graphics.cfg if no
+  % driver is specified.
+  % \usepackage[dvips]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../eps/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.eps}
+\fi
+
+% correct bad hyphenation here
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+
+\begin{document}
+%
+% paper title
+% can use linebreaks \\ within to get better formatting as desired
+\title{OpenMP Support for the Quack Programming Language}
+
+
+\author{Jacob~Lambert}
+% <-this % stops a space
+
+
+
+% The paper headers
+\markboth{CIS 561 Indroduction to Compilers, Winter 2017}%
+{Shell \MakeLowercase{\textit{et al.}}: Bare Demo of IEEEtran.cls for Journals}
+
+
+
+% make the title area
+\maketitle
+
+
+\begin{abstract}
+%\boldmath
+ OpenMP is a high-level, directive based standard designed to allow
+  programmers to implement parallel programs without relying on
+  low-level parallel programming APIs or threading libraries. Many compilers
+  for popular languages such as C, C++, and FORTRAN support OpenMP directives.
+
+  We explore the potential for implementing OpenMP support in our Quack compiler, which
+  currently takes a Quack program and generates LLVM IR.
+  We discuss our previous efforts in this area, and evaluate why these efforts were
+  unsuccessful. We then survey three papers  detailing the implementation of three
+  research-oriented OpenMP compilers. We conclude by presenting a new strategy
+  for implementing OpenMP support in our current Quack compiler by extending the
+  LLVM C++ API. 
+\end{abstract}
+
+\begin{IEEEkeywords}
+Quack 
+\end{IEEEkeywords}
+
+
+\IEEEpeerreviewmaketitle
+
+
+\section{Introduction}
+
+\subsection{Quack}
+Quack \cite{quack} is a simple object-oriented, type-inferenced programming language, loosely based
+    on Java. Quack was designed with a limited set of features for the University of
+    Oregon CIS 461/561 course. Although Quack is considered a simplistic language, it
+    supports integer and string literals, control flow, classes with single inheritance,
+    class method definitions and calls, and dynamic dispatching.
+
+    As part of the course, we design and implement a Quack compiler that performs lexing,
+    parsing, type-checking and code generation. Our implementation takes Quack code as
+    input and produces LLVM code as an alternative to x86 or other assembly languages.
+    Our compiler utilizes the C-based
+    flex \cite{flex} and bison \cite{bison} for lexing and parsing respectively. We implement creation of the
+    Abstract Syntax Tree (AST) and type -checking in pure C++. Finally we implement
+    code generation that produces LLVM \cite{llvm} code using C++ and the LLVM C++ API
+    \cite{llvm_api}. We compiler the C++ code using the Clang \cite{clang} compiler,
+    and we compile the generate LLVM code with LLVM's lli compiler.
+
+\subsection{LLVM}
+    Low-Level Virtual Machine (LLVM) \cite{llvm} is a programming language designed
+    to serve as an intermediate representation (IR) between high-level programming
+    languages like C, C++, and FOTRAN, and low level assembly codes like x86.
+
+    Targeting LLVM in code generation has several advantages over targeting
+    more traditional assembly languages. Because LLVM is not architecture specific,
+    the representation is cross-platform, allowing programs and optimizations
+    written in LLVM to be executed across different systems. Additionally because LLVM
+    abstracts many of the more tedious programming steps required in other assembly
+    programming, LLVM code is more human readable and human writable.
+
+    Even though LLVM offers several abstracts over assembly, because of its location
+    in the compilation stack and representation, many of the optimizations normally
+    performed at the assembly stage can still be performed at the LLVM stage,
+    making LLVM ideal for implementing optimization passes.
+
+\subsection{LLVM C++ API}
+
+    The LLVM C++ API is an extensive code base created to simplify the process
+    of LLVM code generation for C++ compilers. Due to the size the API, its
+    complexity, the level of abstraction it provides, our unfamiliarity with
+    code generation and its associated vocabulary, and the APIs shortage of documentation,
+    we found the LLVM API difficult to use as beginners.
+    However, as we became more familiar with the interface, we understood how
+    it could greatly simplify code generation for experienced users.
+
+    The API has four driving concepts or abstractions, The Context, The Module,
+    Basic Blocks, and a Builder.
+
+    The Context is used to store meta-information concerning your current code generation,
+    and is an argument for many of the API calls. The Module is the top-level construct
+    for keeping track of generated code. Basic Blocks are analogous to basic blocks
+    in LLVM and other assembly languages. Functions, methods, and statement blocks are
+    all represented by Basic Blocks. The Module consists of a sequential set of Basic
+    Blocks. Finally, the Builder is used to append actually code statements to basic
+    blocks, such as arithmetic, function calls, or return statements. Basic
+    Blocks consists of lists of objects created by the Builder class.
+
+\subsection{OpenMP}
+
+    OpenMP \cite{openmp}  is an open-source, cross-platform  standard used
+    for writing high-level, directive based parallel programs.
+    Several commercial C, C++, and FORTRAN compilers currently support OpenMP,
+    along with a few research-based compilers.
+
+    OpenMP offers a high-level abstraction over lower-level parallel programming
+    interfaces like pthreads and MPI. New users can create parallel programs using
+    simple pragmas, while advanced OpenMP users can fine-tune parallelization by
+    using pragmas with additional parameters.
+
+    Because of its numerous advantages, OpenMP has been one of the main tools used in
+    parallel programming since its inception.
+    For this reason, we felt that supporting OpenMP would be an interesting and
+    feasible project extension for our Quack compiler.
+    
+\subsection{Paper Outline}
+    In section II we discuss our previous work and our attempts at implementing
+    OpenMP support in our Quack compiler. In section III, we look at three open-source
+    research-based compilers that support OpenMP in an attempt to understand
+    different approaches to OpenMP support. In section IV we propose possible
+    solutions for implementing OpenMP in our Quack compiler, and in section
+    V we conclude and summarize our findings.
+
+\section{Previous Work}
+
+    We originally chose to implement OpenMP support as our compiler extensions because
+    both compiler writers have previous experience in parallel programming, and
+    supporting simple OpenMP pragams seemed interesting yet feasible. Because
+    the Quack language does not have for loops, the typical target for OpenMP,
+    we chose to implement simple OpenMP parallel sections. For example,
+
+    \begin{verbatim}
+      #pragma omp parallel
+      {
+        f.foo();
+      } 
+    \end{verbatim}
+    Once annotated with the OpenMP pragma, the above code would be executed N times across    all processing units, where N is the number of OpenMP threads specified by an
+    environment variable.
+
+    We first thoroughly search through the LLVM C++ API for any calls specifically
+    designed for creating parallel regions that we could use to handle the
+    OpenMP sections. However, the API lacked any support for creating parallel
+    regions.
+
+    To better understand how other compilers handle OpenMP constructs, we developed
+    some simple C++ code with OpenMP pragmas similar to the functionality we wished
+    to replicate in Quack. We then complied this code using Clang++, with the option
+    to emit LLVM code enabled. This gave us insight into how Clang++ generates
+    LLVM code from C++ with OpenMP. We researched the function calls made in the
+    genererated LLVM code, which led us to Clang's internal API for generating
+    parallel-enabled LLVM.
+
+    However, even after considerable searching, we could not find a way to interface
+    Clang's internal API with the LLVM C++ API, which now forces us to consider
+    other options, detailed in section IV.
+
+\section{Survey of OpenMP Compilers}
+
+\subsection{OpenUH}
+
+\subsection{OpenARC}
+
+\subsection{Omni}
+
+\section{Proposed OpenMP Implementation in Quack Compiler}
+
+\section{Conclusions}
+
+\ifCLASSOPTIONcaptionsoff
+  \newpage
+\fi
+
+\nocite{*}
+\bstctlcite{IEEEexample:BSTcontrol}
+\bibliographystyle{IEEEtran}
+\bibliography{paper}
+
+
+\end{document}
+
+

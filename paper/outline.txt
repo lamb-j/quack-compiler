@@ -1,0 +1,160 @@
+Title
+  OpenMP Support for the Quack Programming Language
+
+Abstract
+  OpenMP is a high-level, directive based standard designed to allow
+  programmers to implement parallel programs without relying on 
+  low-level parallel programming APIs or threading libraries. Many compilers
+  for popular languages such as C, C++, and Fortran support OpenMP directives.
+
+  We explore the potential for implementing OpenMP support in our Quack compiler, which
+  currently takes a Quack program and generates LLVM IR.
+  We discuss our previous efforts in this area, and evaluate why these efforts were
+  uncessful. We then survey two papers  detailing the implementation of two 
+  research-oriented OpenMP compilers. We conclude by presenting a new strategy
+  for implementing OpenMP support in our current Quack compiler by extending the
+  LLVM C++ API.
+
+Intro
+  Quack
+    Quack \cite{quack} is a simple object-oriented, type-inferenced programming language, loosley based
+    on Java. Quack was designed with a limited set of features for the University of 
+    Oregon CIS 461/561 course. Although Quack is considered a simplisitc language, it
+    supports integer and string literals, control flow, classes with single inheritience,
+    class method definitions and calls, and dynamic dispatching. 
+
+    As part of the course, we design and implement a Quack compiler that performs lexing,
+    parsing, typechecking and code generation. Our implememtation takes Quack code as
+    input and produces LLVM code as an alternative to x86 or other assmbley languages.
+    Our compiler utilizes the C-based 
+    flex \cite{flex} and bison \cite{bison} for lexing and parsing respectivly. We implement creation of the
+    Abstract Syntax Tree (AST) and typechecking in pure C++. Finally we implement 
+    code generation that produces LLVM \cite{llvm} code using C++ and the LLVM C++ API
+    \cite{llvm_api}. We compiler the C++ code using the Clang \cite{clang} compiler,
+    and we compile the generate LLVM code with LLVM's lli compiler.
+
+
+  LLVM 
+    Low-Level Virtual Machine (LLVM) \cite{llvm} is a programming language designed
+    to serve as an intermediete representatin (IR) between high-level programming
+    languages like C, C++, and FOTRAN, and low level assembly codes like x86. 
+
+    Targeting LLVM in code generation has several advantages over targeting
+    more traditional assembly languages. Because LLVM is not architecture specific,
+    the representation is cross-platform, allowing programs and optimizations
+    written in LLVM to be executed across different systems. Additionaly because LLVM 
+    abstracts many of the more tedious programming steps required in other assembly
+    programming, LLVM code is more human readable and human writable.
+
+    Even though LLVM offers several abstracts over assembly, because of its location
+    in the compilation stack and represntation, many of the optimizations normally
+    performed at the assemebly stage can still be performed at the LLVM stage, 
+    making LLVM ideal for implementing optimization passes.
+
+
+  LLVM C++ API
+    The LLVM C++ API is an extensive code base created to simplify the process
+    of LLVM code generation for C++ compilers. Due to the size the API, its 
+    complexity, the level of abstraction it provides, our unfamiliartiy with 
+    code generation and its associated vocabulary, and the APIs shortage of documentation,
+    we found the LLVM API difficult to use as beginners. 
+    However, as we became more familiar with the interface, we understood how
+    it could greatly simplifiy code generation for expirenced users.
+
+    The API has four driving concepts or abstractions, The Context, The Module,
+    Basic Blocks, and a Builder. 
+
+    The Context is used to store meta-information concerning your current code generation,
+    and is an argument for many of the API calls. The Module is the top-level construct
+    for keeping track of generated code. Basic Blocks are analogous to basic blocks 
+    in LLVM and other assembly languages. Functions, methods, and statement blocks are 
+    all represented by Basic Blocks. The Module consists of a seqential set of Basic
+    Blocks. Finally, the Builder is used to append actualy code statements to basic
+    blocks, such as arithmetic, function calss, or return statements. Basic
+    Blocks consists of lists of objects created by the Builder class.
+
+   
+  OpenMP
+    OpenMP \cite{openmp}  is an open-source, cross-platform  standard used 
+    for writing high-level, directive based parallel programs.
+    Several commericial C, C++, and Fortran compilers currently support OpenMP,
+    along with a few research-based compilers. 
+
+    OpenMP offers a high-level abstraction over lower-level parallel programming
+    interfaces like pthreads and MPI. New users can create parallel programs using 
+    simple pragmas, while advanced OpenMP users can fine-tune parallelization by
+    using pragmas with additional parameters. 
+
+    Because of its numerous advantages, OpenMP has been one of the main tools used in
+    parallel programming since its inception.
+    For this reason, we felt that supporting OpenMP would be an interesting and 
+    feasible project extension for our Quack compiler.
+
+  Paper Outline
+
+    In section II we discuss our previous work and our attempts at implementing 
+    OpenMP support in our Quack compiler. In section III, we look at three open-source
+    research-based compilers that support OpenMP in an attempt to understand 
+    different approaches to OpenMP support. In section IV we propose possible
+    solutions for implementing OpenMP in our Quack compiler, and in section 
+    V we conclude and summarize our findings.
+  
+Previous Work
+    
+    We originally chose to implement OpenMP support as our compiler extensions because
+    both compiler writires have previous experience in parallel programming, and 
+    supporting simple OpenMP pragams seemed interesting yet feasible. Because
+    the Quack language does not have for loops, the typical target for OpenMP,
+    we chose to implement simple OpenMP parallel sections. For example,
+
+      #pragma omp parallel
+      {
+        f.foo();
+      }
+
+    Once annotated with the OpenMP pragma, the above code would be executed N times across    all processing units, where N is the number of OpenMP threads specified by an 
+    enviornment variable.
+
+    We first thoroughly search through the LLVM C++ API for any calls specifically
+    designed for creating parallel regions that we could use to handle the 
+    OpenMP sections. However, the API lacked any support for creating parallel 
+    regions. 
+
+    To better understand how other compilers handle OpenMP constructs, we developed 
+    some simple C++ code with OpenMP pragmas similar to the functionality we wished 
+    to replicate in Quack. We then complied this code using Clang++, with the option
+    to emit LLVM code enabled. This gave us insight into how Clang++ generates
+    LLVM code from C++ with OpenMP. We researched the function calls made in the
+    genererated LLVM code, which led us to Clang's internal API for generating
+    parallel-enabled LLVM. 
+
+    However, even after considerable searching, we could not find a way to interface
+    Clang's internal API with the LLVM C++ API, which now forces us to consider
+    other options, detailed in section IV.
+
+
+Survey of compilers
+  OpenARC
+
+  OpenUH
+
+
+Proposed implementaion 
+
+
+Conclusion
+
+
+Source
+  clang 
+
+  flex
+  bison
+
+  OpenMP
+  Quack
+  LLVM 
+  LLVM API
+
+  OpenARC
+  OpenUH
